@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "105301568093",
+    "project_id": "infinity-arthvishva-hrms",
+    "storage_bucket": "infinity-arthvishva-hrms.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105301568093:android:475293e15e9e5368ef3bb4",
+        "android_client_info": {
+          "package_name": "com.shasak.InfinityArthvishvaHRMS"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpcvkuBmhooIYdUnyqDk5jRW5hfYcmb-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

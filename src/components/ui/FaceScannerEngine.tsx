@@ -1,0 +1,299 @@
+import React, { useRef, useEffect } from "react";
+import { StyleSheet, View } from "react-native";
+import { WebView, WebViewMessageEvent } from "react-native-webview";
+import { useScannerStore } from "@/store/useScannerStore";
+
+export default function FaceScannerEngine() {
+  const webviewRef = useRef<WebView>(null);
+  const {
+    isOpen,
+    operation,
+    storedDescriptor,
+    onSuccess,
+    onError,
+    closeScanner,
+  } = useScannerStore();
+
+  useEffect(() => {
+    if (isOpen && operation && webviewRef.current) {
+      const descriptorArg = storedDescriptor
+        ? JSON.stringify(storedDescriptor)
+        : "null";
+      webviewRef.current.injectJavaScript(`
+        if (window.startCamera) window.startCamera('${operation}', ${descriptorArg});
+        true;
+      `);
+    } else if (!isOpen && webviewRef.current) {
+      webviewRef.current.injectJavaScript(`
+        if (window.stopCamera) window.stopCamera();
+        true;
+      `);
+    }
+  }, [isOpen, operation, storedDescriptor]);
+
+  const handleMessage = (event: WebViewMessageEvent) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      switch (data.type) {
+        case "descriptor":
+          if (onSuccess) onSuccess(data.descriptor, data.image);
+          closeScanner();
+          break;
+        case "error":
+          if (onError) onError(data.error);
+          closeScanner();
+          break;
+        case "cancel":
+          closeScanner();
+          break;
+      }
+    } catch (error) {
+      console.log("WebView Message Error", error);
+    }
+  };
+
+  const htmlTemplate = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover">
+      <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+          --rc:#374151;--rg:rgba(55,65,81,0.15);
+          --blue:#2076C7;--teal:#1CADA3;--amber:#F59E0B;--green:#10B981;--red:#EF4444;
+        }
+        body{
+          background:#080C14; display:flex;flex-direction:column;align-items:center;
+          min-height:100vh;overflow:hidden;
+          font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
+          color:#F9FAFB;
+        }
+        #loadingOverlay{
+          position:fixed;inset:0;background:#080C14;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;
+          z-index:100;transition:opacity .3s ease;
+        }
+        #loadingOverlay.hidden{opacity:0;pointer-events:none}
+        .loader-ring{
+          width:40px;height:40px;border-radius:50%;
+          border:3px solid rgba(255,255,255,.08);border-top-color:var(--blue);
+          animation:spin .6s linear infinite;margin-bottom:15px;
+        }
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .hdr{width:100%;padding:env(safe-area-inset-top,25px) 24px 0;text-align:center}
+        .hdr-title{font-size:20px;font-weight:800;letter-spacing:-0.3px}
+        .hdr-sub{font-size:13px;color:#6B7280;margin-top:4px}
+        .cam-stage{
+          position:relative;margin-top:30px; width:min(280px,75vw);height:min(280px,75vw); padding:8px;
+        }
+        .cam-wrap{
+          position:relative;width:100%;height:100%; border-radius:50%;overflow:hidden;background:#000;
+          box-shadow:0 0 0 4px rgba(255,255,255,0.05);
+        }
+        video{ width:100%;height:100%;object-fit:cover; display:block;transform:scaleX(-1); }
+        .ring-glow{
+          position:absolute;inset:0;border-radius:50%;
+          background:radial-gradient(circle,var(--rg) 0%,transparent 70%); pointer-events:none;z-index:2;
+        }
+        .ring-svg{
+          position:absolute;top:-5px;left:-5px; width:calc(100% + 10px);height:calc(100% + 10px);
+          pointer-events:none;z-index:3;
+        }
+        .ring-arc{
+          fill:none;stroke:var(--rc);stroke-width:3.5;stroke-linecap:round;
+          transition:stroke .2s ease;transform-origin:center;
+        }
+        .ring-arc.spinning{animation:rotateCW 2s linear infinite}
+        @keyframes rotateCW{to{transform:rotate(360deg)}}
+        .face-oval{
+          position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+          width:68%;height:82%;border:2px dashed rgba(255,255,255,.2);border-radius:50%;
+          z-index:1;transition:border-color .2s, border-style .2s;
+        }
+        .face-oval.lit{border-color:var(--green);border-style:solid}
+        .status-wrap{margin-top:30px;text-align:center;padding:0 24px;min-height:70px}
+        .s-text{font-size:16px;font-weight:700;color:#F9FAFB}
+        .s-sub{font-size:13px;color:#6B7280;margin-top:6px}
+        .prog-wrap{width:min(240px,65vw);height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:15px;overflow:hidden}
+        .prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));width:0%;transition:width .15s ease}
+        .btn-row{display:flex;padding:30px 24px calc(env(safe-area-inset-bottom,0px) + 20px);width:100%;max-width:320px}
+        .btn-cancel{
+          flex:1;background:rgba(255,255,255,.06);color:#E5E7EB; border:1px solid rgba(255,255,255,.1);padding:14px;border-radius:16px;
+          font-size:14px;font-weight:600;cursor:pointer; transition:background .2s; outline:none;
+        }
+        .btn-cancel:active{ background:rgba(255,255,255,.12); }
+      </style>
+    </head>
+    <body>
+      <div id="loadingOverlay">
+        <div class="loader-ring"></div>
+        <div class="loader-text" id="loText">AI Core Starting...</div>
+      </div>
+      <div class="hdr">
+        <div class="hdr-title" id="hdrTitle">Face ID Verification</div>
+        <div class="hdr-sub" id="hdrSub">Position your face inside the circle</div>
+      </div>
+      <div class="cam-stage">
+        <div class="cam-wrap">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="face-oval" id="faceOval"></div>
+        </div>
+        <div class="ring-glow" id="glow"></div>
+        <svg class="ring-svg" viewBox="0 0 320 320">
+          <circle class="ring-arc spinning" cx="160" cy="160" r="156" id="arc" stroke-dasharray="12 18"/>
+        </svg>
+      </div>
+      <div class="status-wrap">
+        <div class="s-text" id="sTxt">Ready</div>
+        <div class="s-sub" id="sSub">Align your face to begin</div>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" id="prog"></div></div>
+      <div class="btn-row">
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+      <script>
+      const video = document.getElementById('video');
+      const arc = document.getElementById('arc');
+      const sTxt = document.getElementById('sTxt');
+      const sSub = document.getElementById('sSub');
+      const prog = document.getElementById('prog');
+      const faceOval = document.getElementById('faceOval');
+      const lo = document.getElementById('loadingOverlay');
+      const loText = document.getElementById('loText');
+      const hdrTitle = document.getElementById('hdrTitle');
+
+      let stream = null, isProcessing = false;
+      let detInterval = null;
+      
+      // Using public CDN for testing purposes
+      const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+      const SCAN_OPTS = new faceapi.TinyFaceDetectorOptions({ inputSize: 128, scoreThreshold: 0.5 });
+
+      function postRN(obj) { try { window.ReactNativeWebView.postMessage(JSON.stringify(obj)); } catch(e) {} }
+
+      function setUI(txt, sub, p, color) {
+        sTxt.textContent = txt; sSub.textContent = sub; prog.style.width = p + '%';
+        if (color) { document.documentElement.style.setProperty('--rc', color); arc.style.stroke = color; }
+      }
+
+      async function prewarmModels() {
+        try {
+          loText.textContent = "Waking up AI Core...";
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+          ]);
+          lo.classList.add('hidden');
+          setUI('AI Offline', 'Waiting for check-in action...', 100, '#10B981');
+          postRN({ type: 'ready' });
+        } catch (e) {
+          loText.textContent = "AI Offline: " + e.message;
+          postRN({ type: 'error', error: 'AI Core model pre-loading failed: ' + e.message });
+        }
+      }
+
+      window.startCamera = async (op, savedDescriptor) => {
+        try {
+          isProcessing = false; window.FACE_OP = op; window.USER_FACE_DESCRIPTOR = savedDescriptor;
+          hdrTitle.textContent = op === 'register' ? 'Register Face ID' : 'Identity Verification';
+          faceOval.classList.remove('lit'); arc.classList.add('spinning');
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          
+          setUI('Starting Camera...', 'Initializing capture stream', 20, '#2076C7');
+          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 360 }, height: { ideal: 360 } }, audio: false });
+          video.srcObject = stream;
+          setUI('Position Face', 'Fit inside the dashed oval', 45, '#2076C7');
+          
+          if (detInterval) clearInterval(detInterval);
+          detInterval = setInterval(async () => {
+            if (isProcessing || video.readyState < 2) return;
+            const det = await faceapi.detectSingleFace(video, SCAN_OPTS);
+            if (det && det.score > 0.7) { isProcessing = true; capture(); }
+          }, 100);
+        } catch (e) {
+          setUI('Camera Offline', e.message, 0, '#EF4444');
+          postRN({ type: 'error', error: 'Camera access failed: ' + e.message });
+        }
+      };
+
+      window.stopCamera = () => {
+        isProcessing = false; faceOval.classList.remove('lit');
+        if (detInterval) { clearInterval(detInterval); detInterval = null; }
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+        video.srcObject = null;
+        setUI('Standby', 'Camera deactivated safely', 0, '#374151');
+      };
+
+      async function capture() {
+        setUI('Verifying Identity...', 'Matching structural descriptor', 85, '#F59E0B');
+        faceOval.classList.add('lit'); arc.classList.remove('spinning');
+        try {
+          const det = await faceapi.detectSingleFace(video, SCAN_OPTS).withFaceLandmarks().withFaceDescriptor();
+          if (!det) {
+            isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning');
+            setUI('Face Lost', 'Re-align face inside the oval', 45, '#2076C7'); return;
+          }
+          if (window.FACE_OP !== 'register' && window.USER_FACE_DESCRIPTOR) {
+            const savedDescriptorArray = new Float32Array(Object.values(window.USER_FACE_DESCRIPTOR));
+            const dist = faceapi.euclideanDistance(det.descriptor, savedDescriptorArray);
+            if (dist > 0.55) {
+              setUI('Verification Failed', 'Faces do not match', 0, '#EF4444');
+              postRN({ type: 'error', error: 'Face ID does not match registered profile. Try again.' });
+              setTimeout(() => { isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning'); setUI('Scanning...', 'Align face again', 45, '#2076C7'); }, 2000);
+              return;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = 300; canvas.height = 300;
+          canvas.getContext('2d').drawImage(video, 0, 0, 300, 300);
+          setUI('Identity Verified ✓', 'Syncing secure logs...', 100, '#10B981');
+          
+          // SEND THE DESCRIPTOR BACK TO REACT NATIVE
+          postRN({ type: 'descriptor', descriptor: Array.from(det.descriptor), image: canvas.toDataURL('image/jpeg', 0.5) });
+        } catch (e) {
+          isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning');
+          setUI('Scan Timeout', 'Failed to calculate facial descriptors', 45, '#2076C7');
+        }
+      }
+
+      document.getElementById('cancelBtn').onclick = () => { stopCamera(); postRN({ type: 'cancel' }); };
+      prewarmModels();
+      </script>
+    </body>
+    </html>
+  `;
+
+  return (
+    <View
+      style={[styles.container, isOpen ? styles.visible : styles.hidden]}
+      pointerEvents={isOpen ? "auto" : "none"}
+    >
+      <WebView
+        ref={webviewRef}
+        source={{ html: htmlTemplate, baseUrl: "https://localhost" }}
+        style={styles.webview}
+        originWhitelist={["*"]}
+        allowsInlineMediaPlayback={true}
+        mediaPlaybackRequiresUserAction={false}
+        javaScriptEnabled={true}
+        onMessage={handleMessage}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#080C14",
+    zIndex: 9999,
+  },
+  visible: { opacity: 1 },
+  hidden: { opacity: 0 },
+  webview: { flex: 1, backgroundColor: "transparent" },
+});
