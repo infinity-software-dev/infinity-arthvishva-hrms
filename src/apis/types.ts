@@ -5,82 +5,137 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface LeaveBalanceHistoryItem {
+  _id?: string;
+  type: "Accrual" | "Deduction" | "Adjustment" | "Reset" | "CarryOver";
+  leaveType: "Paid" | "CompOff";
+  amount: number;
+  previousBalance: number;
+  newBalance: number;
+  remarks?: string;
+  timestamp?: string;
+  accrualMonthKey?: string;
+  earnedDate?: string;
+  expiryDate?: string;
+  isUsed?: boolean;
+  usedDate?: string;
+}
+
 export interface Employee {
-  // Core Identity
+  // ── CORE IDENTITY ──
   _id: string;
   __v?: number;
   employeeCode: string;
   name: string;
   email: string;
-  role: string;
-  status: string;
+  password?: string; // Optional since it's stripped in toSafeObject()
+  role:
+    | "SuperUser"
+    | "HR"
+    | "Manager"
+    | "Director"
+    | "VP"
+    | "GM"
+    | "Employee"
+    | "Intern"
+    | "fresher";
+  status: "Active" | "Inactive";
+  deactivateReason?: string;
 
-  // Professional Details
-  department?: string;
-  position?: string;
-  joiningDate?: string;
-  lastWorkingDate?: string | null;
-  experienceType?: string;
-  totalExperienceYears?: number;
-  reportingManager?: string;
-  reportingManagers?: string[];
-  managerIds?: string[];
-  salary?: number;
-
-  // Personal Details
-  mobileNumber?: string;
+  // ── BASIC DETAILS ──
+  mobileNumber: string;
+  alternateMobileNumber?: string;
+  gender?: "Male" | "Female" | "Other";
+  bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   dateOfBirth?: string;
-  gender?: string;
-  maritalStatus?: string;
+  maritalStatus?: "Single" | "Married" | "Divorced" | "Widowed";
+  profileImageUrl?: string;
+  faceDescriptor?: number[];
+
+  // ── PERSONAL DETAILS ──
   fatherName?: string;
   motherName?: string;
-
-  // Addresses
   currentAddress?: string;
   permanentAddress?: string;
   district?: string;
   state?: string;
   pincode?: string;
 
-  // Emergency Contact
+  // ── JOB DETAILS ──
+  department?: string;
+  position?: string;
+  joiningDate?: string;
+  lastWorkingDate?: string | null;
+  salary?: number;
+  reportingManagers?: string[];
+  managerIds?: string[]; // Represents ObjectId array
+
+  // ── EXPERIENCE ──
+  experienceType?: "Fresher" | "Experienced";
+  totalExperienceYears?: number;
+  lastCompanyName?: string;
+  experienceCertificateUrl?: string;
+
+  // ── EDUCATION ──
+  hscPercent?: number;
+  graduationCourse?: string;
+  graduationPercent?: number;
+  postGraduationCourse?: string;
+  postGraduationPercent?: number;
+
+  // ── DOCS (Cloudinary URLs) ──
+  aadhaarNumber?: string;
+  panNumber?: string;
+  aadhaarFileUrl?: string;
+  panFileUrl?: string;
+  passbookFileUrl?: string;
+  tenthMarksheetUrl?: string;
+  twelfthMarksheetUrl?: string;
+  graduationMarksheetUrl?: string;
+  postGraduationMarksheetUrl?: string;
+  medicalDocumentUrl?: string;
+
+  // ── BANK DETAILS ──
+  accountHolderName?: string;
+  bankName?: string;
+  accountNumber?: string;
+  ifsc?: string;
+  branch?: string;
+  bankVerified?: boolean;
+  bankVerifiedDate?: string;
+
+  // ── VERIFICATION ──
+  aadhaarVerified?: boolean;
+  panVerified?: boolean;
+  aadhaarVerifiedDate?: string;
+  panVerifiedDate?: string;
+
+  // ── EMERGENCY CONTACT ──
   emergencyContactName?: string;
   emergencyContactRelationship?: string;
   emergencyContactMobile?: string;
   emergencyContactAddress?: string;
 
-  // Education
-  graduationCourse?: string;
-  graduationPercent?: number;
-  postGraduationCourse?: string;
-  postGraduationPercent?: number;
-  hscPercent?: number;
+  // ── HEALTH ──
+  hasDisease?: "Yes" | "No";
+  diseaseName?: string;
+  diseaseType?: string;
+  diseaseSince?: string;
+  medicinesRequired?: string;
+  doctorName?: string;
+  doctorContact?: string;
 
-  // Balances & Biometrics
+  // ── LEAVE BALANCES ──
   compOffBalance?: number;
   paidLeaveBalance?: number;
-  leaveBalanceHistory?: any[]; // You can type this more strictly later if needed
-  faceDescriptor?: number[];
-  profileImageUrl?: string; // Kept from earlier docs just in case
+  lastLeaveAccrualDate?: string;
+  leaveBalanceHistory?: LeaveBalanceHistoryItem[];
 
-  // Identity & Verification
-  aadhaarNumber?: string;
-  aadhaarVerified?: boolean;
-  panNumber?: string;
-  panVerified?: boolean;
+  // ── TOKENS & NOTIFICATIONS ──
+  refreshToken?: string; // Optional since it's stripped in toSafeObject()
+  fcmToken?: string;
 
-  // Banking
-  accountHolderName?: string;
-  accountNumber?: string;
-  bankName?: string;
-  branch?: string;
-  ifsc?: string;
-  bankVerified?: boolean;
-
-  // Health & Misc
-  hasDisease?: string;
-  bloodGroup?:string;
-
-  // Timestamps
+  // ── TIMESTAMPS ──
   createdAt?: string;
   updatedAt?: string;
 }

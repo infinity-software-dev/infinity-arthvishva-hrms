@@ -197,15 +197,36 @@ export default function FaceScannerEngine() {
         }
       }
 
+      let isCameraActive = false; // Add this flag to track intended state
+
       window.startCamera = async (op, savedDescriptor) => {
         try {
-          isProcessing = false; window.FACE_OP = op; window.USER_FACE_DESCRIPTOR = savedDescriptor;
+          isCameraActive = true; // Mark that we WANT the camera on
+          isProcessing = false; 
+          window.FACE_OP = op; 
+          window.USER_FACE_DESCRIPTOR = savedDescriptor;
+          
           hdrTitle.textContent = op === 'register' ? 'Register Face ID' : 'Identity Verification';
-          faceOval.classList.remove('lit'); arc.classList.add('spinning');
-          if (stream) stream.getTracks().forEach(t => t.stop());
+          faceOval.classList.remove('lit'); 
+          arc.classList.add('spinning');
+          
+          if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
           
           setUI('Starting Camera...', 'Initializing capture stream', 20, '#2076C7');
-          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 360 }, height: { ideal: 360 } }, audio: false });
+          
+          // Fetch the stream into a temporary variable
+          const newStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'user', width: { ideal: 360 }, height: { ideal: 360 } }, 
+            audio: false 
+          });
+
+          // CRITICAL FIX: If stopCamera() was called while we were waiting for userMedia, kill it immediately.
+          if (!isCameraActive) {
+            newStream.getTracks().forEach(t => t.stop());
+            return;
+          }
+
+          stream = newStream;
           video.srcObject = stream;
           setUI('Position Face', 'Fit inside the dashed oval', 45, '#2076C7');
           
@@ -222,10 +243,25 @@ export default function FaceScannerEngine() {
       };
 
       window.stopCamera = () => {
-        isProcessing = false; faceOval.classList.remove('lit');
+        isCameraActive = false; // Instantly invalidate any pending camera startups
+        isProcessing = false; 
+        faceOval.classList.remove('lit');
+        
         if (detInterval) { clearInterval(detInterval); detInterval = null; }
-        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-        video.srcObject = null;
+        
+        if (stream) { 
+          stream.getTracks().forEach(t => t.stop()); 
+          stream = null; 
+        }
+        
+        // CRITICAL FIX: Force the mobile WebView to release the hardware lock
+        if (video) {
+          video.pause();
+          video.removeAttribute('src');
+          video.load();
+          video.srcObject = null;
+        }
+        
         setUI('Standby', 'Camera deactivated safely', 0, '#374151');
       };
 

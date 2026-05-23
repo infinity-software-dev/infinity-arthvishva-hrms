@@ -13,26 +13,36 @@ import { colors, FONTS } from "@/constants/theme";
 interface ProfileAccordionProps {
   title: string;
   iconName: keyof typeof Ionicons.glyphMap;
-  children: React.ReactNode;
+  children?: React.ReactNode; // Made optional so direct clickables don't require it
+  isAccordion?: boolean; // Flag to determine behavior (defaults to true)
+  onActionPress?: () => void; // Function to call when clicked (if it's a direct button)
 }
 
 export default function ProfileAccordion({
   title,
   iconName,
   children,
+  isAccordion = true,
+  onActionPress,
 }: ProfileAccordionProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const toggleExpand = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpanded(!expanded);
+  const handlePress = () => {
+    if (isAccordion) {
+      // Accordion behavior
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setExpanded(!expanded);
+    } else if (onActionPress) {
+      // Direct click behavior
+      onActionPress();
+    }
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.header}
-        onPress={toggleExpand}
+        onPress={handlePress}
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
@@ -45,30 +55,79 @@ export default function ProfileAccordion({
           </View>
           <Text style={styles.title}>{title}</Text>
         </View>
+
+        {/* Change icon based on behavior */}
         <Ionicons
-          name={expanded ? "chevron-up" : "chevron-down"}
+          name={
+            isAccordion
+              ? expanded
+                ? "chevron-up"
+                : "chevron-down"
+              : "chevron-forward" // Shows a right arrow for direct links
+          }
           size={moderateScale(20)}
           color="#94A3B8"
         />
       </TouchableOpacity>
 
-      {expanded && <View style={styles.content}>{children}</View>}
+      {/* Only render children if it is an accordion and is currently expanded */}
+      {isAccordion && expanded && children && (
+        <View style={styles.content}>{children}</View>
+      )}
     </View>
   );
 }
 
+// DETAIL ROW ──
 export const DetailRow = ({
   label,
   value,
+  isLink = false,
+  onPress,
 }: {
   label: string;
   value: string;
-}) => (
-  <View style={styles.row}>
-    <Text style={styles.rowLabel}>{label}</Text>
-    <Text style={styles.rowValue}>{value}</Text>
-  </View>
-);
+  isLink?: boolean;
+  onPress?: () => void;
+}) => {
+  const content = (
+    <>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <View style={styles.valueContainer}>
+        <Text
+          style={[styles.rowValue, isLink && styles.linkText]}
+          // Only truncate if it's a link (like a document name).
+          // Otherwise, allow it to wrap to multiple lines (undefined).
+          numberOfLines={isLink ? 1 : undefined}
+        >
+          {value}
+        </Text>
+        {isLink && (
+          <Ionicons
+            name="open-outline"
+            size={moderateScale(14)}
+            color={colors.Brand_Blue}
+            style={styles.linkIcon}
+          />
+        )}
+      </View>
+    </>
+  );
+
+  if (isLink && onPress) {
+    return (
+      <TouchableOpacity
+        style={styles.row}
+        onPress={onPress}
+        activeOpacity={0.6}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return <View style={styles.row}>{content}</View>;
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -113,6 +172,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     paddingVertical: moderateScale(10),
     borderBottomWidth: 1,
     borderBottomColor: "#F8FAFC",
@@ -122,12 +182,26 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(13),
     color: "#64748B",
     flex: 1,
+    marginTop: moderateScale(2), //
+  },
+  valueContainer: {
+    flex: 1.5,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "flex-start",
   },
   rowValue: {
     fontFamily: FONTS.semiBold,
     fontSize: moderateScale(13),
     color: "#1E293B",
-    flex: 1.5,
     textAlign: "right",
+    flexShrink: 1,
+  },
+  linkText: {
+    color: colors.Brand_Blue,
+    textDecorationLine: "underline",
+  },
+  linkIcon: {
+    marginLeft: moderateScale(4),
   },
 });

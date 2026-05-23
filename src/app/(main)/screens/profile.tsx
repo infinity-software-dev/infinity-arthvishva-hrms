@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
-import { colors} from "@/constants/theme";
+import { colors } from "@/constants/theme";
 
 // Components
 import { CustomHeader } from "@/components/navbar/CustomHeader";
@@ -21,21 +21,27 @@ import ProfileLogoutSection from "@/components/cards/ProfileScreen/LogoutSection
 
 // Hooks
 import { useProfile } from "@/hooks/useProfile";
-
-// Utility for formatting dates
-const formatDate = (isoString?: string) => {
-  if (!isoString) return "N/A";
-  const date = new Date(isoString);
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
+import CustomBottomModal from "@/components/modals/CustomBottomModal";
+import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
+import ActionModal from "@/components/modals/AlertModal";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   const { state, actions } = useProfile();
   const { profile, isLoading } = state;
+
+  // Helper to render document rows cleanly using the action from the hook
+  const renderDocRow = (label: string, url?: string) => {
+    const isUploaded = !!url;
+    return (
+      <DetailRow
+        label={label}
+        value={isUploaded ? "View Document" : "Not Uploaded"}
+        isLink={isUploaded}
+        onPress={() => actions.handleOpenDocument(url, label)}
+      />
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -61,85 +67,278 @@ export default function ProfileScreen() {
           <QuickStats profile={profile} />
 
           <View style={styles.accordionsWrapper}>
+            {/* ── PERSONAL & FAMILY ── */}
             <ProfileAccordion
-              title="Contact & Personal"
+              title="Personal & Family"
               iconName="person-outline"
             >
-              <DetailRow label="Mobile" value={profile.mobileNumber} />
-              <DetailRow label="Email" value={profile.email} />
               <DetailRow
-                label="Blood Group"
-                value={profile.bloodGroup || "N/A"}
+                label="Date of Birth"
+                value={actions.formatDate(profile?.dateOfBirth)}
+              />
+              <DetailRow label="Gender" value={profile?.gender || "N/A"} />
+              <DetailRow
+                label="Marital Status"
+                value={profile?.maritalStatus || "N/A"}
               />
               <DetailRow
-                label="Location"
-                value={profile.currentAddress || "N/A"}
+                label="Father's Name"
+                value={profile?.fatherName || "N/A"}
+              />
+              <DetailRow
+                label="Mother's Name"
+                value={profile?.motherName || "N/A"}
               />
             </ProfileAccordion>
 
+            {/* ── CONTACT & ADDRESSES ── */}
+            <ProfileAccordion title="Contact & Address" iconName="call-outline">
+              <DetailRow
+                label="Mobile"
+                value={profile?.mobileNumber || "N/A"}
+              />
+              <DetailRow
+                label="Alt Mobile"
+                value={profile?.alternateMobileNumber || "N/A"}
+              />
+              <DetailRow label="Email" value={profile?.email || "N/A"} />
+              <DetailRow
+                label="Current Address"
+                value={profile?.currentAddress || "N/A"}
+              />
+              <DetailRow
+                label="Permanent Address"
+                value={profile?.permanentAddress || "N/A"}
+              />
+              <DetailRow
+                label="State & District"
+                value={
+                  profile?.state && profile?.district
+                    ? `${profile.district}, ${profile.state}`
+                    : "N/A"
+                }
+              />
+              <DetailRow label="Pincode" value={profile?.pincode || "N/A"} />
+            </ProfileAccordion>
+
+            {/* ── EMPLOYMENT & EXPERIENCE ── */}
             <ProfileAccordion
-              title="Employment Details"
+              title="Employment & Experience"
               iconName="briefcase-outline"
             >
-              <DetailRow label="Emp Code" value={profile.employeeCode} />
-              <DetailRow label="Department" value={profile.department} />
-              <DetailRow label="Position" value={profile.position} />
+              <DetailRow
+                label="Emp Code"
+                value={profile?.employeeCode || "N/A"}
+              />
+              <DetailRow
+                label="Department"
+                value={profile?.department || "N/A"}
+              />
+              <DetailRow label="Position" value={profile?.position || "N/A"} />
               <DetailRow
                 label="Joining Date"
-                value={formatDate(profile.joiningDate)}
+                value={actions.formatDate(profile?.joiningDate)}
+              />
+              <DetailRow
+                label="Experience Type"
+                value={profile?.experienceType || "N/A"}
+              />
+              <DetailRow
+                label="Total Experience"
+                value={
+                  profile?.totalExperienceYears
+                    ? `${profile.totalExperienceYears} Years`
+                    : "N/A"
+                }
+              />
+              <DetailRow
+                label="Previous Company"
+                value={profile?.lastCompanyName || "N/A"}
               />
             </ProfileAccordion>
 
+            {/* ── EDUCATION ── */}
             <ProfileAccordion
-              title="Emergency Contact"
+              title="Education Details"
+              iconName="school-outline"
+            >
+              <DetailRow
+                label="HSC / 12th"
+                value={profile?.hscPercent ? `${profile.hscPercent}%` : "N/A"}
+              />
+              <DetailRow
+                label="Graduation"
+                value={
+                  profile?.graduationCourse
+                    ? `${profile.graduationCourse} ${profile.graduationPercent ? `(${profile.graduationPercent}%)` : ""}`
+                    : "N/A"
+                }
+              />
+              <DetailRow
+                label="Post Graduation"
+                value={
+                  profile?.postGraduationCourse
+                    ? `${profile.postGraduationCourse} ${profile.postGraduationPercent ? `(${profile.postGraduationPercent}%)` : ""}`
+                    : "N/A"
+                }
+              />
+            </ProfileAccordion>
+
+            {/* ── HEALTH & EMERGENCY ── */}
+            <ProfileAccordion
+              title="Health & Emergency"
               iconName="medical-outline"
             >
               <DetailRow
-                label="Name"
-                value={profile.emergencyContactName || "N/A"}
+                label="Blood Group"
+                value={profile?.bloodGroup || "N/A"}
               />
               <DetailRow
-                label="Phone"
-                value={profile.emergencyContactMobile || "N/A"}
+                label="Pre-existing Disease"
+                value={profile?.hasDisease || "No"}
+              />
+              {profile?.hasDisease === "Yes" && (
+                <>
+                  <DetailRow
+                    label="Disease Details"
+                    value={`${profile?.diseaseName || ""} (${profile?.diseaseType || ""})`}
+                  />
+                  <DetailRow
+                    label="Required Medicines"
+                    value={profile?.medicinesRequired || "N/A"}
+                  />
+                </>
+              )}
+              <DetailRow
+                label="Emergency Contact"
+                value={profile?.emergencyContactName || "N/A"}
+              />
+              <DetailRow
+                label="Relation & Phone"
+                value={
+                  profile?.emergencyContactRelationship &&
+                  profile?.emergencyContactMobile
+                    ? `${profile.emergencyContactRelationship} - ${profile.emergencyContactMobile}`
+                    : "N/A"
+                }
               />
             </ProfileAccordion>
 
+            {/* ── LEAVE BALANCES ── */}
             <ProfileAccordion
-              title="Bank & Documents"
-              iconName="shield-checkmark-outline"
+              title="Leave Balances"
+              iconName="calendar-outline"
             >
-              <DetailRow label="Bank Name" value={profile.bankName || "N/A"} />
+              <DetailRow
+                label="Paid Leaves (PL)"
+                value={`${profile?.paidLeaveBalance || 0}`}
+              />
+              <DetailRow
+                label="Comp-Offs"
+                value={`${profile?.compOffBalance || 0}`}
+              />
+              <DetailRow
+                label="Last Accrual"
+                value={actions.formatDate(profile?.lastLeaveAccrualDate)}
+              />
+            </ProfileAccordion>
+
+            {/* ── BANK & VERIFICATION ── */}
+            <ProfileAccordion title="Bank Details" iconName="card-outline">
+              <DetailRow label="Bank Name" value={profile?.bankName || "N/A"} />
               <DetailRow
                 label="Account"
                 value={
-                  profile.accountNumber
+                  profile?.accountNumber
                     ? `•••• ${profile.accountNumber.slice(-4)}`
                     : "N/A"
                 }
               />
+              <DetailRow label="IFSC Code" value={profile?.ifsc || "N/A"} />
               <DetailRow
-                label="PAN Card"
+                label="Status"
+                value={profile?.bankVerified ? "Verified" : "Pending"}
+              />
+            </ProfileAccordion>
+
+            {/* ── DOCUMENTS & CERTIFICATES ── */}
+            <ProfileAccordion
+              title="Documents & Certificates"
+              iconName="document-text-outline"
+            >
+              {/* Note: Aadhaar must always remain fully redacted/masked for compliance */}
+              <DetailRow
+                label="Aadhaar Number"
+                value={profile?.aadhaarNumber ? "[Aadhaar Redacted]" : "N/A"}
+              />
+              <DetailRow
+                label="PAN Number"
                 value={
-                  profile.panNumber
+                  profile?.panNumber
                     ? `•••••${profile.panNumber.slice(-4)}`
                     : "N/A"
                 }
               />
-              {/* Note: Aadhaar must be strictly redacted in UI for privacy compliance */}
-              <DetailRow label="Aadhaar" value={profile.aadhaarNumber
-                    ? `•••••••• ${profile.aadhaarNumber.slice(-4)}`
-                    : "N/A"} />
-              <DetailRow
-                label="Status"
-                value={profile.bankVerified ? "Verified" : "Pending"}
-                // You could pass a custom color to DetailRow if it supports it!
-              />
+
+              {renderDocRow("Aadhaar Card", profile?.aadhaarFileUrl)}
+              {renderDocRow("PAN Card", profile?.panFileUrl)}
+              {renderDocRow("Bank Passbook", profile?.passbookFileUrl)}
+
+              {profile?.tenthMarksheetUrl &&
+                renderDocRow("10th Marksheet", profile.tenthMarksheetUrl)}
+              {profile?.twelfthMarksheetUrl &&
+                renderDocRow("12th Marksheet", profile.twelfthMarksheetUrl)}
+              {profile?.graduationMarksheetUrl &&
+                renderDocRow("Graduation", profile.graduationMarksheetUrl)}
+              {profile?.postGraduationMarksheetUrl &&
+                renderDocRow("Post Grad", profile.postGraduationMarksheetUrl)}
+              {profile?.experienceCertificateUrl &&
+                renderDocRow(
+                  "Experience Cert",
+                  profile.experienceCertificateUrl,
+                )}
             </ProfileAccordion>
+
+            <ProfileAccordion
+              title="Change Password"
+              iconName="lock-closed-outline"
+              isAccordion={false}
+              onActionPress={() => {
+                actions.setIsChangePasswordModalVisible(true);
+              }}
+            />
           </View>
 
           <ProfileLogoutSection />
+          <CustomBottomModal
+            isVisible={state.isChangePasswordModalVisible}
+            onClose={() => actions.setIsChangePasswordModalVisible(false)}
+            backdropColor="rgba(0, 0, 0, 0.9)"
+          >
+            <ChangePasswordModal
+              onSubmit={(oldPassword, newPassword) =>
+                actions.handleChangePassword(oldPassword, newPassword)
+              }
+              onCancel={() => actions.setIsChangePasswordModalVisible(false)}
+            />
+          </CustomBottomModal>
         </ScrollView>
       )}
+      {/* Render the icon here instead! */}
+      <ActionModal
+        visible={state.isActionModalVisible}
+        title={state.actionModalConfig.title}
+        message={state.actionModalConfig.message}
+        icon={
+          <Ionicons
+            name={state.actionModalConfig.iconName as any}
+            size={moderateScale(50)}
+            color={state.actionModalConfig.iconColor}
+          />
+        }
+        confirmText="OK"
+        onConfirm={() => actions.setActionModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }

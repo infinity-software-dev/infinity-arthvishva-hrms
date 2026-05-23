@@ -1,71 +1,15 @@
 import apiClient from "@/apis/client";
-import { getMyProfile } from "./authService";
+import { Employee } from "@/apis/types";
 
-export interface EmployeeProfile {
-  _id: string;
-  employeeCode: string;
-  name: string;
-  position: string;
-  department: string;
-  status: string;
-  email: string;
-  mobileNumber: string;
-  bloodGroup: string;
-  joiningDate: string;
-  paidLeaveBalance: number;
-  compOffBalance: number;
-  profileImageUrl?: string;
-  currentAddress: string;
-  emergencyContactName: string;
-  emergencyContactMobile: string;
-  panNumber: string;
-  bankName: string;
-  accountNumber: string;
-  bankVerified: boolean;
-  ifsc?: string;
-  totalExperienceYears?: number;
-  aadhaarNumber?: string;
-}
-
-export const fetchProfile = async (): Promise<EmployeeProfile> => {
+export const getProfileDetails = async (): Promise<Employee> => {
   try {
-    // Call your actual API
-    const res = await getMyProfile();
-
-    // Defensive mapping: If the API changes or misses a field, it falls back to a safe default
-    // instead of crashing the app with "undefined is not an object".
-    return {
-      _id: res?._id || "",
-      employeeCode: res?.employeeCode || "N/A",
-      name: res?.name || "Unknown User",
-      position: res?.position || "N/A",
-      department: res?.department || "N/A",
-      status: res?.status || "Inactive",
-      email: res?.email || "N/A",
-      mobileNumber: res?.mobileNumber || "N/A",
-      // Notice bloodGroup isn't in your current JSON, so it safely falls back to "N/A"
-      bloodGroup: res?.bloodGroup || "N/A",
-      joiningDate: res?.joiningDate || new Date().toISOString(),
-
-      // Use ?? for numbers/booleans so 0 or false aren't accidentally overwritten
-      paidLeaveBalance: res?.paidLeaveBalance ?? 0,
-      compOffBalance: res?.compOffBalance ?? 0,
-
-      profileImageUrl: res?.profileImageUrl || "",
-      currentAddress: res?.currentAddress || "N/A",
-      emergencyContactName: res?.emergencyContactName || "N/A",
-      emergencyContactMobile: res?.emergencyContactMobile || "N/A",
-      panNumber: res?.panNumber || "N/A",
-      bankName: res?.bankName || "N/A",
-      accountNumber: res?.accountNumber || "N/A",
-      bankVerified: res?.bankVerified ?? false,
-      ifsc: res?.ifsc || "N/A",
-      totalExperienceYears: res?.totalExperienceYears ?? 0,
-      aadhaarNumber: res?.aadhaarNumber || "",
-    };
+    const response = await apiClient.get("/api/auth/me");
+    // Your docs state the profile data is directly inside response.data.data
+    const profileData = response.data.data;
+    return profileData;
   } catch (error) {
-    console.error("Error fetching profile:", error);
-    throw error; // Let the hook's try/catch block handle the UI state
+    console.error("Failed to fetch profile", error);
+    throw error;
   }
 };
 
@@ -75,3 +19,24 @@ export const fetchProfile = async (): Promise<EmployeeProfile> => {
 //   });
 //   return response.data;
 // };
+
+export const updatePassword = async (
+  currentPassword: string,
+  newPassword: string,
+) => {
+  try {
+    const response = await apiClient.post("/api/auth/change-password", {
+      currentPassword,
+      newPassword,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw new Error(
+        error.response.data.message || "Failed to change password",
+      );
+    }
+    throw new Error("Network error. Please try again later.");
+  }
+};

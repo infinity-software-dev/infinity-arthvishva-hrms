@@ -19,6 +19,7 @@ interface CustomBottomModalProps {
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
+  backdropColor?: string;
 }
 
 export default function CustomBottomModal({
@@ -26,6 +27,7 @@ export default function CustomBottomModal({
   onClose,
   children,
   title,
+  backdropColor = "rgba(0, 0, 0, 0.5)",
 }: CustomBottomModalProps) {
   // Use Animated Value to smoothly transition the padding
   const keyboardPadding = useRef(new Animated.Value(0)).current;
@@ -71,7 +73,7 @@ export default function CustomBottomModal({
       >
         {/* Clickable backdrop to close */}
         <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.backdrop} />
+          <View style={[styles.backdrop, { backgroundColor: backdropColor }]} />
         </TouchableWithoutFeedback>
 
         <View style={styles.modalContent}>
@@ -98,7 +100,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     backgroundColor: "#FFFFFF",

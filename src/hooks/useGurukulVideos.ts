@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import apiClient from "@/apis/client";
 import { VideoProps } from "@/components/cards/GurukulScreen/VideoCard";
+import { Keyboard } from "react-native";
 
 export const useGurukulVideos = () => {
   const [videos, setVideos] = useState<VideoProps[]>([]);
@@ -58,6 +59,12 @@ export const useGurukulVideos = () => {
   useEffect(() => {
     fetchVideos(1, debouncedSearch);
   }, [debouncedSearch, fetchVideos]);
+
+  useEffect(() => {
+    return () => {
+      Keyboard.dismiss();
+    };
+  }, []);
 
   // Handlers
   const handleRefresh = () => {

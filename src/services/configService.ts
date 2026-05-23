@@ -22,13 +22,17 @@ export async function initializeAppConfigs(): Promise<void> {
     // }
     // const data: ApiConfigResponse = await response.json();
 
+    // Check if today is Saturday (6)
+    const isSaturday = new Date().getDay() === 6;
+    const currentShiftHours = isSaturday ? 7 : 8.5;
+
     // --- SIMULATED API DELAY AND RESPONSE FOR TESTING ---
     await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network latency
     const data: ApiConfigResponse = {
       office_lat: 18.5339582, // Your testing coordinates
       office_lon: 73.839535,
       radius_meters: 100,
-      shift_hours: 8.5,
+      shift_hours: currentShiftHours,
     };
     // ----------------------------------------------------
 
@@ -47,6 +51,9 @@ export async function initializeAppConfigs(): Promise<void> {
   } catch (error) {
     console.error("❌ Failed to fetch app configs:", error);
 
+    const isSaturday = new Date().getDay() === 6;
+    const currentShiftHours = isSaturday ? 7 : 8.5;
+
     // Enterprise Fallback: If the API fails (e.g., bad network),
     // inject safe default coordinates so the app doesn't freeze on the splash screen.
     useConfigStore.getState().setConfigs({
@@ -55,7 +62,7 @@ export async function initializeAppConfigs(): Promise<void> {
         longitude: 73.839535,
       },
       geofenceRadius: 100,
-      shiftHours: 8.5,
+      shiftHours: currentShiftHours,
     });
   }
 }

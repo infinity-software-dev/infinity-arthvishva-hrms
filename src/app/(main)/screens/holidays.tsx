@@ -9,7 +9,7 @@ import { HolidayCardSkeleton } from "@/components/ui/loadings/HolidayCardSkeleto
 import { colors, FONTS } from "@/constants/theme";
 import { useHolidays } from "@/hooks/useHolidays";
 
-const HolidayList = () => {
+const HolidayScreen = () => {
   const { state, actions } = useHolidays();
 
   return (
@@ -174,4 +174,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HolidayList;
+export default HolidayScreen;
