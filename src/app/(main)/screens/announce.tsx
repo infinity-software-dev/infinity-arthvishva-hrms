@@ -5,6 +5,7 @@ import { colors, FONTS } from "@/constants/theme";
 import apiClient from "@/apis/client";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CustomHeader } from "@/components/navbar/CustomHeader";
+import { Ionicons } from "@expo/vector-icons";
 
 // types/announcement.ts
 export interface Announcement {
@@ -81,7 +82,10 @@ const AnnouncementScreen = () => {
         }
         ListEmptyComponent={
           !loading ? (
-            <Text style={styles.empty}>No new announcements.</Text>
+            <View style={styles.emptyContainer}>
+              <Ionicons name="alert-circle" size={48} color="#888" />
+              <Text style={styles.empty}>No new announcements.</Text>
+            </View>
           ) : null
         }
       />
@@ -138,6 +142,11 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.medium,
     fontSize: moderateScale(11),
     color: "#94A3B8",
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 200,
   },
   empty: {
     textAlign: "center",
