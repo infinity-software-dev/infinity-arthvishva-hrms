@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, ImageBackground, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 import NetInfo from "@react-native-community/netinfo";
@@ -12,41 +12,43 @@ const OfflineScreen = () => {
   const { isOffline } = useNetworkStatus();
   const [isChecking, setIsChecking] = useState(false);
 
-  // Manual retry function for the button
   const handleRetry = async () => {
     setIsChecking(true);
-    // Force NetInfo to check the connection immediately
     await NetInfo.refresh();
     setTimeout(() => {
       setIsChecking(false);
-    }, 1000); // Artificial delay so the button press feels responsive
+    }, 1000); 
   };
 
-  // If online, render absolutely nothing
   if (!isOffline) return null;
 
   return (
-    // We use absoluteFillObject to completely cover whatever screen the user was on
-    <SafeAreaView style={[StyleSheet.absoluteFillObject, styles.container]}>
+    <SafeAreaView style={[StyleSheet.absoluteFillObject, styles.container]} edges={["bottom"]}>
       <StatusBar style="dark" />
       <View style={styles.content}>
-        <Image
-          source={require("@/assets/images/Offline-image.png")}
-          style={styles.image}
-          resizeMode="contain"
-        />
+        
+        <ImageBackground
+          source={require("@/assets/images/offline-animation.gif")} 
+          style={styles.gifBackground}
+          resizeMode="cover"
+        >
+          {/* <Text style={styles.giantText}>Offline</Text> */}
+        </ImageBackground>
 
-        <Text style={styles.title}>You're Offline</Text>
-        <Text style={styles.message}>
-          It seems you've lost your internet connection. Please check your Wi-Fi
-          or mobile data and try again.
-        </Text>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>Look like you're lost</Text>
+          <Text style={styles.message}>
+            It seems you've lost your internet connection. Please check your Wi-Fi
+            or mobile data and try again.
+          </Text>
 
-        <GradientButton
-          text={isChecking ? "Checking Network..." : "Try Again"}
-          onPress={handleRetry}
-          disabled={isChecking}
-        />
+            <GradientButton
+              text={isChecking ? "Checking Network..." : "Try Again"}
+              onPress={handleRetry}
+              disabled={isChecking}
+            />
+          {/* </View> */}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -54,32 +56,44 @@ const OfflineScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.Base_Background,
-    zIndex: 99999, // Guarantees this sits on top of all navigation headers/tabs
+    backgroundColor: "#ffffff", 
+    zIndex: 99999,
     elevation: 99999,
   },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: moderateScale(30),
   },
-  image: {
-    width: moderateScale(500),
-    height: moderateScale(250),
-    marginBottom: moderateScale(20),
+  gifBackground: {
+    width: "100%",
+    height: moderateScale(400),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  giantText: {
+    fontSize: moderateScale(60),
+    fontFamily: FONTS.extraBold || "System",
+    color: "#1D1D1D",
+    marginTop: moderateScale(-40),
+  },
+  textContainer: {
+    paddingHorizontal: moderateScale(30),
+    marginTop: moderateScale(-50), 
+    alignItems: "center",
+    width: "100%",
   },
   title: {
     fontSize: moderateScale(26),
     color: "#1D1D1D",
-    fontFamily: FONTS.extraBold,
+    fontFamily: FONTS.extraBold || "System",
     marginBottom: moderateScale(10),
     textAlign: "center",
   },
   message: {
     fontSize: moderateScale(15),
-    color: "#6B7280", // Modern slate grey
-    fontFamily: FONTS.medium,
+    color: "#6B7280", 
+    fontFamily: FONTS.medium || "System",
     textAlign: "center",
     marginBottom: moderateScale(35),
     lineHeight: moderateScale(22),
@@ -88,22 +102,11 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: moderateScale(30),
     overflow: "hidden",
-    shadowColor: "#2076C7",
+    shadowColor: colors.Brand_Blue,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
-  },
-  button: {
-    paddingVertical: moderateScale(15),
-    alignItems: "center",
-    justifyContent: "center",
-    height: moderateScale(55), // Fixed height so it doesn't jump when loading spinner appears
-  },
-  buttonText: {
-    fontSize: moderateScale(16),
-    color: "#ffffff",
-    fontFamily: FONTS.bold,
   },
 });
 
