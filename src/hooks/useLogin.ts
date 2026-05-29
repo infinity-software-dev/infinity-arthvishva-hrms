@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TextInput, Keyboard } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { loginEmployee } from "@/services/authService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { resetAndNavigate } from "@/utils/NavigationHelper";
 import { getAppPermissionReport } from "@/utils/PermissionCheck";
+
 
 export const useLogin = () => {
   const setUser = useAuthStore((state) => state.setUser);
@@ -18,6 +19,12 @@ export const useLogin = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const passwordInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    return () => {
+      Keyboard.dismiss();
+    };
+  }, []);
 
   const handleEmpIDChange = (text: string) => {
     setEmpID(text);
