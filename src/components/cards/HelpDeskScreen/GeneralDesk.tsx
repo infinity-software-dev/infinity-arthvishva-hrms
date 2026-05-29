@@ -28,7 +28,7 @@ export default function GeneralDesk() {
           <Text style={styles.slaDesc}>
             Our Help Desk operates from{" "}
             <Text style={{ fontFamily: FONTS.bold }}>9:30 AM to 6:30 PM</Text>,
-            Monday to Friday.
+            Monday to Saturday.
           </Text>
         </View>
       </View>

@@ -33,7 +33,7 @@ const GlobalAlertScreen = () => {
       if (accessToken) {
         const profile = await getMyProfile();
         if (profile) {
-          return resetAndNavigate("/(main)/home");
+          return resetAndNavigate("/(main)/screens/home");
         }
       }
       // Fallback if no token or token is invalid
@@ -47,6 +47,8 @@ const GlobalAlertScreen = () => {
     const fetchAlert = async () => {
       try {
         const data = await fetchGlobalAlertData();
+
+        console.log("Alert data:", data);
 
         if (!data) {
           throw new Error("Failed to fetch alert. Please try again later.");

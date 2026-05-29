@@ -1,3 +1,4 @@
+import apiClient from "@/apis/client";
 import { AlertData } from "@/apis/types";
 import { DOMAIN_URL } from "@/apis/url";
 import axios from "axios";
@@ -7,16 +8,19 @@ import DeviceInfo from "react-native-device-info";
 export const checkGlobalAlertStatus = async (
   versionCode: number,
 ): Promise<boolean> => {
-  return false;
-  // try {
-  //   const response = await axios.get(
-  //     `${DOMAIN_URL}/customer/checkAlert/${versionCode}`,
-  //   );
-  //   return response.data.isActive;
-  // } catch (error) {
-  //   console.error("Error fetching alert:", error);
-  //   return false;
-  // }
+  try {
+    const response = await axios.post(
+      `${DOMAIN_URL}/api/version/check`,
+      {
+        platform: Platform.OS,
+        versionCode: versionCode,
+      }
+    );
+    return response.data.data.updateRequired;
+  } catch (error) {
+    console.error("Error fetching alert:", error);
+    return false;
+  }
 };
 
 export const fetchGlobalAlertData = async (): Promise<AlertData | null> => {
@@ -31,7 +35,7 @@ export const fetchGlobalAlertData = async (): Promise<AlertData | null> => {
     buttonLink: "https://expo.dev", // Dummy link
   };
   // try {
-  //   const response = await axios.get(`${DOMAIN_URL}/api/app/alert`);
+  //   const response = await axios.get(`${DOMAIN_URL}/api/alert`);
   //   return response.data;
   // } catch (error) {
   //   console.error("Error fetching alert data:", error);
@@ -39,26 +43,27 @@ export const fetchGlobalAlertData = async (): Promise<AlertData | null> => {
   // }
 };
 
+
 export const updateFcmTokenService = async (token: string): Promise<boolean> => {
   // console.log(token);
-  return true;
-  // try {
-  //   const deviceId = await DeviceInfo.getUniqueId();
+  // return true;
+  try {
+    const deviceId = await DeviceInfo.getUniqueId();
 
-  //   const payload = {
-  //     fcmToken: token,
-  //     deviceType: Platform.OS, // 'android' or 'ios'
-  //     deviceId: deviceId,
-  //   };
+    const payload = {
+      fcmToken: token,
+      deviceType: Platform.OS, // 'android' or 'ios'
+      deviceId: deviceId,
+    };
 
-  //   const response = await axios.post(
-  //     `${DOMAIN_URL}/employee/update-fcm-token`,
-  //     payload,
-  //   );
+    const response = await apiClient.patch(
+      `${DOMAIN_URL}/api/employees/profile/fcm-token`,
+      payload,
+    );
 
-  //   return response.status === 200 || response.status === 201;
-  // } catch (error) {
-  //   console.error("Error updating FCM token:", error);
-  //   return false;
-  // }
+    return response.status === 200 || response.status === 201;
+  } catch (error) {
+    console.error("Error updating FCM token:", error);
+    return false;
+  }
 };

@@ -99,7 +99,7 @@ export default function Index() {
         if (isAlertActive) {
           setTimeout(() => resetAndNavigate("/globalAlert/GlobalAlert"), 1000);
 
-          return; // Stop execution here so we don't route to login/home
+          return;
         }
 
         // 2. If no alert, proceed to check Auth Status
@@ -164,7 +164,7 @@ export default function Index() {
           <View style={styles.glowContainer}>
             <GlossyLogo
               text="HRMS"
-              imageSource={require("@/assets/images/ic_launcher_foreground.png")}
+              imageSource={require("@/assets/images/ic_launcher_index.png")}
             />
           </View>
         </View>

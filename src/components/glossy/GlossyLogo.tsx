@@ -1,6 +1,6 @@
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -37,14 +37,15 @@ export default function GlossyLogo({
   height = 200,
   baseColor = "#FFFFFF",
 }: GlossyLogoProps) {
-  // 1. Centralize scaling logic
+  // 1. State to track when the image is fully in memory
+  const [isImageReady, setIsImageReady] = useState(false);
+
   const scaledTextSize = moderateScale(textSize);
   const scaledImageSize = moderateScale(imageSize);
   const scaledWidth = moderateScale(width);
   const scaledHeight = moderateScale(height);
   const scaledMargin = moderateScale(-20);
 
-  // 2. Start the shine off-screen based on the actual scaled width
   const translateX = useSharedValue(-scaledWidth * 2);
 
   useEffect(() => {
@@ -57,9 +58,17 @@ export default function GlossyLogo({
       false,
     );
 
-    // 3. Cleanup to prevent memory leaks on unmount
     return () => cancelAnimation(translateX);
   }, [scaledWidth, translateX]);
+
+  // 2. Failsafe: Local images sometimes fail to fire onLoad. 
+  // This guarantees the mask renders after 200ms no matter what.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isImageReady) setIsImageReady(true);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [isImageReady]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -67,7 +76,6 @@ export default function GlossyLogo({
     };
   });
 
-  // 4. Memoize dynamic styles to prevent unnecessary re-renders
   const containerStyle = useMemo(
     () => ({
       height: scaledHeight,
@@ -96,35 +104,52 @@ export default function GlossyLogo({
   );
 
   return (
-    <MaskedView
-      style={containerStyle}
-      maskElement={
-        <View style={styles.maskWrapper}>
-          <View style={imageWrapperStyle}>
-            <Image source={imageSource} style={styles.image} />
-          </View>
-
-          <Text style={dynamicTextStyle}>{text}</Text>
-        </View>
-      }
-    >
-      {/* Solid Base Color */}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: baseColor }]} />
-
-      {/* Animated Glossy Shine */}
-      <Animated.View style={[StyleSheet.absoluteFill, animatedStyle]}>
-        <LinearGradient
-          colors={[
-            "rgba(212, 175, 55, 0)", // Transparent edges
-            "rgba(212, 175, 55, 0.8)", // Rich metallic gold (Hex: #D4AF37)
-            "rgba(212, 175, 55, 0)", // Transparent edges
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFill}
+    <View style={containerStyle}>
+      {/* 3. The Hidden Preloader: Forces the image into device cache */}
+      {!isImageReady && (
+        <Image
+          source={imageSource}
+          style={styles.hiddenPreloader}
+          onLoad={() => setIsImageReady(true)}
+          onError={() => setIsImageReady(true)} // Prevent infinite lock
         />
-      </Animated.View>
-    </MaskedView>
+      )}
+
+      {/* 4. Only mount the MaskedView when the image is guaranteed to be ready */}
+      {isImageReady && (
+        <MaskedView
+          style={StyleSheet.absoluteFill}
+          maskElement={
+            <View style={styles.maskWrapper}>
+              <View style={imageWrapperStyle}>
+                <Image 
+                  source={imageSource} 
+                  style={styles.image} 
+                  fadeDuration={0} // Prevents Android fading bug inside masks
+                />
+              </View>
+
+              <Text style={dynamicTextStyle}>{text}</Text>
+            </View>
+          }
+        >
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: baseColor }]} />
+
+          <Animated.View style={[StyleSheet.absoluteFill, animatedStyle]}>
+            <LinearGradient
+              colors={[
+                "rgba(212, 175, 55, 0)",
+                "rgba(212, 175, 55, 0.8)",
+                "rgba(212, 175, 55, 0)",
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
+        </MaskedView>
+      )}
+    </View>
   );
 }
 
@@ -143,5 +168,12 @@ const styles = StyleSheet.create({
     fontFamily: "Ubuntu_700Bold",
     letterSpacing: -1,
     color: "black",
+  },
+  // Added style for the preloader
+  hiddenPreloader: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    opacity: 0,
   },
 });

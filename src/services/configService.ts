@@ -27,7 +27,7 @@ export async function initializeAppConfigs(): Promise<void> {
     const currentShiftHours = isSaturday ? 7 : 8.5;
 
     // --- SIMULATED API DELAY AND RESPONSE FOR TESTING ---
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network latency
+    await new Promise((resolve) => setTimeout(resolve, 800));
     const data: ApiConfigResponse = {
       office_lat: 18.5339582, // Your testing coordinates
       office_lon: 73.839535,
