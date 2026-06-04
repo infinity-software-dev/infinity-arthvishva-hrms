@@ -31,7 +31,7 @@ export async function initializeAppConfigs(): Promise<void> {
     const data: ApiConfigResponse = {
       office_lat: 18.5339582, // Your testing coordinates
       office_lon: 73.839535,
-      radius_meters: 100,
+      radius_meters: 50,
       shift_hours: currentShiftHours,
     };
     // ----------------------------------------------------
@@ -61,8 +61,9 @@ export async function initializeAppConfigs(): Promise<void> {
         latitude: 18.5339582, // Generic Pune fallback
         longitude: 73.839535,
       },
-      geofenceRadius: 100,
+      geofenceRadius: 50,
       shiftHours: currentShiftHours,
     });
   }
 }
+

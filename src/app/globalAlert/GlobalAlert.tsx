@@ -48,7 +48,7 @@ const GlobalAlertScreen = () => {
       try {
         const data = await fetchGlobalAlertData();
 
-        console.log("Alert data:", data);
+        // console.log("Alert data:", data);
 
         if (!data) {
           throw new Error("Failed to fetch alert. Please try again later.");

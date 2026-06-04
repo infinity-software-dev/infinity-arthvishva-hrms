@@ -104,7 +104,7 @@ export default function Index() {
 
         // 2. If no alert, proceed to check Auth Status
         const [_, accessToken] = await Promise.all([
-          initializeAppConfigs(), // Loads configs unconditionally
+          initializeAppConfigs(),
           SecureStore.getItemAsync("accessToken"),
         ]);
 

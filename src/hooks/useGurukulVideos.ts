@@ -81,7 +81,7 @@ export const useGurukulVideos = () => {
 
   const handleVideoPress = (video: VideoProps) => {
     // Navigate to your video player screen here in the future
-    console.log("Play video:", video.title);
+    // console.log("Play video:", video.title);
   };
 
   return {
