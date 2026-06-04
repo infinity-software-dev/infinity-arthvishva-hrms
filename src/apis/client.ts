@@ -86,7 +86,7 @@ apiClient.interceptors.response.use(
         });
 
         // Your API docs indicate ONLY the accessToken is returned here
-        const newAccessToken = data.data.accessToken;
+        const newAccessToken = data.accessToken;
 
         await SecureStore.setItemAsync("accessToken", newAccessToken);
 

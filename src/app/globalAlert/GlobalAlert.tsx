@@ -4,29 +4,36 @@ import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Linking,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
+import DeviceInfo from "react-native-device-info";
 
 // Import your internal helpers and services
 import { AlertData } from "@/apis/types";
 import { fetchGlobalAlertData } from "@/services/appService";
 import { getMyProfile } from "@/services/authService";
 import { resetAndNavigate } from "@/utils/NavigationHelper";
-import { FONTS } from "@/constants/theme";
+import { colors, FONTS } from "@/constants/theme";
 
 const GlobalAlertScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [alertData, setAlertData] = useState<AlertData | null>(null);
 
-  // Smart routing: Check if the user is actually logged in before sending them home
+  const versionCode = parseInt(DeviceInfo.getBuildNumber(), 10);
+
+  // Safely extract the link for the current OS
+  const platformLink = alertData?.buttonLink?.[Platform.OS as 'ios' | 'android'];
+
+  // Smart routing
   const navigateForward = async () => {
     try {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -36,7 +43,6 @@ const GlobalAlertScreen = () => {
           return resetAndNavigate("/(main)/screens/home");
         }
       }
-      // Fallback if no token or token is invalid
       resetAndNavigate("/(auth)/login");
     } catch (e) {
       resetAndNavigate("/(auth)/login");
@@ -46,14 +52,8 @@ const GlobalAlertScreen = () => {
   useEffect(() => {
     const fetchAlert = async () => {
       try {
-        const data = await fetchGlobalAlertData();
-
-        // console.log("Alert data:", data);
-
-        if (!data) {
-          throw new Error("Failed to fetch alert. Please try again later.");
-        }
-
+        const data = await fetchGlobalAlertData(versionCode);
+        if (!data) throw new Error("Failed to fetch alert. Please try again later.");
         setAlertData(data);
       } catch (err: any) {
         setError(err.message || "An unexpected error occurred.");
@@ -61,11 +61,22 @@ const GlobalAlertScreen = () => {
         setLoading(false);
       }
     };
-
     fetchAlert();
-  }, []);
+  }, [versionCode]);
 
-  // Removed the !fontsLoaded check since the RootLayout guarantees fonts are ready
+  // ── NEW LOGIC: Dynamic Button Handler ──
+  const handlePrimaryAction = () => {
+    if (platformLink) {
+      // If there is a link, open the App Store / Play Store
+      Linking.openURL(platformLink).catch((err) => {
+        console.error("Failed to open URL:", err);
+      });
+    } else {
+      // If there is no link, just dismiss the alert and enter the app
+      navigateForward();
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -80,10 +91,7 @@ const GlobalAlertScreen = () => {
         <View style={styles.card}>
           <Text style={styles.title}>Error</Text>
           <Text style={styles.message}>{error}</Text>
-          <TouchableOpacity
-            style={styles.skipButtonError}
-            onPress={navigateForward}
-          >
+          <TouchableOpacity style={styles.skipButtonError} onPress={navigateForward}>
             <Text style={styles.skipText}>Continue to App</Text>
           </TouchableOpacity>
         </View>
@@ -91,15 +99,16 @@ const GlobalAlertScreen = () => {
     );
   }
 
-  // If the alert was turned off while the app was loading, auto-route them forward
   if (!alertData?.isActive) {
     navigateForward();
-    return null; // Render nothing while routing
+    return null;
   }
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <StatusBar style="dark" />
+
+      {/* Optional Top-Right Skip Button */}
       {alertData.isSkippable && (
         <TouchableOpacity style={styles.skipButton} onPress={navigateForward}>
           <Text style={styles.skipText}>Close</Text>
@@ -118,23 +127,22 @@ const GlobalAlertScreen = () => {
         <Text style={styles.title}>{alertData.title}</Text>
         <Text style={styles.message}>{alertData.message}</Text>
 
-        {alertData.buttonLink && (
-          <TouchableOpacity
-            style={styles.actionButtonWrapper}
-            onPress={() => Linking.openURL(alertData.buttonLink!)}
+        {/* ── NEW LOGIC: Always render the primary button ── */}
+        <TouchableOpacity
+          style={styles.actionButtonWrapper}
+          onPress={handlePrimaryAction}
+        >
+          <LinearGradient
+            colors={[colors.Brand_Blue, colors.Brand_Green]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.actionButton}
           >
-            <LinearGradient
-              colors={["#2076C7", "#1CADA3"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.actionButton}
-            >
-              <Text style={styles.actionButtonText}>
-                {alertData.buttonText || "Continue"}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
+            <Text style={styles.actionButtonText}>
+              {alertData.buttonText || "Continue"}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

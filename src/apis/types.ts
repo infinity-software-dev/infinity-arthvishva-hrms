@@ -30,15 +30,15 @@ export interface Employee {
   email: string;
   password?: string; // Optional since it's stripped in toSafeObject()
   role:
-    | "SuperUser"
-    | "HR"
-    | "Manager"
-    | "Director"
-    | "VP"
-    | "GM"
-    | "Employee"
-    | "Intern"
-    | "fresher";
+  | "SuperUser"
+  | "HR"
+  | "Manager"
+  | "Director"
+  | "VP"
+  | "GM"
+  | "Employee"
+  | "Intern"
+  | "fresher";
   status: "Active" | "Inactive";
   deactivateReason?: string;
 
@@ -151,12 +151,34 @@ export interface LoginResponse {
   success: boolean;
 }
 
+export type AlertType = 'force_update' | 'optional_update' | 'info' | 'promo' | 'maintenance';
+export type AlertPlatform = 'android' | 'ios' | 'both';
+
 export interface AlertData {
+  _id: string;
   title: string;
   message: string;
   imageUrl?: string;
-  buttonText?: string;
-  buttonLink?: string;
+  buttonText: string;
+
+  buttonLink?: {
+    android?: string;
+    ios?: string;
+  };
+
   isSkippable: boolean;
   isActive: boolean;
+  type: AlertType;
+  platform: AlertPlatform;
+
+  minimumVersionCode?: {
+    android?: number;
+    ios?: number;
+  };
+  maximumVersionCode?: {
+    android?: number;
+    ios?: number;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
