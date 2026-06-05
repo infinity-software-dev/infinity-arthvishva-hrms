@@ -11,13 +11,13 @@ export interface CreateComplaintPayload {
 export const helpDeskService = {
   // GET: Fetch all complaints for the logged-in user
   fetchMyComplaints: async () => {
-    const response = await apiClient.get("/api/complaints/my");
+    const response = await apiClient.get("/api/app/complaints/my");
     return response.data;
   },
 
   // POST: Create a new complaint
   createComplaint: async (payload: CreateComplaintPayload) => {
-    const response = await apiClient.post("/api/complaints/apply", payload);
+    const response = await apiClient.post("/api/app/complaints", payload); 
     return response.data;
   },
 };

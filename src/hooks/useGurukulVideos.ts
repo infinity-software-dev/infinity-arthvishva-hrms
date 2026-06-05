@@ -16,6 +16,7 @@ export const useGurukulVideos = () => {
   // Filter/Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [activeVideo, setActiveVideo] = useState<VideoProps | null>(null);
 
   // Debounce handler for search input modifications
   useEffect(() => {
@@ -78,7 +79,11 @@ export const useGurukulVideos = () => {
   };
 
   const handleVideoPress = (video: VideoProps) => {
-    // Operational routing target for video playback viewports
+    setActiveVideo(video);
+  };
+
+  const closeVideo = () => {
+    setActiveVideo(null);
   };
 
   return {
@@ -89,12 +94,14 @@ export const useGurukulVideos = () => {
       isRefreshing,
       isFetchingMore,
       searchQuery,
+      activeVideo
     },
     actions: {
       setSearchQuery,
       handleRefresh,
       handleLoadMore,
       handleVideoPress,
+      closeVideo
     },
   };
 };

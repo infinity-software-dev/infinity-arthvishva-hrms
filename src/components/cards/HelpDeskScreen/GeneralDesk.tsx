@@ -9,10 +9,10 @@ import {
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
-import { useHelpDesk } from "@/hooks/useHelpDesk";
+import { useHelpDeskGeneral } from "@/hooks/useHelpDeskGeneral";
 
 export default function GeneralDesk() {
-  const { state, actions } = useHelpDesk();
+  const { state, actions } = useHelpDeskGeneral();
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>

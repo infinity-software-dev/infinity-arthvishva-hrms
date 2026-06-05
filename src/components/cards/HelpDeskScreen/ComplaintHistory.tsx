@@ -10,36 +10,44 @@ import {
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
+
+// Components
 import CustomBottomModal from "@/components/modals/CustomBottomModal";
 import NewComplaintModal from "@/components/modals/NewComplaintModal";
-import { useHelpDesk } from "@/hooks/useHelpDesk";
-import ComplaintCard from "./ComplaintCard";
 import UniversalButton from "@/components/buttons/UniversalButton";
+import ComplaintCard from "./ComplaintCard"; // Ensure this matches your file structure
+
+// Hooks
+import { useComplaintsHistory } from "@/hooks/useComplaintsHistory";
+import { useHelpDeskGeneral } from "@/hooks/useHelpDeskGeneral";
 
 export default function ComplaintHistory() {
-  const { state, actions } = useHelpDesk();
+  // 1. Data Fetching Hook
+  const { state: historyState, actions: historyActions } = useComplaintsHistory();
+
+  // 2. UI & Modal Hook
+  const { state: generalState, actions: generalActions } = useHelpDeskGeneral();
 
   return (
     <View style={styles.container}>
       {/* List Content */}
-      {state.isLoading && !state.isRefreshing ? (
+      {historyState.isLoading && !historyState.isRefreshing ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.Brand_Green} />
         </View>
       ) : (
         <FlatList
-          data={state.complaints}
+          data={historyState.complaints}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => <ComplaintCard complaint={item} />}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
-          // 2. ADD THE REFRESH CONTROL HERE
           refreshControl={
             <RefreshControl
-              refreshing={state.isRefreshing}
-              onRefresh={actions.handleRefresh}
-              tintColor={colors.Brand_Green} // Colors the spinner on iOS
-              colors={[colors.Brand_Green]} // Colors the spinner on Android
+              refreshing={historyState.isRefreshing}
+              onRefresh={historyActions.handleRefresh}
+              tintColor={colors.Brand_Green}
+              colors={[colors.Brand_Green]}
             />
           }
           ListEmptyComponent={
@@ -57,9 +65,10 @@ export default function ComplaintHistory() {
         />
       )}
 
+      {/* Floating Action Button */}
       <UniversalButton
         title="Raise Ticket"
-        onPress={actions.openModal}
+        onPress={generalActions.openModal}
         color={colors.Brand_Green}
         icon={<Ionicons name="add" size={moderateScale(24)} color="#FFFFFF" />}
         style={styles.fab}
@@ -67,13 +76,22 @@ export default function ComplaintHistory() {
 
       {/* New Complaint Modal */}
       <CustomBottomModal
-        onClose={actions.closeModal}
+        onClose={generalActions.closeModal}
         title="Raise new complaint"
-        isVisible={state.isModalVisible}
+        isVisible={generalState.isModalVisible}
       >
         <NewComplaintModal
-          onSubmit={actions.submitComplaint}
-          isSubmitting={state.isSubmitting}
+          isSubmitting={generalState.isSubmitting}
+          onSubmit={async (payload) => {
+            // 1. Submit the complaint
+            const result = await generalActions.submitComplaint(payload);
+
+            // 2. If successful, silently refresh the list behind the scenes
+            if (result.success) {
+              historyActions.refreshComplaints(true);
+            }
+            return result;
+          }}
         />
       </CustomBottomModal>
     </View>
@@ -87,14 +105,13 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: moderateScale(16),
-    paddingBottom: moderateScale(100),
+    paddingBottom: moderateScale(100), // Extra padding so the FAB doesn't cover the last item
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  // Floating Action Button Styles
   fab: {
     position: "absolute",
     bottom: moderateScale(24),
@@ -111,11 +128,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  // Empty State Styles
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: moderateScale(60),
+    paddingTop: moderateScale(80),
   },
   emptyText: {
     fontFamily: FONTS.medium,

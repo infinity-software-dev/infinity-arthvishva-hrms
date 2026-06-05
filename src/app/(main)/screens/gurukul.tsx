@@ -15,6 +15,7 @@ import VideoCard from "@/components/cards/GurukulScreen/VideoCard";
 import { CustomHeader } from "@/components/navbar/CustomHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGurukulVideos } from "@/hooks/useGurukulVideos";
+import PlayerOverlay from "@/components/modals/PlayerOverlay";
 
 export default function GurukulScreen() {
   const { state, actions } = useGurukulVideos();
@@ -106,6 +107,12 @@ export default function GurukulScreen() {
             ListFooterComponent={renderFooter}
           />
         )}
+
+        {/* Isolated Video Player Component */}
+        <PlayerOverlay
+          video={state.activeVideo}
+          onClose={actions.closeVideo}
+        />
       </View>
     </SafeAreaView>
   );
