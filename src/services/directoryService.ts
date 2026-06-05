@@ -8,14 +8,11 @@ export interface FetchDirectoryParams {
 }
 
 export const fetchEmployeeDirectory = async (params: FetchDirectoryParams) => {
-  const response = await apiClient.get("/api/employees/directory", {
+  const response = await apiClient.get("/api/app/employee/directory", {
     params: {
       limit: 20,
       ...params,
     },
   });
-
-  // Assumes your backend wraps the response in your ApiResponse class
-  // e.g., { statusCode: 200, data: { employees: [...], totalPages: 5, ... }, message: "..." }
   return response.data.data;
 };

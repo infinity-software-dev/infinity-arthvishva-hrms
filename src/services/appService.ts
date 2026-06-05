@@ -39,7 +39,6 @@ export const fetchGlobalAlertData = async (versionCode: number): Promise<AlertDa
   }
 };
 
-
 export const updateFcmTokenService = async (token: string): Promise<boolean> => {
   // console.log(token);
   // return true;
@@ -53,7 +52,7 @@ export const updateFcmTokenService = async (token: string): Promise<boolean> => 
     };
 
     const response = await apiClient.patch(
-      `${DOMAIN_URL}/api/employees/profile/fcm-token`,
+      `${DOMAIN_URL}/api/app/employee/profile/fcm-token`,
       payload,
     );
 

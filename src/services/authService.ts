@@ -4,7 +4,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 // IMPORT YOUR TYPES
-import { Employee, LoginResponse } from "@/apis/types";
+import { LoginResponse } from "@/apis/types";
 
 export const loginEmployee = async (
   employeeCode: string,
@@ -28,28 +28,9 @@ export const loginEmployee = async (
 
 export const logoutEmployee = async (): Promise<void> => {
   try {
-    const refreshToken = await SecureStore.getItemAsync("refreshToken");
-    if (refreshToken) {
-      await apiClient.post("/api/auth/logout", {
-        refreshToken: refreshToken,
-      });
-    }
-  } catch (error) {
-    console.error("Logout API failed", error);
-  } finally {
     await SecureStore.deleteItemAsync("accessToken");
     await SecureStore.deleteItemAsync("refreshToken");
-  }
-};
-
-// Apply the Employee type to the profile fetcher
-export const getMyProfile = async (): Promise<Employee | null> => {
-  try {
-    const response = await apiClient.get("/api/app/employee/profile");
-    const profileData = response.data.data as Employee;
-    return profileData;
   } catch (error) {
-    console.error("Failed to fetch profile", error);
-    return null;
+    console.error("Logout API failed", error);
   }
 };

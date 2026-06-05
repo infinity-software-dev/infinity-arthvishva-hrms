@@ -1,15 +1,15 @@
 import apiClient from "@/apis/client";
 import { Employee } from "@/apis/types";
 
-export const getProfileDetails = async (): Promise<Employee> => {
+// Apply the Employee type to the profile fetcher
+export const getMyProfile = async (): Promise<Employee | null> => {
   try {
-    const response = await apiClient.get("/api/auth/me");
-    // Your docs state the profile data is directly inside response.data.data
-    const profileData = response.data.data;
+    const response = await apiClient.get("/api/app/employee/profile");
+    const profileData = response.data.data as Employee;
     return profileData;
   } catch (error) {
     console.error("Failed to fetch profile", error);
-    throw error;
+    return null;
   }
 };
 

@@ -110,7 +110,7 @@ const HomeNavbar: React.FC<HomeNavbarProps> = ({ userName = "User" }) => {
               <Text style={styles.userName} numberOfLines={1}>
                 {toTitleCase(userName.split(" ")[0])}
               </Text>
-              <HelloWave />
+              {isFocused && <HelloWave />}
             </View>
           </View>
 

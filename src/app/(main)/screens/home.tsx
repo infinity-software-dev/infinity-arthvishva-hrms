@@ -1,73 +1,25 @@
+import React from "react";
+import { ScrollView } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { moderateScale } from "react-native-size-matters";
 import QuickActions from "@/components/cards/HomeScreen/QuickActionsCard";
 import MonthlyTarget from "@/components/cards/HomeScreen/MonthlyTargetCard";
 import ActionModal from "@/components/modals/AlertModal";
 import HomeNavbar from "@/components/navbar/HomeNavbar";
-import { colors } from "@/constants/theme";
-import { useAuthStore } from "@/store/useAuthStore";
-import {
-  checkLocationPermission,
-  requestLocationPermission,
-} from "@/utils/LocationHelper";
-import { getFirstName } from "@/utils/TextHelpers";
-import { useIsFocused } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Linking, AppState, ScrollView } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { moderateScale } from "react-native-size-matters";
 import HighlightsFeed from "@/components/cards/HomeScreen/HighlightsFeedCard";
 import Attendance from "@/components/cards/HomeScreen/AttendanceCard";
 import PerformanceInsights from "@/components/cards/HomeScreen/PerformanceInsights";
+import { useAuthStore } from "@/store/useAuthStore";
+import { colors } from "@/constants/theme";
+import { getFirstName } from "@/utils/TextHelpers";
+import { useLocationPermission } from "@/hooks/useLocationPermission";
 
 export default function HomeScreen() {
   const user = useAuthStore((state) => state.user);
-  const isFocused = useIsFocused();
 
-  const [isVisible, setIsVisible] = useState(false);
-  const [requiresSettings, setRequiresSettings] = useState(false);
-
-  const handleLocationFlow = async () => {
-    const isPermitted = await checkLocationPermission();
-
-    if (isPermitted) {
-      setIsVisible(false);
-      setRequiresSettings(false);
-    } else {
-      setIsVisible(true);
-    }
-  };
-
-  useEffect(() => {
-    if (isFocused) {
-      handleLocationFlow();
-    }
-  }, [isFocused]);
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState === "active") {
-        handleLocationFlow();
-      }
-    });
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
-  const handleModalConfirm = async () => {
-    if (requiresSettings) {
-      Linking.openSettings();
-      return;
-    }
-
-    const granted = await requestLocationPermission();
-
-    if (granted) {
-      handleLocationFlow();
-    } else {
-      setRequiresSettings(true);
-    }
-  };
+  // Consume our extracted location logic
+  const { isVisible, requiresSettings, handleModalConfirm } = useLocationPermission();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -76,23 +28,24 @@ export default function HomeScreen() {
         edges={["bottom"]}
       >
         <HomeNavbar userName={user?.name ? getFirstName(user.name) : "User"} />
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{ marginTop: -50, zIndex: 100 }}
           contentContainerStyle={{ paddingBottom: moderateScale(10) }}
         >
-          <Attendance />
           <QuickActions />
-          {/* <MonthlyTarget /> */}
+          {/* <Attendance />
+          
           <HighlightsFeed />
-          <PerformanceInsights />
+          <PerformanceInsights />*/}
         </ScrollView>
+        {/* <MonthlyTarget />  */}
+
 
         <ActionModal
           visible={isVisible}
-          title={
-            requiresSettings ? "Action Required" : "Enable Location Services"
-          }
+          title={requiresSettings ? "Action Required" : "Enable Location Services"}
           message={
             requiresSettings
               ? "Location permissions have been disabled. Please enable them in your device settings to continue."

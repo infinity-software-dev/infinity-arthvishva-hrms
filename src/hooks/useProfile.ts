@@ -1,14 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
 import { Linking, Alert } from "react-native";
-import { getProfileDetails, updatePassword } from "@/services/profileService";
+import { getMyProfile, updatePassword } from "@/services/profileService";
 import { Employee } from "@/apis/types";
 import { colors } from "@/constants/theme";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const useProfile = () => {
   const [profile, setProfile] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] =
     useState(false);
+  const fetchLatestProfile = useAuthStore((state) => state.fetchLatestProfile);
 
   // Action Modal States
   const [isActionModalVisible, setActionModalVisible] = useState(false);
@@ -22,7 +24,7 @@ export const useProfile = () => {
   const loadProfile = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getProfileDetails();
+      const data = await getMyProfile();
       setProfile(data);
     } catch (error) {
       console.error("Failed to fetch profile:", error);
@@ -33,6 +35,7 @@ export const useProfile = () => {
 
   useEffect(() => {
     loadProfile();
+    fetchLatestProfile();
   }, [loadProfile]);
 
   const formatDate = (isoString?: string) => {

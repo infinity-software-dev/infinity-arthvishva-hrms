@@ -51,10 +51,10 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Reject immediately if the request was to login or refresh
+    // Broader check to catch /employee/login, /hr/login, etc.
     if (
-      originalRequest.url?.includes("/api/auth/login") ||
-      originalRequest.url?.includes("/api/auth/refresh")
+      originalRequest.url?.includes("/login") ||
+      originalRequest.url?.includes("/refresh")
     ) {
       return Promise.reject(error);
     }
@@ -80,13 +80,12 @@ apiClient.interceptors.response.use(
           throw new Error("No refresh token available");
         }
 
-        // Use global axios to bypass interceptors
         const { data } = await axios.post(`${DOMAIN_URL}/api/auth/refresh`, {
           refreshToken: refreshToken,
         });
 
-        // Your API docs indicate ONLY the accessToken is returned here
-        const newAccessToken = data.accessToken;
+        // Account for the backend's standard { success, message, data } wrapper
+        const newAccessToken = data.data.accessToken;
 
         await SecureStore.setItemAsync("accessToken", newAccessToken);
 
@@ -97,7 +96,6 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
 
-        // Refresh token failed. Force logout.
         await SecureStore.deleteItemAsync("accessToken");
         await SecureStore.deleteItemAsync("refreshToken");
         resetAndNavigate("/(auth)/login");
