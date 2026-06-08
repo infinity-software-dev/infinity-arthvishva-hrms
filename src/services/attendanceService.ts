@@ -2,14 +2,7 @@ import apiClient from "@/apis/client";
 import { WorkMode } from "@/hooks/useAttendanceSession";
 import { AttendanceApiResponse } from "@/types/attendance";
 
-export type BackendAttendanceStatus =
-  | "P"
-  | "A"
-  | "WO"
-  | "L"
-  | "Coff"
-  | "AUTO"
-  | "H";
+export type BackendAttendanceStatus = | "P" | "A" | "WO" | "L" | "Coff" | "AUTO" | "H";
 
 export interface DailyAttendanceRecord {
   uiStatus: "pending" | "in" | "completed" | "blocked";
@@ -34,14 +27,12 @@ export interface CheckoutData {
   todayWork: string;
   pendingWork: string;
   issuesFaced: string;
-  reportParticipants: string[];
 }
 
 export interface ManagementEmployee {
   _id: string;
   name: string;
-  employeeCode: string;
-  role: string;
+  position: string;
 }
 
 export interface CorrectionPayload {
@@ -52,13 +43,15 @@ export interface CorrectionPayload {
 }
 
 /**
- * Helper to handle inconsistent backend keys ('record' vs 'attendance')
+ * Helper to handle inconsistent backend keys 'attendance'
  */
-const extractRecord = (data: any) => data?.record || data?.attendance;
+const extractRecord = (data: any) => {
+  return data?.record || null;
+};
 
 export async function fetchTodayAttendance(): Promise<DailyAttendanceRecord> {
   try {
-    const response = await apiClient.get("/api/attendance/today");
+    const response = await apiClient.get("/api/app/attendance/today-status");
     const data = response.data.data;
     const record = extractRecord(data);
 
@@ -76,7 +69,7 @@ export async function fetchTodayAttendance(): Promise<DailyAttendanceRecord> {
     const { inTime, outTime, workMode, status } = record;
 
     let uiStatus: DailyAttendanceRecord["uiStatus"] = "pending";
-    if (["H", "L", "WO", "A"].includes(status)) {
+    if (["L", "A"].includes(status)) { // Removed 'H' and 'WO'
       uiStatus = "blocked";
     } else if (outTime || status === "AUTO") {
       uiStatus = "completed";
@@ -99,44 +92,6 @@ export async function fetchTodayAttendance(): Promise<DailyAttendanceRecord> {
   }
 }
 
-export async function submitAttendancePunch(
-  action: "in" | "out",
-  latitude: number | null,
-  longitude: number | null,
-  workMode: WorkMode,
-  checkoutData?: CheckoutData, // Add optional parameter here
-): Promise<DailyAttendanceRecord> {
-  try {
-    const url =
-      action === "in"
-        ? "/api/attendance/check-in"
-        : "/api/attendance/check-out";
-
-    // Attach the checkoutData to the payload if it exists (for check-out)
-    const payload =
-      action === "in"
-        ? { latitude, longitude, workMode }
-        : { latitude, longitude, workMode, ...checkoutData };
-
-    const response = await apiClient.post(url, payload);
-    const data = response.data.data;
-
-    const record = extractRecord(data);
-
-    return {
-      uiStatus: record.outTime ? "completed" : "in",
-      backendStatus: record.status,
-      checkInTime: record.inTime ? new Date(record.inTime) : null,
-      checkOutTime: record.outTime ? new Date(record.outTime) : null,
-      workMode: record.workMode,
-      statusMessage:
-        STATUS_LABELS[record.status as BackendAttendanceStatus] || "",
-    };
-  } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Punch failed");
-  }
-}
-
 export const getAttendanceSummary = async (
   fromDate: string,
   toDate: string,
@@ -152,14 +107,14 @@ export const getAttendanceSummary = async (
   }
 };
 
+// Used in attendance check-out screen to fetch list of managers for EOD report
 export const fetchManagementEmployees = async (): Promise<
   ManagementEmployee[]
 > => {
   try {
     // Adjust the endpoint URL if your actual route differs
-    const response = await apiClient.get("/api/employees/management");
+    const response = await apiClient.get("/api/app/attendance/reporting-managers");
 
-    // The backend uses ApiResponse, so the array is inside response.data.data
     return response.data.data;
   } catch (error: any) {
     console.error("Error fetching management employees:", error);
@@ -168,6 +123,67 @@ export const fetchManagementEmployees = async (): Promise<
     );
   }
 };
+
+export async function submitCheckIn(
+  latitude: number | null,
+  longitude: number | null,
+  workMode: WorkMode
+): Promise<DailyAttendanceRecord> {
+  try {
+    const payload = { latitude, longitude, workMode };
+
+    // Hardcoded URL for the check-in route
+    const response = await apiClient.post("/api/app/attendance/check-in", payload);
+    const data = response.data.data;
+
+    const record = extractRecord(data);
+
+    return {
+      // Safely hardcoded since this is strictly a check-in action
+      uiStatus: "in",
+      backendStatus: record.status || "P",
+      checkInTime: record.inTime ? new Date(record.inTime) : null,
+
+      // Check-out time will always be null at the exact moment of check-in
+      checkOutTime: null,
+
+      workMode: record.workMode || "Office",
+      statusMessage: STATUS_LABELS[record.status as BackendAttendanceStatus] || "Present",
+    };
+  } catch (error: any) {
+    // Specific error message for this exact flow
+    throw new Error(error.response?.data?.message || "Check-in failed");
+  }
+}
+
+export async function submitCheckOut(
+  latitude: number | null,
+  longitude: number | null,
+  workMode: WorkMode,
+  checkoutData: CheckoutData // Require this if your EOD report is mandatory
+): Promise<DailyAttendanceRecord> {
+  try {
+    const payload = { latitude, longitude, workMode, ...checkoutData };
+
+    // Hardcoded URL for the check-out route
+    const response = await apiClient.post("/api/app/attendance/check-out", payload);
+    const data = response.data.data;
+
+    const record = extractRecord(data);
+
+    return {
+      // Safely hardcoded since this is strictly a check-out action
+      uiStatus: "completed",
+      backendStatus: record.status || "P",
+      checkInTime: record.inTime ? new Date(record.inTime) : null,
+      checkOutTime: record.outTime ? new Date(record.outTime) : null,
+      workMode: record.workMode || "Office",
+      statusMessage: STATUS_LABELS[record.status as BackendAttendanceStatus] || "Present",
+    };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Check-out failed");
+  }
+}
 
 export async function submitAttendanceCorrection(
   attendanceId: string,
@@ -197,7 +213,7 @@ export async function trackLocation(
   longitude: number,
 ): Promise<void> {
   try {
-    await apiClient.post("/api/attendance/track", { latitude, longitude });
+    await apiClient.post("/api/app/attendance/track-location", { latitude, longitude });
   } catch (error) {
     console.error("Failed to sync location to server:", error);
   }

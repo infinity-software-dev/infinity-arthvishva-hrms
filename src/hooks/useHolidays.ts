@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { fetchHolidays, Holiday } from "@/services/holidayService";
+import { router } from "expo-router";
 
 export const useHolidays = () => {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -48,6 +49,11 @@ export const useHolidays = () => {
     setErrorModal((prev) => ({ ...prev, visible: false }));
   };
 
+  const cancelErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, visible: false }));
+    router.back(); // Navigate back to the previous screen
+  };
+
   return {
     state: {
       holidays,
@@ -58,6 +64,7 @@ export const useHolidays = () => {
     actions: {
       loadData,
       closeErrorModal,
+      cancelErrorModal,
     },
   };
 };

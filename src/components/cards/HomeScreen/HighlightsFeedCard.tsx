@@ -62,11 +62,11 @@ export default function HighlightsFeed() {
               </Text>
             </View>
 
-            <Ionicons
+            {/* <Ionicons
               name="chevron-forward"
               size={moderateScale(16)}
               color="#9CA3AF"
-            />
+            /> */}
           </TouchableOpacity>
         ))
       ) : (

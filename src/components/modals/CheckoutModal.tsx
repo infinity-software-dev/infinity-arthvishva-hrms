@@ -21,7 +21,7 @@ interface CheckoutFormData {
   todayWork: string;
   pendingWork: string;
   issuesFaced: string;
-  reportParticipants: string[]; // This will now hold an array of employee _ids
+  reportParticipants: string[];
 }
 
 interface CheckoutModalProps {
@@ -37,22 +37,15 @@ export default function CheckoutModal({
   const [pendingWork, setPendingWork] = useState("");
   const [issuesFaced, setIssuesFaced] = useState("");
 
-  // State for fetched employees and loading status
   const [employees, setEmployees] = useState<ManagementEmployee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
-    [],
-  );
 
   const insets = useSafeAreaInsets();
 
+  // 1. Validation updated: No longer depends on participant selection
   const isFormIncomplete =
-    !todayWork.trim() ||
-    !pendingWork.trim() ||
-    !issuesFaced.trim() ||
-    selectedParticipants.length === 0;
+    !todayWork.trim() || !pendingWork.trim() || !issuesFaced.trim();
 
-  // Fetch employees when the modal mounts
   useEffect(() => {
     const loadEmployees = async () => {
       try {
@@ -68,20 +61,12 @@ export default function CheckoutModal({
     loadEmployees();
   }, []);
 
-  const toggleParticipant = (participantId: string) => {
-    setSelectedParticipants((prev) =>
-      prev.includes(participantId)
-        ? prev.filter((id) => id !== participantId)
-        : [...prev, participantId],
-    );
-  };
-
   const handleSubmit = () => {
     onConfirm({
       todayWork,
       pendingWork,
       issuesFaced,
-      reportParticipants: selectedParticipants, // Sending the array of _ids
+      reportParticipants: employees.map((emp) => emp._id),
     });
   };
 
@@ -117,7 +102,7 @@ export default function CheckoutModal({
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Pending Work</Text>
+          <Text style={styles.label}>Pending Work *</Text>
           <TextInput
             style={styles.textInput}
             placeholder="What is left for tomorrow?"
@@ -131,7 +116,7 @@ export default function CheckoutModal({
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Issues Faced</Text>
+          <Text style={styles.label}>Issues Faced *</Text>
           <TextInput
             style={styles.textInput}
             placeholder="Any blockers or challenges?"
@@ -144,8 +129,9 @@ export default function CheckoutModal({
           />
         </View>
 
+        {/* 3. Read-only UI for Reporting Managers */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Report Participants</Text>
+          <Text style={styles.label}>Reporting To</Text>
           <View style={styles.pillContainer}>
             {isLoading ? (
               <ActivityIndicator
@@ -155,29 +141,15 @@ export default function CheckoutModal({
               />
             ) : employees.length === 0 ? (
               <Text style={styles.emptyText}>
-                No management contacts found.
+                No reporting managers assigned.
               </Text>
             ) : (
-              employees.map((emp) => {
-                // Check selection using the unique _id
-                const isSelected = selectedParticipants.includes(emp._id);
-                return (
-                  <TouchableOpacity
-                    key={emp._id}
-                    style={[styles.pill, isSelected && styles.activePill]}
-                    onPress={() => toggleParticipant(emp._id)}
-                  >
-                    <Text
-                      style={[
-                        styles.pillText,
-                        isSelected && styles.activePillText,
-                      ]}
-                    >
-                      {emp.name} {/* Render the name, but store the _id */}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })
+              employees.map((emp) => (
+                // Replaced TouchableOpacity with a static View
+                <View key={emp._id} style={styles.readOnlyPill}>
+                  <Text style={styles.readOnlyPillText}>{emp.name}</Text>
+                </View>
+              ))
             )}
           </View>
         </View>
@@ -193,9 +165,7 @@ export default function CheckoutModal({
             text="Submit"
             onPress={handleSubmit}
             disabled={isFormIncomplete}
-            customStyles={{
-              marginVertical: 0,
-            }}
+            customStyles={{ marginVertical: 0 }}
           />
         </View>
       </View>
@@ -245,7 +215,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: moderateScale(8),
-    minHeight: moderateScale(35), // Prevents layout jump when loading finishes
+    minHeight: moderateScale(35),
   },
   loader: {
     marginTop: moderateScale(5),
@@ -256,26 +226,19 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     marginTop: moderateScale(5),
   },
-  pill: {
-    backgroundColor: "#F3F4F6",
+  // 4. Updated pill styles to look like static tags
+  readOnlyPill: {
+    backgroundColor: "#EFF6FF", // Light blue background
     paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(8),
-    borderRadius: moderateScale(20),
+    paddingVertical: moderateScale(6),
+    borderRadius: moderateScale(8), // Less rounded, looks more like a tag
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: "#DBEAFE", // Very subtle border
   },
-  activePill: {
-    backgroundColor: "#EFF6FF",
-    borderColor: colors.Brand_Blue,
-  },
-  pillText: {
+  readOnlyPillText: {
     fontSize: moderateScale(12),
-    fontFamily: FONTS.semiBold,
-    color: "#6B7280",
-  },
-  activePillText: {
-    color: colors.Brand_Blue,
     fontFamily: FONTS.bold,
+    color: colors.Brand_Blue, // Matches your brand
   },
   footer: {
     flexDirection: "row",

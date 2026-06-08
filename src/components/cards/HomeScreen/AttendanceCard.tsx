@@ -19,16 +19,23 @@ import CheckoutModal from "@/components/modals/CheckoutModal";
 import { useFaceVerification } from "@/hooks/useFaceVerification";
 import ActionModal from "@/components/modals/AlertModal";
 
-export default function Attendance() {
+export default function AttendanceCard() {
   const {
     status,
     statusMessage,
     workMode,
-    setWorkMode,
+    modalVisible,
+    modalTitle,
+    modalMessage,
     currentTime,
     checkInTime,
     checkOutTime,
-    handleAttendanceAction,
+    setWorkMode,
+    setModalVisible,
+    setModalTitle,
+    setModalMessage,
+    handleCheckInPunch,
+    handleCheckOutPunch,
     getTotalTimeLogged,
     formatPunchTime,
   } = useAttendanceSession();
@@ -39,9 +46,7 @@ export default function Attendance() {
   const { verifyFaceAction } = useFaceVerification();
 
   const [isCheckoutModalVisible, setCheckoutModalVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
+
 
   const isLocationBlocked = workMode === "Office" && !isInsideOffice;
 
@@ -53,23 +58,29 @@ export default function Attendance() {
 
   const onSwipeComplete = () => {
     if (status === "pending") {
+
+      //  CHECK-IN FLOW
       verifyFaceAction(
         "checkin",
-        () => handleAttendanceAction(),
+        () => handleCheckInPunch(),
         handleFaceError,
       );
+
     } else if (status === "in") {
+
+      //  CHECK-OUT FLOW
       verifyFaceAction(
         "checkout",
         () => setCheckoutModalVisible(true),
         handleFaceError,
       );
+
     }
   };
 
   const handleModalConfirm = (data: CheckoutData) => {
-    setCheckoutModalVisible(false); // Close modal
-    handleAttendanceAction(data); // Trigger the API with form data
+    setCheckoutModalVisible(false);
+    handleCheckOutPunch(data);
   };
 
   return (
@@ -132,7 +143,7 @@ export default function Attendance() {
                 : workMode !== "Office"
                   ? `${workMode} Active`
                   : isInsideOffice
-                    ? "At Worksite"
+                    ? "At Office"
                     : "Out of Range"}
             </Text>
           </View>
@@ -169,11 +180,15 @@ export default function Attendance() {
                 <Text style={styles.statLabel}>Shift Duration</Text>
                 <Text style={styles.statValue}>{shiftHours} Hours</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.stat}>
-                <Text style={styles.statLabel}>Distance</Text>
-                <Text style={styles.statValue}>{distance}</Text>
-              </View>
+              {workMode === "Office" && (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.stat}>
+                    <Text style={styles.statLabel}>Distance</Text>
+                    <Text style={styles.statValue}>{distance}</Text>
+                  </View>
+                </>
+              )}
             </>
           )}
 
@@ -264,7 +279,7 @@ export default function Attendance() {
                   ? "Swipe to Check-In"
                   : "Swipe to Check-Out"
               }
-              onComplete={onSwipeComplete} // Use the intercepter function here
+              onComplete={onSwipeComplete}
               disabled={isLocationBlocked}
             />
           )}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -12,6 +12,12 @@ import { useHolidays } from "@/hooks/useHolidays";
 const HolidayScreen = () => {
   const { state, actions } = useHolidays();
 
+  const today = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: colors.Base_Background }}
@@ -20,10 +26,9 @@ const HolidayScreen = () => {
       <CustomHeader title="Holidays" />
 
       {state.loading && !state.refreshing ? (
-        <>
-          <HolidayCardSkeleton />
-          <HolidayCardSkeleton />
-        </>
+        new Array(4).fill(0).map((_, index) => (
+          <HolidayCardSkeleton key={index} />
+        ))
       ) : (
         <FlatList
           data={state.holidays}
@@ -31,34 +36,46 @@ const HolidayScreen = () => {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
+            const itemDate = new Date(item.date);
+            itemDate.setHours(0, 0, 0, 0);
+            const isPast = itemDate < today;
+
             const isNational = item.type === "National";
-            const accentColor = isNational
-              ? colors.Danger_Red
-              : colors.Brand_Green;
-            const pastelBg = `${accentColor}14`;
+
+            // Base colors for the active state
+            const baseAccent = isNational ? colors.Danger_Red : colors.Brand_Green;
+
+            // The left border dictates the visual hierarchy
+            const accentColor = isPast ? "#CBD5E1" : baseAccent;
+
+            // Ultra-subtle background for the badge
+            const pastelBg = isPast ? "#F1F5F9" : `${baseAccent}10`;
 
             return (
-              <View style={styles.card}>
+              <View style={[styles.card, { borderLeftColor: accentColor }, isPast && styles.pastCard]}>
+
+                {/* Header: Name & Badge */}
                 <View style={styles.header}>
-                  <Text style={styles.name} numberOfLines={2}>
+                  <Text style={[styles.name, isPast && styles.pastText]} numberOfLines={2}>
                     {item.name}
                   </Text>
                   <View style={[styles.badge, { backgroundColor: pastelBg }]}>
-                    <Text style={[styles.badgeText, { color: accentColor }]}>
+                    <Text style={[styles.badgeText, { color: isPast ? "#94A3B8" : baseAccent }]}>
                       {item.type}
                     </Text>
                   </View>
                 </View>
 
-                <View style={styles.dateContainer}>
+                {/* Date Row: Clean, inline, icon-led */}
+                <View style={styles.dateRow}>
                   <MaterialIcons
-                    name="calendar-today"
-                    size={moderateScale(13)}
-                    color={colors.Brand_Blue}
+                    name="event"
+                    size={moderateScale(16)}
+                    color={isPast ? "#CBD5E1" : "#64748B"}
                   />
-                  <Text style={styles.date}>
-                    {new Date(item.date).toLocaleDateString(undefined, {
-                      weekday: "short",
+                  <Text style={[styles.dateText, isPast && styles.pastText]}>
+                    {itemDate.toLocaleDateString("en-US", {
+                      weekday: "long",
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -66,8 +83,9 @@ const HolidayScreen = () => {
                   </Text>
                 </View>
 
+                {/* Description: Separated with margin, softer color */}
                 {item.description && (
-                  <Text style={styles.description} numberOfLines={3}>
+                  <Text style={[styles.description, isPast && { color: "#CBD5E1" }]} numberOfLines={2}>
                     {item.description}
                   </Text>
                 )}
@@ -102,6 +120,7 @@ const HolidayScreen = () => {
           actions.closeErrorModal();
           actions.loadData(false);
         }}
+        onCancel={actions.cancelErrorModal}
       />
     </SafeAreaView>
   );
@@ -110,67 +129,76 @@ const HolidayScreen = () => {
 const styles = StyleSheet.create({
   listContent: {
     paddingBottom: moderateScale(24),
-    paddingTop: moderateScale(12),
+    paddingTop: moderateScale(16),
   },
   card: {
     backgroundColor: "#FFFFFF",
-    marginVertical: moderateScale(6),
+    marginVertical: moderateScale(8),
     marginHorizontal: moderateScale(16),
     borderRadius: moderateScale(16),
-    padding: moderateScale(16),
+    paddingVertical: moderateScale(18),
+    paddingHorizontal: moderateScale(20),
+    // ─── MODERN ACCENT BORDER ───
+    borderLeftWidth: moderateScale(5),
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: "#F8FAFC",
+    // ─── PREMIUM SOFT SHADOW ───
     shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  pastCard: {
+    opacity: 0.65,
+    backgroundColor: "#F8FAFC", // Slight tint for past events
+    borderColor: "#F1F5F9",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  pastText: {
+    color: "#94A3B8",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: moderateScale(10),
+    alignItems: "flex-start", // Keeps badge at top if name wraps to 2 lines
+    marginBottom: moderateScale(12),
   },
   name: {
-    fontSize: moderateScale(16),
-    fontFamily: FONTS.bold,
+    fontSize: moderateScale(17),
+    fontFamily: FONTS.extraBold,
     color: "#0F172A",
     flex: 1,
     marginRight: moderateScale(12),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(24),
   },
   badge: {
     paddingHorizontal: moderateScale(10),
-    paddingVertical: moderateScale(4),
-    borderRadius: moderateScale(99),
+    paddingVertical: moderateScale(5),
+    borderRadius: moderateScale(8),
   },
   badgeText: {
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(11),
     fontFamily: FONTS.bold,
-    textTransform: "capitalize",
+    letterSpacing: 0.3,
   },
-  dateContainer: {
+  dateRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    paddingVertical: moderateScale(6),
-    paddingHorizontal: moderateScale(10),
-    borderRadius: moderateScale(8),
-    alignSelf: "flex-start",
   },
-  date: {
-    fontSize: moderateScale(12),
+  dateText: {
+    fontSize: moderateScale(13),
     color: "#475569",
-    fontFamily: FONTS.medium,
-    marginLeft: moderateScale(6),
+    fontFamily: FONTS.semiBold,
+    marginLeft: moderateScale(8),
   },
   description: {
     fontSize: moderateScale(13),
     color: "#64748B",
-    fontFamily: FONTS.regular,
-    lineHeight: moderateScale(19),
-    marginTop: moderateScale(12),
+    fontFamily: FONTS.medium,
+    lineHeight: moderateScale(20),
+    marginTop: moderateScale(10),
   },
 });
 

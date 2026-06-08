@@ -13,6 +13,7 @@ export interface BirthdayEmployee {
 export interface BirthdaysResponse {
   today: BirthdayEmployee[];
   tomorrow: BirthdayEmployee[];
+  upcoming: BirthdayEmployee[];
 }
 
 /**
@@ -20,8 +21,7 @@ export interface BirthdaysResponse {
  */
 export const fetchUpcomingBirthdays = async (): Promise<BirthdaysResponse> => {
   try {
-    // Adjust this URL path to exactly match your Express router setup
-    const response = await apiClient.get("/api/employees/birthdays/upcoming");
+    const response = await apiClient.get("/api/app/employee/birthdays/upcoming");
 
     // ApiResponse wraps the payload in `data`
     return response.data.data;

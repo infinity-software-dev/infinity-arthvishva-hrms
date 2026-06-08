@@ -8,7 +8,7 @@ import MonthlyTarget from "@/components/cards/HomeScreen/MonthlyTargetCard";
 import ActionModal from "@/components/modals/AlertModal";
 import HomeNavbar from "@/components/navbar/HomeNavbar";
 import HighlightsFeed from "@/components/cards/HomeScreen/HighlightsFeedCard";
-import Attendance from "@/components/cards/HomeScreen/AttendanceCard";
+import AttendanceCard from "@/components/cards/HomeScreen/AttendanceCard";
 import PerformanceInsights from "@/components/cards/HomeScreen/PerformanceInsights";
 import { useAuthStore } from "@/store/useAuthStore";
 import { colors } from "@/constants/theme";
@@ -34,11 +34,11 @@ export default function HomeScreen() {
           style={{ marginTop: -50, zIndex: 100 }}
           contentContainerStyle={{ paddingBottom: moderateScale(10) }}
         >
+          <AttendanceCard />
           <QuickActions />
-          {/* <Attendance />
-          
           <HighlightsFeed />
-          <PerformanceInsights />*/}
+
+          {/* <PerformanceInsights />*/}
         </ScrollView>
         {/* <MonthlyTarget />  */}
 

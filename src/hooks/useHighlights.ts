@@ -20,18 +20,45 @@ export const useHighlights = () => {
     const loadHighlights = async () => {
       setIsLoading(true);
       try {
-        // Fetch the real data from the backend
         const birthdaysData = await fetchUpcomingBirthdays();
         const dynamicHighlights: HighlightItem[] = [];
 
-        // 1. Map Today's Birthdays
+        // ─── SMART NAME FORMATTING LOGIC ───
+
+        // 1. Pool all the birthday employees together
+        const allBirthdayEmployees = [
+          ...(birthdaysData.today || []),
+          ...(birthdaysData.tomorrow || []),
+          ...(birthdaysData.upcoming || []),
+        ];
+
+        // 2. Count how many times each first name appears
+        const firstNameCounts: Record<string, number> = {};
+        allBirthdayEmployees.forEach((emp) => {
+          const firstName = emp.name.trim().split(" ")[0]; // Grab the first word
+          firstNameCounts[firstName] = (firstNameCounts[firstName] || 0) + 1;
+        });
+
+        // 3. Helper function to decide which name to show
+        const getDisplayName = (fullName: string) => {
+          const firstName = fullName.trim().split(" ")[0];
+          // If this first name appears more than once, return the full name.
+          // Otherwise, just return the first name.
+          return firstNameCounts[firstName] > 1 ? fullName : firstName;
+        };
+
+        // ───────────────────────────────────
+
+        // Map Today's Birthdays
         if (birthdaysData.today && birthdaysData.today.length > 0) {
           birthdaysData.today.forEach((emp) => {
+            const displayName = getDisplayName(emp.name); // Get smart name
+
             dynamicHighlights.push({
               id: `bday-today-${emp._id}`,
               type: "Birthday",
-              title: `${emp.name}'s Birthday`,
-              desc: `Wish ${emp.name} a very happy birthday today! 🎂`,
+              title: `${displayName}'s Birthday`,
+              desc: `Wish ${displayName} a very happy birthday today! 🎂`,
               time: "Today",
               icon: "gift",
               theme: colors.Rise_Orange,
@@ -39,37 +66,40 @@ export const useHighlights = () => {
           });
         }
 
-        // 2. Map Tomorrow's Birthdays
+        // Map Tomorrow's Birthdays
         if (birthdaysData.tomorrow && birthdaysData.tomorrow.length > 0) {
           birthdaysData.tomorrow.forEach((emp) => {
+            const displayName = getDisplayName(emp.name);
+
             dynamicHighlights.push({
               id: `bday-tmrw-${emp._id}`,
               type: "Birthday",
-              title: `${emp.name}'s Birthday`,
-              desc: "Upcoming birthday tomorrow. Get ready to celebrate!",
+              title: `${displayName}'s Birthday`,
+              desc: `Upcoming birthday tomorrow. Get ready to celebrate!`,
               time: "Tomorrow",
               icon: "gift",
-              theme: colors.Magic_Violet, // Purple
+              theme: colors.Magic_Violet,
             });
           });
         }
 
-        // 3. Keep your existing static/dummy data (Holidays, Events)
-        // until you build APIs for them.
-        const staticHighlights: HighlightItem[] = [
-          {
-            id: "static-holiday-1",
-            type: "Holiday",
-            title: "Buddha Purnima",
-            desc: "The office will remain closed tomorrow, May 16th.",
-            time: "Upcoming",
-            icon: "flag",
-            theme: "#16A34A",
-          },
-        ];
+        // Map Upcoming Birthdays (Day after tomorrow)
+        if (birthdaysData.upcoming && birthdaysData.upcoming.length > 0) {
+          birthdaysData.upcoming.forEach((emp) => {
+            const displayName = getDisplayName(emp.name);
 
-        // Combine the real API data with the static data
-        // setUpdates([...dynamicHighlights, ...staticHighlights]);
+            dynamicHighlights.push({
+              id: `bday-upc-${emp._id}`,
+              type: "Upcoming",
+              title: `${displayName}'s Birthday`,
+              desc: "Coming up in two days. Plan ahead!",
+              time: "Upcoming",
+              icon: "calendar-outline",
+              theme: colors.Brand_Blue,
+            });
+          });
+        }
+
         setUpdates(dynamicHighlights);
       } catch (error) {
         console.error("Failed to fetch highlights", error);

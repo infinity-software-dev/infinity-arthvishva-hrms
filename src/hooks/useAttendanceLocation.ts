@@ -14,7 +14,7 @@ export function useAttendanceLocation(workMode: WorkMode, status: string) {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
   const lastSyncedTime = useRef<number>(0);
-  const TRACKING_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+  const TRACKING_INTERVAL_MS = 0.12 * 60 * 1000; // 10 minutes
 
   // Use refs to track the latest state without triggering the useEffect to restart the GPS watcher
   const workModeRef = useRef(workMode);
