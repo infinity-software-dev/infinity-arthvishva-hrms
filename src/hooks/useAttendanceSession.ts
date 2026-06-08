@@ -62,6 +62,7 @@ export function useAttendanceSession() {
     if (status === "loading" || status === "in" || status === "completed") return;
 
     const previousStatus = status;
+    setStatus("loading");
 
     try {
       // 2. Fetch fresh GPS coordinates right when they swipe (prevents stale data)
@@ -105,6 +106,7 @@ export function useAttendanceSession() {
     if (status !== "in") return;
 
     const previousStatus = status;
+    setStatus("loading");
 
     try {
       // 2. Fetch fresh GPS coordinates right when they swipe
