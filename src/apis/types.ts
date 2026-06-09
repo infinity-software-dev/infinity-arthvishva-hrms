@@ -29,16 +29,8 @@ export interface Employee {
   name: string;
   email: string;
   password?: string; // Optional since it's stripped in toSafeObject()
-  role:
-  | "SuperUser"
-  | "HR"
-  | "Manager"
-  | "Director"
-  | "VP"
-  | "GM"
-  | "Employee"
-  | "Intern"
-  | "fresher";
+  role: "Director" | "HR" | "Employee"; // Synced with schema enum
+  isAppAdmin?: boolean;
   status: "Active" | "Inactive";
   deactivateReason?: string;
 
@@ -47,7 +39,7 @@ export interface Employee {
   alternateMobileNumber?: string;
   gender?: "Male" | "Female" | "Other";
   bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
-  dateOfBirth?: string;
+  dateOfBirth?: string; // Standardized to string (ISO Date) for frontend
   maritalStatus?: "Single" | "Married" | "Divorced" | "Widowed";
   profileImageUrl?: string;
   faceDescriptor?: number[];
@@ -64,11 +56,11 @@ export interface Employee {
   // ── JOB DETAILS ──
   department?: string;
   position?: string;
+  isLeadershipRole: boolean; // Synced from Schema
   joiningDate?: string;
   lastWorkingDate?: string | null;
   salary?: number;
-  reportingManagers?: string[];
-  managerIds?: string[]; // Represents ObjectId array
+  managerId?: string; // Represents ObjectId as string in frontend
 
   // ── EXPERIENCE ──
   experienceType?: "Fresher" | "Experienced";
@@ -125,11 +117,12 @@ export interface Employee {
   doctorName?: string;
   doctorContact?: string;
 
-  // ── LEAVE BALANCES ──
-  compOffBalance?: number;
+  // ── LEAVE BALANCES (Legacy / Deprecated) ──
+  // Note: These are in your schema, but modern ledger architecture 
+  // calculates active balances from the LeaveLedger collection.
+  compOffBalance?: number; 
   paidLeaveBalance?: number;
   lastLeaveAccrualDate?: string;
-  leaveBalanceHistory?: LeaveBalanceHistoryItem[];
 
   // ── TOKENS & NOTIFICATIONS ──
   refreshToken?: string; // Optional since it's stripped in toSafeObject()

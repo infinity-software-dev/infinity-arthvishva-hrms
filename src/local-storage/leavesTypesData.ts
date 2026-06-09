@@ -15,14 +15,14 @@ export const LEAVE_TYPES = [
     value: "Sick",
     label: "Sick Leave",
     icon: "medical-outline",
-    color: "#EF4444",
+    color: "#EC4899",
   },
-  {
-    value: "Earned",
-    label: "Earned Leave",
-    icon: "ribbon-outline", // or "star-outline"
-    color: "#14B8A6", // Teal
-  },
+  // {
+  //   value: "Earned",
+  //   label: "Earned Leave",
+  //   icon: "ribbon-outline", // or "star-outline"
+  //   color: "#14B8A6", // Teal
+  // },
   {
     value: "Unpaid",
     label: "Unpaid",
@@ -35,12 +35,12 @@ export const LEAVE_TYPES = [
     icon: "gift-outline",
     color: "#8B5CF6",
   },
-  {
-    value: "MaternityPaternity",
-    label: "Maternity/Paternity",
-    icon: "heart-outline", // or "people-outline"
-    color: "#EC4899", // Pink
-  },
+  // {
+  //   value: "MaternityPaternity",
+  //   label: "Maternity/Paternity",
+  //   icon: "heart-outline", // or "people-outline"
+  //   color: "#EC4899", // Pink
+  // },
   {
     value: "Other",
     label: "Other",

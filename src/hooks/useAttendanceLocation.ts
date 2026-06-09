@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import Geolocation from "react-native-geolocation-service";
 import { calculateDistance } from "@/utils/LocationHelper";
 import { useConfigStore } from "@/store/useConfigStore";
-import { trackLocation } from "@/services/attendanceService"; 
+import { trackLocation } from "@/services/attendanceService";
 import { WorkMode } from "@/hooks/useAttendanceSession";
 
 export function useAttendanceLocation(workMode: WorkMode, status: string) {
@@ -14,7 +14,7 @@ export function useAttendanceLocation(workMode: WorkMode, status: string) {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
   const lastSyncedTime = useRef<number>(0);
-  const TRACKING_INTERVAL_MS = 0.12 * 60 * 1000; // 10 minutes
+  const TRACKING_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
   // Use refs to track the latest state without triggering the useEffect to restart the GPS watcher
   const workModeRef = useRef(workMode);
@@ -33,7 +33,8 @@ export function useAttendanceLocation(workMode: WorkMode, status: string) {
     const startTracking = () => {
       watchId = Geolocation.watchPosition(
         (position) => {
-          const { latitude, longitude } = position.coords;
+          // 1. Extract accuracy alongside lat and lng
+          const { latitude, longitude, accuracy } = position.coords;
           const mocked = Platform.OS === "android" ? position.mocked : false;
 
           setIsSpoofing(!!mocked);
@@ -42,6 +43,15 @@ export function useAttendanceLocation(workMode: WorkMode, status: string) {
           if (mocked) {
             setDistance("Spoofed GPS");
             setIsInsideOffice(false);
+            return;
+          }
+
+          // 2. Filter out highly inaccurate indoor drift
+          // 50 meters is a solid baseline, but you may need to tweak this 
+          // based on the specific building's interference.
+          if (accuracy > 50) {
+            // console.log(`Skipping inaccurate location. Error margin: ${accuracy}m`);
+            // We return early so we don't accidentally mark them as outside
             return;
           }
 
@@ -61,13 +71,13 @@ export function useAttendanceLocation(workMode: WorkMode, status: string) {
           const now = Date.now();
 
           // Condition: Check if in Field/WFH AND currently punched in
-          const isEligibleForTracking = 
-            (currentMode === "Field" || currentMode === "WFH") && 
+          const isEligibleForTracking =
+            (currentMode === "Field" || currentMode === "WFH") &&
             currentStatus === "in";
 
           if (isEligibleForTracking && (now - lastSyncedTime.current >= TRACKING_INTERVAL_MS)) {
             lastSyncedTime.current = now;
-            
+
             trackLocation(latitude, longitude).catch((err) => {
               console.error("Background tracking error:", err);
             });

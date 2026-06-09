@@ -19,9 +19,14 @@ import { useApplyLeave } from "@/hooks/useApplyLeave";
 import LeaveBalanceCard from "./LeaveBalanceCard";
 import ActionModal from "@/components/modals/AlertModal";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import LedgerSelectionVault from "./LedgerSelectionVault";
+import LedgerBalanceCard from "./LedgerBalanceCard";
+import LedgerTokenDetails from "@/components/modals/LedgerTokenDetails";
 
 export default function ApplyLeaves() {
   const { state, actions } = useApplyLeave();
+
+  // Basic validation retains existing checks
   const isFormValid = state.selectedValue !== "" && state.reason.trim() !== "";
   const isDisabled = state.isSubmitting || !isFormValid;
 
@@ -35,7 +40,13 @@ export default function ApplyLeaves() {
         enableOnAndroid={true}
         extraScrollHeight={moderateScale(120)}
       >
-        <LeaveBalanceCard data={state.balances} />
+        <LedgerBalanceCard
+          balances={{
+            paid: state.activeLedgerTokens.filter(t => t.leaveType === 'Paid').length,
+            compOff: state.activeLedgerTokens.filter(t => t.leaveType === 'CompOff').length
+          }}
+          onViewDetails={actions.openLedgerInfo}
+        />
 
         {/* Form Section */}
         <View style={styles.formSection}>
@@ -61,6 +72,17 @@ export default function ApplyLeaves() {
               />
             </TouchableOpacity>
           </View>
+
+          {/*  NEW: Ledger Selection Vault rendered dynamically  */}
+          {(state.selectedValue === "CompOff" || state.selectedValue === "Paid") && (
+            <LedgerSelectionVault
+              leaveType={state.selectedValue}
+              allTokens={state.activeLedgerTokens}
+              selectedTokenIds={state.selectedTokenIds}
+              onToggleToken={actions.toggleTokenSelection}
+              requiredDays={Math.ceil(state.totalDays)} // Use Math.ceil to require 1 token even for 0.5 days
+            />
+          )}
 
           {/* Dates Row */}
           <View style={styles.row}>
@@ -168,7 +190,7 @@ export default function ApplyLeaves() {
                   style={[
                     styles.shiftPillText,
                     state.halfDayShift === "Morning" &&
-                      styles.shiftPillTextActive,
+                    styles.shiftPillTextActive,
                   ]}
                 >
                   Morning
@@ -196,7 +218,7 @@ export default function ApplyLeaves() {
                   style={[
                     styles.shiftPillText,
                     state.halfDayShift === "Afternoon" &&
-                      styles.shiftPillTextActive,
+                    styles.shiftPillTextActive,
                   ]}
                 >
                   Afternoon
@@ -256,7 +278,7 @@ export default function ApplyLeaves() {
           state.actionModal.type === "success"
             ? colors.Brand_Green
             : colors.Danger_Red
-        } // Uses your theme green for success, red for error
+        }
         icon={
           state.actionModal.type === "success" ? (
             <Ionicons
@@ -283,10 +305,22 @@ export default function ApplyLeaves() {
           selectedValue={state.selectedValue}
           onSelect={(val: string) => {
             actions.setSelectedValue(val);
-            actions.setOptionVisible(false);
           }}
         />
       </CustomBottomModal>
+
+      <CustomBottomModal
+        title={`${state.ledgerInfoModal.leaveType} Token Details`}
+        onClose={actions.closeLedgerInfo}
+        isVisible={state.ledgerInfoModal.visible}
+      >
+        <LedgerTokenDetails
+          tokens={state.activeLedgerTokens.filter(t => t.leaveType === state.ledgerInfoModal.leaveType)}
+          leaveType={state.ledgerInfoModal.leaveType}
+          onClose={actions.closeLedgerInfo}
+        />
+      </CustomBottomModal>
+
       {/* iOS ONLY: Render DatePickers safely inside Bottom Sheets */}
       {Platform.OS === "ios" && (
         <>

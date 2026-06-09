@@ -1,8 +1,5 @@
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { Stack, withLayoutContext } from "expo-router";
+import { Stack } from "expo-router";
 
-const { Navigator } = createMaterialTopTabNavigator();
-const MaterialTopTabs = withLayoutContext(Navigator);
 
 export default function MainLayout() {
   return (
@@ -24,18 +21,4 @@ export default function MainLayout() {
       />
     </Stack>
   );
-}
-{
-  /* <MaterialTopTabs
-        initialRouteName="home"
-        // Notice: We removed the tabBar prop completely!
-        screenOptions={{
-          tabBarStyle: { display: "none" }, // Completely hide the default tab bar
-          swipeEnabled: true,
-        }}
-      >
-        <MaterialTopTabs.Screen name="profile" />
-        <MaterialTopTabs.Screen name="home" />
-        <MaterialTopTabs.Screen name="gallery" />
-      </MaterialTopTabs> */
 }

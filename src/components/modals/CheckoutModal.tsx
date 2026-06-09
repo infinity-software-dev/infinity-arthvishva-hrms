@@ -21,7 +21,7 @@ interface CheckoutFormData {
   todayWork: string;
   pendingWork: string;
   issuesFaced: string;
-  reportParticipants: string[];
+  reportParticipant: string | null;
 }
 
 interface CheckoutModalProps {
@@ -37,28 +37,28 @@ export default function CheckoutModal({
   const [pendingWork, setPendingWork] = useState("");
   const [issuesFaced, setIssuesFaced] = useState("");
 
-  const [employees, setEmployees] = useState<ManagementEmployee[]>([]);
+  // 1. Updated from array to a single object or null
+  const [manager, setManager] = useState<ManagementEmployee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const insets = useSafeAreaInsets();
 
-  // 1. Validation updated: No longer depends on participant selection
   const isFormIncomplete =
     !todayWork.trim() || !pendingWork.trim() || !issuesFaced.trim();
 
   useEffect(() => {
-    const loadEmployees = async () => {
+    const loadManager = async () => {
       try {
         const data = await fetchManagementEmployees();
-        setEmployees(data);
+        setManager(data);
       } catch (error) {
-        console.error("Failed to load management employees", error);
+        console.error("Failed to load reporting manager", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadEmployees();
+    loadManager();
   }, []);
 
   const handleSubmit = () => {
@@ -66,7 +66,7 @@ export default function CheckoutModal({
       todayWork,
       pendingWork,
       issuesFaced,
-      reportParticipants: employees.map((emp) => emp._id),
+      reportParticipant: manager ? manager._id : "",
     });
   };
 
@@ -129,7 +129,6 @@ export default function CheckoutModal({
           />
         </View>
 
-        {/* 3. Read-only UI for Reporting Managers */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Reporting To</Text>
           <View style={styles.pillContainer}>
@@ -139,17 +138,16 @@ export default function CheckoutModal({
                 color={colors.Brand_Blue}
                 style={styles.loader}
               />
-            ) : employees.length === 0 ? (
+            ) : !manager ? (
+              // 4. Fallback rendering if no manager is returned
               <Text style={styles.emptyText}>
-                No reporting managers assigned.
+                No reporting manager assigned.
               </Text>
             ) : (
-              employees.map((emp) => (
-                // Replaced TouchableOpacity with a static View
-                <View key={emp._id} style={styles.readOnlyPill}>
-                  <Text style={styles.readOnlyPillText}>{emp.name}</Text>
-                </View>
-              ))
+              // 5. Cleaned up mapping array down to a direct render of the single manager element
+              <View style={styles.readOnlyPill}>
+                <Text style={styles.readOnlyPillText}>{manager.name}</Text>
+              </View>
             )}
           </View>
         </View>
@@ -226,19 +224,18 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     marginTop: moderateScale(5),
   },
-  // 4. Updated pill styles to look like static tags
   readOnlyPill: {
-    backgroundColor: "#EFF6FF", // Light blue background
+    backgroundColor: "#EFF6FF",
     paddingHorizontal: moderateScale(12),
     paddingVertical: moderateScale(6),
-    borderRadius: moderateScale(8), // Less rounded, looks more like a tag
+    borderRadius: moderateScale(8),
     borderWidth: 1,
-    borderColor: "#DBEAFE", // Very subtle border
+    borderColor: "#DBEAFE",
   },
   readOnlyPillText: {
     fontSize: moderateScale(12),
     fontFamily: FONTS.bold,
-    color: colors.Brand_Blue, // Matches your brand
+    color: colors.Brand_Blue,
   },
   footer: {
     flexDirection: "row",

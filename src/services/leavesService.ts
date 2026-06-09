@@ -10,14 +10,15 @@ export interface LeaveRequestPayload {
   halfDayShift?: "Morning" | "Afternoon";
   totalDays: number;
   reason: string;
+  consumedLedgerIds?: string[]; // NEW: Array of specific tokens to burn
 }
 
 export const fetchMyLeaves = async () => {
   try {
-    const response = await apiClient.get("/api/leaves/my?limit=50");
+    const response = await apiClient.get("/api/app/leaves/my?limit=50");
     const payload = response.data?.data;
 
-    // 1. UPDATE THIS FALLBACK
+    //  UPDATE THIS FALLBACK
     if (!payload) {
       return {
         leaves: [],
@@ -44,7 +45,7 @@ export const fetchMyLeaves = async () => {
   } catch (error) {
     console.error("Failed to fetch leaves data:", error);
 
-    // 2. UPDATE THIS FALLBACK TOO
+    // UPDATE THIS FALLBACK TOO
     return {
       leaves: [],
       summary: { approved: 0, pending: 0, total: 0, rejected: 0, cancelled: 0 },
@@ -52,20 +53,30 @@ export const fetchMyLeaves = async () => {
   }
 };
 
+export const fetchActiveLedgers = async () => {
+  try {
+    const response = await apiClient.get("/api/app/leaves/ledger?status=Active");
+    return response.data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch active ledger array:", error);
+    return [];
+  }
+};
+
 export const submitLeaveRequest = async (payload: LeaveRequestPayload) => {
   try {
-    // Map frontend state names to exactly match backend req.body expectations
     const backendPayload = {
-      leaveType: payload.leaveType,
+      leaveCategory: payload.leaveType,      // Maps to leaveCategory
       startDate: payload.fromDate,
       endDate: payload.toDate,
-      reason: payload.reason,
-      halfDay: payload.isHalfDay,
+      totalDays: payload.totalDays,          // Must be included
+      isHalfDay: payload.isHalfDay,          // Maps to isHalfDay
       halfDayPeriod: payload.isHalfDay ? payload.halfDayShift : "",
+      reason: payload.reason,
+      consumedLedgerIds: payload.consumedLedgerIds,
     };
 
-    // Replace "/api/leaves/apply" with your exact backend route
-    const response = await apiClient.post("/api/leaves/apply", backendPayload);
+    const response = await apiClient.post("/api/app/leaves/apply", backendPayload);
 
     return {
       success: true,
@@ -73,14 +84,9 @@ export const submitLeaveRequest = async (payload: LeaveRequestPayload) => {
       data: response.data?.data,
     };
   } catch (error: any) {
-    // console.error("Submit Leave Error:", error);
-
-    // Extract the exact ApiError message thrown by your Express controller
     const errorMessage =
       error.response?.data?.message ||
       "Failed to submit leave request. Please try again.";
-
-    // Throw the error so the hook can catch it and show it in the Alert
     throw new Error(errorMessage);
   }
 };

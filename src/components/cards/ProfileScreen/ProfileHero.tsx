@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { colors, FONTS } from "@/constants/theme";
-import { EmployeeProfile } from "@/services/profileService";
+import { Employee } from "@/apis/types";
 
 interface ProfileHeroProps {
-  profile: EmployeeProfile;
+  profile: Employee;
 }
 
 export default function ProfileHero({ profile }: ProfileHeroProps) {

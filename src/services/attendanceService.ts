@@ -2,7 +2,7 @@ import apiClient from "@/apis/client";
 import { WorkMode } from "@/hooks/useAttendanceSession";
 import { AttendanceApiResponse } from "@/types/attendance";
 
-export type BackendAttendanceStatus = | "P" | "A" | "WO" | "L" | "Coff" | "AUTO" | "H";
+export type BackendAttendanceStatus = | "P" | "A" | "WO" | "L" | "CompOff" | "AUTO" | "H";
 
 export interface DailyAttendanceRecord {
   uiStatus: "pending" | "in" | "completed" | "blocked";
@@ -18,7 +18,7 @@ const STATUS_LABELS: Record<BackendAttendanceStatus, string> = {
   A: "Absent",
   WO: "Week Off",
   L: "On Leave",
-  Coff: "Comp. Off",
+  CompOff: "Comp. Off",
   AUTO: "Auto Logged-Out",
   H: "Holiday",
 };
@@ -109,7 +109,7 @@ export const getAttendanceSummary = async (
 
 // Used in attendance check-out screen to fetch list of managers for EOD report
 export const fetchManagementEmployees = async (): Promise<
-  ManagementEmployee[]
+  ManagementEmployee
 > => {
   try {
     // Adjust the endpoint URL if your actual route differs

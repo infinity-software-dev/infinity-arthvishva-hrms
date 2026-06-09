@@ -1,0 +1,140 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, FONTS } from '@/constants/theme';
+import UniversalButton from '@/components/buttons/UniversalButton';
+
+export interface LedgerToken {
+    _id: string;
+    leaveType: string;
+    createdAt: string;
+    expiryDate?: string;
+}
+
+interface LedgerTokenDetailsProps {
+    tokens: LedgerToken[];
+    leaveType: string;
+    onClose: () => void;
+}
+
+export default function LedgerTokenDetails({ tokens, leaveType, onClose }: LedgerTokenDetailsProps) {
+    if (tokens.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.emptyText}>No active {leaveType} tokens found.</Text>
+                <UniversalButton
+                    title="Close"
+                    color={colors.Brand_Blue}
+                    onPress={onClose}
+                    style={styles.closeButton}
+                />
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <ScrollView 
+                showsVerticalScrollIndicator={false} 
+                contentContainerStyle={styles.scrollContent}
+            >
+                {tokens.map((token) => (
+                    <View key={token._id} style={styles.tokenRow}>
+                        <View style={styles.leftSection}>
+                            <Ionicons name="ticket-outline" size={moderateScale(20)} color={colors.Brand_Blue} />
+                            <View>
+                                <Text style={styles.tokenTitle}>1 Day Token</Text>
+                                <Text style={styles.dateText}>
+                                    Added: {new Date(token.createdAt).toLocaleDateString()}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.rightSection}>
+                            {token.expiryDate ? (
+                                <>
+                                    <Text style={styles.expiresLabel}>Expires</Text>
+                                    <Text style={styles.expiryDateText}>
+                                        {new Date(token.expiryDate).toLocaleDateString()}
+                                    </Text>
+                                </>
+                            ) : (
+                                <Text style={styles.neverExpiresText}>Never Expires</Text>
+                            )}
+                        </View>
+                    </View>
+                ))}
+            </ScrollView>
+
+            <UniversalButton
+                title="Close"
+                color={colors.Brand_Blue}
+                onPress={onClose}
+                style={styles.closeButton}
+            />
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        maxHeight: moderateScale(400), // Ensures it doesn't grow infinitely inside the bottom sheet
+    },
+    scrollContent: {
+        paddingBottom: moderateScale(16),
+    },
+    tokenRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: moderateScale(12),
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9',
+    },
+    leftSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: moderateScale(12),
+    },
+    tokenTitle: {
+        fontFamily: FONTS.semiBold,
+        color: '#0F172A',
+        fontSize: moderateScale(14),
+    },
+    dateText: {
+        fontFamily: FONTS.medium,
+        color: '#64748B',
+        fontSize: moderateScale(11),
+        marginTop: moderateScale(2),
+    },
+    rightSection: {
+        alignItems: 'flex-end',
+    },
+    expiresLabel: {
+        fontFamily: FONTS.bold,
+        color: colors.Danger_Red,
+        fontSize: moderateScale(11),
+    },
+    expiryDateText: {
+        fontFamily: FONTS.medium,
+        color: '#475569',
+        fontSize: moderateScale(12),
+        marginTop: moderateScale(2),
+    },
+    neverExpiresText: {
+        fontFamily: FONTS.bold,
+        color: colors.Brand_Green,
+        fontSize: moderateScale(11),
+    },
+    emptyText: {
+        fontFamily: FONTS.medium,
+        color: '#94A3B8',
+        textAlign: 'center',
+        marginTop: moderateScale(20),
+        marginBottom: moderateScale(20),
+    },
+    closeButton: {
+        marginTop: moderateScale(12),
+    },
+});
