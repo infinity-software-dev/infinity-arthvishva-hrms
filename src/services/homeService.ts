@@ -35,8 +35,10 @@ export const fetchUpcomingBirthdays = async (): Promise<BirthdaysResponse> => {
 
 export const fetchPerformanceInsights = async () => {
   try {
-    const res = await apiClient.get("/api/dashboard/employee-dashboard");
-    return res.data.data.monthlySummary;
+    const res = await apiClient.get("/api/app/attendance/insights/performance");
+
+    return res.data.data;
+
   } catch (error) {
     console.error("Error fetching performance insights:", error);
     throw error;

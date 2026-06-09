@@ -38,7 +38,7 @@ export default function HomeScreen() {
           <QuickActions />
           <HighlightsFeed />
 
-          {/* <PerformanceInsights />*/}
+          <PerformanceInsights />
         </ScrollView>
         {/* <MonthlyTarget />  */}
 
