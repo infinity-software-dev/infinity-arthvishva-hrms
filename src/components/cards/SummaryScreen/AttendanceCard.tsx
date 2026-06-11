@@ -22,20 +22,39 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
     .toLocaleDateString("en-US", { weekday: "short" })
     .toUpperCase();
 
+  // 1. Identify the specific statuses (adjust strings based on your exact API response)
   const isPresent = status === "P" || status === "Present";
   const isAbsent = status === "A" || status === "Absent";
+  const isHalfDay = status === "H" || status === "Half";
+  const isCompOff = status === "CO" || status === "CompOff";
 
-  let badgeColor = "#64748B"; // Default WO
-  if (isPresent) badgeColor = colors.Success_Green;
-  if (isAbsent && !isWeekOff) badgeColor = colors.Danger_Red;
+  // 2. Assign unique colors for each status badge
+  let badgeColor = "#64748B"; // Default (WeekOff or undefined status)
+
+  if (isPresent) {
+    badgeColor = colors.Success_Green;
+  } else if (isAbsent && !isWeekOff) {
+    badgeColor = colors.Danger_Red;
+  } else if (isHalfDay) {
+    badgeColor = colors.Warning_Yellow;
+  } else if (isCompOff) {
+    badgeColor = colors.Brand_Blue
+  }
 
   return (
-    <View style={styles.cardContainer}>
+    <View
+      style={[
+        styles.cardContainer,
+        isCompOff ? { borderColor: badgeColor, borderWidth: 1.5 } : { borderTopColor: "#F1F5F9", borderTopWidth: 4 }
+      ]}
+    >
       <View style={styles.cardHeader}>
         <View>
           <Text style={styles.dayNum}>{dayNum}</Text>
           <Text style={styles.dayName}>{dayName}</Text>
         </View>
+
+        {/* Badge styling automatically adapts to the chosen color and applies 15% opacity to the background */}
         <View style={[styles.badge, { backgroundColor: badgeColor + "15" }]}>
           <Text style={[styles.badgeText, { color: badgeColor }]}>
             {status}
@@ -43,18 +62,17 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
         </View>
       </View>
 
-      {isPresent && myAttendance ? (
+      {/* 3. Safely check if myAttendance exists to prevent crashes on Absent/CompOff days */}
+      {myAttendance ? (
         <View style={styles.timeSection}>
           <View style={styles.timeRow}>
             <Text style={styles.timeLabel}>IN</Text>
-            {/* FIX: Format the IN time */}
             <Text style={styles.timeValue}>
               {formatTime(myAttendance.inTime)}
             </Text>
           </View>
           <View style={styles.timeRow}>
             <Text style={styles.timeLabel}>OUT</Text>
-            {/* FIX: Format the OUT time */}
             <Text style={styles.timeValue}>
               {formatTime(myAttendance.outTime)}
             </Text>
@@ -67,11 +85,11 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
           </View>
 
           <TouchableOpacity
-            style={styles.ghostButton}
+            style={[styles.ghostButton, isCompOff ? { borderColor: badgeColor, borderWidth: 1.5 } : { borderColor: colors.Brand_Green, }]}
             activeOpacity={0.7}
             onPress={onViewDetails}
           >
-            <Text style={styles.ghostButtonText}>View Details</Text>
+            <Text style={[styles.ghostButtonText, isCompOff ? { color: badgeColor } : { color: colors.Brand_Green }]}>View Details</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -93,8 +111,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
-    borderTopWidth: 4,
-    borderTopColor: "#F1F5F9",
   },
   cardHeader: {
     flexDirection: "row",
@@ -158,13 +174,11 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(8),
     borderRadius: moderateScale(8),
     borderWidth: 1,
-    borderColor: colors.Brand_Green,
     alignItems: "center",
   },
   ghostButtonText: {
     fontFamily: FONTS.semiBold,
     fontSize: moderateScale(12),
-    color: colors.Brand_Green_Dark,
   },
 });
 

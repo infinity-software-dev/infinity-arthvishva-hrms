@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getAttendanceSummary } from "../services/attendanceService";
+import { fetchMonthlyAttendance } from "../services/attendanceService";
 import { SummaryStats, AttendanceDayRecord } from "../types/attendance";
 
 export const useAttendanceSummary = () => {
@@ -14,23 +14,12 @@ export const useAttendanceSummary = () => {
     setError(null);
 
     const year = date.getFullYear();
-    const month = date.getMonth();
-
-    // Format to YYYY-MM-DD
-    const fromDate = new Date(year, month, 1).toLocaleDateString("en-CA");
-    const toDate = new Date(year, month + 1, 0).toLocaleDateString("en-CA");
+    const month = date.getMonth() + 1;
 
     try {
-      const data = await getAttendanceSummary(fromDate, toDate);
-      // console.log(data)
+      const data = await fetchMonthlyAttendance(year, month);
       setSummaryStats(data.summary);
-
-      // FIX: Sort records chronologically (1 to 31)
-      const sortedRecords = [...data.records].sort((a, b) => {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      });
-
-      setRecords(sortedRecords);
+      setRecords(data.records);
     } catch (err: any) {
       setError(err?.message || "Failed to load attendance data.");
     } finally {
@@ -42,16 +31,31 @@ export const useAttendanceSummary = () => {
     fetchMonthData(currentDate);
   }, [currentDate, fetchMonthData]);
 
-  const goToNextMonth = () => {
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
+  // 🌟 NEW: Create the function HERE where setRecords exists
+  const markCorrectionAsRequested = useCallback((attendanceId: string) => {
+    setRecords((prevRecords) =>
+      prevRecords.map((day) => {
+        if (day.myAttendance?._id === attendanceId) {
+          return {
+            ...day,
+            myAttendance: {
+              ...day.myAttendance,
+              correctionRequested: true,
+              correctionStatus: 'Pending',
+            },
+          };
+        }
+        return day;
+      })
     );
+  }, []);
+
+  const goToNextMonth = () => {
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
   const goToPrevMonth = () => {
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
-    );
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
   const formattedMonthYear = currentDate.toLocaleDateString("en-US", {
@@ -68,5 +72,6 @@ export const useAttendanceSummary = () => {
     goToNextMonth,
     goToPrevMonth,
     refetch: () => fetchMonthData(currentDate),
+    markCorrectionAsRequested, // 🌟 Export it so the screen can use it!
   };
 };

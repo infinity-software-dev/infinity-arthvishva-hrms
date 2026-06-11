@@ -2,11 +2,11 @@ import apiClient from "@/apis/client";
 import { WorkMode } from "@/hooks/useAttendanceSession";
 import { AttendanceApiResponse } from "@/types/attendance";
 
-export type BackendAttendanceStatus = | "P" | "A" | "WO" | "L" | "CompOff" | "AUTO" | "H";
+export type BackendAttendanceStatus =  "P" | "A" | "WO" | "L" | "CompOff" | "AUTO" | "H" | "Half";
 
 export interface DailyAttendanceRecord {
   uiStatus: "pending" | "in" | "completed" | "blocked";
-  backendStatus: BackendAttendanceStatus;
+  status: BackendAttendanceStatus;
   checkInTime: Date | null;
   checkOutTime: Date | null;
   workMode: WorkMode;
@@ -21,6 +21,7 @@ const STATUS_LABELS: Record<BackendAttendanceStatus, string> = {
   CompOff: "Comp. Off",
   AUTO: "Auto Logged-Out",
   H: "Holiday",
+  Half: "Half Day",
 };
 
 export interface CheckoutData {
@@ -58,7 +59,7 @@ export async function fetchTodayAttendance(): Promise<DailyAttendanceRecord> {
     if (!record) {
       return {
         uiStatus: "pending",
-        backendStatus: "P",
+        status: "P",
         checkInTime: null,
         checkOutTime: null,
         workMode: "Office",
@@ -79,7 +80,7 @@ export async function fetchTodayAttendance(): Promise<DailyAttendanceRecord> {
 
     return {
       uiStatus,
-      backendStatus: status as BackendAttendanceStatus,
+      status: status as BackendAttendanceStatus,
       checkInTime: inTime ? new Date(inTime) : null,
       checkOutTime: outTime ? new Date(outTime) : null,
       workMode: workMode || "Office",
@@ -92,17 +93,15 @@ export async function fetchTodayAttendance(): Promise<DailyAttendanceRecord> {
   }
 }
 
-export const getAttendanceSummary = async (
-  fromDate: string,
-  toDate: string,
-): Promise<AttendanceApiResponse> => {
+export const fetchMonthlyAttendance = async (year: number, month: number) => {
   try {
-    const response = await apiClient.get(
-      `/api/attendance/my-summary?from=${fromDate}&to=${toDate}`,
-    );
-    return response.data.data;
+    // Passes the exact year and month to the backend
+    const res = await apiClient.get(`/api/app/attendance/monthly?year=${year}&month=${month}`);
+
+    // Returns { summary: {...}, records: [...] }
+    return res.data.data;
   } catch (error) {
-    console.error("Error fetching attendance summary:", error);
+    console.error("Error fetching monthly attendance:", error);
     throw error;
   }
 };
@@ -141,7 +140,7 @@ export async function submitCheckIn(
     return {
       // Safely hardcoded since this is strictly a check-in action
       uiStatus: "in",
-      backendStatus: record.status || "P",
+      status: record.status || "P",
       checkInTime: record.inTime ? new Date(record.inTime) : null,
 
       // Check-out time will always be null at the exact moment of check-in
@@ -174,7 +173,7 @@ export async function submitCheckOut(
     return {
       // Safely hardcoded since this is strictly a check-out action
       uiStatus: "completed",
-      backendStatus: record.status || "P",
+      status: record.status || "P",
       checkInTime: record.inTime ? new Date(record.inTime) : null,
       checkOutTime: record.outTime ? new Date(record.outTime) : null,
       workMode: record.workMode || "Office",
@@ -191,7 +190,7 @@ export async function submitAttendanceCorrection(
 ) {
   try {
     const response = await apiClient.post(
-      `/api/attendance/correction/${attendanceId}`,
+      `/api/app/attendance/correction/${attendanceId}`,
       {
         reason: payload.reason,
         requestedInTime: payload.requestedInTime.toISOString(),

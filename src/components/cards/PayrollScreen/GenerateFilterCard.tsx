@@ -12,6 +12,7 @@ interface GenerateFilterCardProps {
   onShowFromPicker: () => void;
   onShowToPicker: () => void;
   onGenerate: () => void;
+  onShowCycleModal: () => void;
   isGenerating: boolean;
 }
 
@@ -22,9 +23,9 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
   onShowFromPicker,
   onShowToPicker,
   onGenerate,
+  onShowCycleModal,
   isGenerating,
 }) => {
-  // Explicitly type the colors array to satisfy the CustomStyle tuple requirement
   const buttonColors: [string, string] = [
     colors.Brand_Green,
     colors.Brand_Green_Dark,
@@ -32,15 +33,17 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
 
   return (
     <View style={styles.filterCard}>
-      <Text style={styles.sectionTitle}>Generate / Filter Statement</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionTitle}>Generate Statement</Text>
+
+        <TouchableOpacity onPress={onShowCycleModal} style={styles.quickSelectBtn}>
+          <Ionicons name="list" size={moderateScale(14)} color={colors.Brand_Blue} />
+          <Text style={styles.quickSelectText}>Standard Cycles</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.row}>
-        <View
-          style={[
-            styles.inputGroup,
-            { flex: 1, marginRight: moderateScale(12) },
-          ]}
-        >
+        <View style={[styles.inputGroup, { flex: 1, marginRight: moderateScale(12) }]}>
           <Text style={styles.inputLabel}>START DATE</Text>
           <TouchableOpacity
             style={styles.inputBox}
@@ -74,7 +77,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
       </View>
 
       <GradientButton
-        text={isGenerating ? "Generating..." : "Generate Payslip"}
+        text={isGenerating ? "Simulating..." : "Preview Payslip"}
         onPress={onGenerate}
         disabled={isGenerating}
         customStyles={{
@@ -83,9 +86,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
           marginVertical: 0,
           marginTop: moderateScale(4),
         }}
-        customTextStyles={{
-          fontSize: moderateScale(14),
-        }}
+        customTextStyles={{ fontSize: moderateScale(14) }}
       />
     </View>
   );
@@ -100,11 +101,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: moderateScale(16),
+  },
   sectionTitle: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(15),
     color: "#0F172A",
-    marginBottom: moderateScale(16),
+  },
+  quickSelectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(6),
+    borderRadius: moderateScale(20),
+  },
+  quickSelectText: {
+    fontFamily: FONTS.semiBold,
+    fontSize: moderateScale(11),
+    color: colors.Brand_Blue,
+    marginLeft: moderateScale(4),
   },
   row: { flexDirection: "row", justifyContent: "space-between" },
   inputGroup: { marginBottom: moderateScale(16) },

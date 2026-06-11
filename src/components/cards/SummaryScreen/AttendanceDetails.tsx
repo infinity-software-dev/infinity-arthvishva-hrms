@@ -12,6 +12,7 @@ import ActionModal from "@/components/modals/AlertModal";
 
 interface Props {
   data: AttendanceDayRecord;
+  onCorrectionSuccess?: (attendanceId: string) => void;
 }
 
 const formatTime = (timeString?: string | null) => {
@@ -25,7 +26,7 @@ const formatTime = (timeString?: string | null) => {
   });
 };
 
-export default function AttendanceDetails({ data }: Props) {
+export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) {
   const att = data.myAttendance;
   const [isCorrectionModalVisible, setCorrectionModalVisible] = useState(false);
   const [isActionModalVisible, setActionModalVisible] = useState(false);
@@ -64,6 +65,9 @@ export default function AttendanceDetails({ data }: Props) {
         message: response.message,
       });
       setIsRequestedLocally(true);
+      if (onCorrectionSuccess) {
+        onCorrectionSuccess(att._id);
+      }
       setActionModalVisible(true);
     } catch (error: any) {
       setActionConfig({
@@ -231,7 +235,7 @@ export default function AttendanceDetails({ data }: Props) {
           }
           onPress={() => setCorrectionModalVisible(true)}
           style={{ marginTop: moderateScale(10) }}
-          disabled={isRequested}
+          disabled={isRequested || !att.inTime || !att.outTime}
         />
       </ScrollView>
       <CustomBottomModal

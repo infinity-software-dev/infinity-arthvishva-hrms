@@ -16,7 +16,6 @@ import UniversalButton from "@/components/buttons/UniversalButton";
 import CustomBottomModal from "@/components/modals/CustomBottomModal";
 import LeaveTypesModal from "@/components/modals/LeaveTypesModal";
 import { useApplyLeave } from "@/hooks/useApplyLeave";
-import LeaveBalanceCard from "./LeaveBalanceCard";
 import ActionModal from "@/components/modals/AlertModal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import LedgerSelectionVault from "./LedgerSelectionVault";
@@ -309,17 +308,18 @@ export default function ApplyLeaves() {
         />
       </CustomBottomModal>
 
-      <CustomBottomModal
+      {/* <CustomBottomModal
         title={`${state.ledgerInfoModal.leaveType} Token Details`}
         onClose={actions.closeLedgerInfo}
-        isVisible={state.ledgerInfoModal.visible}
-      >
+        
+      > */}
         <LedgerTokenDetails
           tokens={state.activeLedgerTokens.filter(t => t.leaveType === state.ledgerInfoModal.leaveType)}
           leaveType={state.ledgerInfoModal.leaveType}
           onClose={actions.closeLedgerInfo}
+          isVisible={state.ledgerInfoModal.visible}
         />
-      </CustomBottomModal>
+      {/* </CustomBottomModal> */}
 
       {/* iOS ONLY: Render DatePickers safely inside Bottom Sheets */}
       {Platform.OS === "ios" && (

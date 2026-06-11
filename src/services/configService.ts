@@ -24,7 +24,7 @@ export async function initializeAppConfigs(): Promise<void> {
 
     // Check if today is Saturday (6)
     const isSaturday = new Date().getDay() === 6;
-    const currentShiftHours = isSaturday ? 7 : 8.5;
+    const currentShiftHours = isSaturday ? 7 : 0.5;
 
     // --- SIMULATED API DELAY AND RESPONSE FOR TESTING ---
     await new Promise((resolve) => setTimeout(resolve, 800));

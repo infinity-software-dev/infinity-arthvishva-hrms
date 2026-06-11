@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useRef } from "react";
+import { View, Text, StyleSheet, Pressable, Animated } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
@@ -14,6 +14,51 @@ interface LedgerBalanceCardProps {
   onViewDetails: (leaveType: string) => void;
 }
 
+const PUSH_DISTANCE = 4; // The "thickness" of the 3D button
+
+// Reusable 3D Button Component
+const ThreeDPressable = ({ children, onPress, style }: any) => {
+  const pushAnim = useRef(new Animated.Value(0)).current;
+
+  const handlePressIn = () => {
+    Animated.timing(pushAnim, {
+      toValue: PUSH_DISTANCE,
+      duration: 50,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(pushAnim, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={style}
+    >
+      {/* Base layer (The 3D lip) */}
+      <View style={styles.buttonBase}>
+        {/* Top face layer (Moves down on press) */}
+        <Animated.View
+          style={[
+            styles.buttonFace,
+            { transform: [{ translateY: pushAnim }] },
+          ]}
+        >
+          {children}
+        </Animated.View>
+      </View>
+    </Pressable>
+  );
+};
+
 export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBalanceCardProps) {
   return (
     <View style={styles.vaultCard}>
@@ -25,10 +70,9 @@ export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBal
 
       <View style={styles.balanceContainer}>
         {/* Paid Leaves */}
-        <TouchableOpacity 
-            style={styles.balanceBox} 
-            activeOpacity={0.7}
-            onPress={() => onViewDetails('Paid')}
+        <ThreeDPressable 
+          style={styles.flexBox} 
+          onPress={() => onViewDetails('Paid')}
         >
           <View style={styles.iconCircle}>
             <Ionicons name="calendar" size={moderateScale(20)} color={colors.Brand_Blue} />
@@ -37,13 +81,12 @@ export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBal
             <Text style={styles.countText}>{balances.paid}</Text>
             <Text style={styles.labelText}>Paid Leaves</Text>
           </View>
-        </TouchableOpacity>
+        </ThreeDPressable>
 
         {/* Comp-Offs */}
-        <TouchableOpacity 
-            style={styles.balanceBox} 
-            activeOpacity={0.7}
-            onPress={() => onViewDetails('CompOff')}
+        <ThreeDPressable 
+          style={styles.flexBox} 
+          onPress={() => onViewDetails('CompOff')}
         >
           <View style={[styles.iconCircle, { backgroundColor: `${colors.Success_Green}15` }]}>
             <Ionicons name="time" size={moderateScale(20)} color={colors.Success_Green} />
@@ -52,14 +95,13 @@ export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBal
             <Text style={styles.countText}>{balances.compOff}</Text>
             <Text style={styles.labelText}>Comp-Offs</Text>
           </View>
-        </TouchableOpacity>
+        </ThreeDPressable>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // ... keep all your existing styles ...
   vaultCard: {
     backgroundColor: "#F8FAFC",
     borderRadius: moderateScale(16),
@@ -81,7 +123,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  hintText: { // 🌟 NEW STYLE
+  hintText: {
     fontFamily: FONTS.medium,
     fontSize: moderateScale(10),
     color: "#94A3B8",
@@ -92,20 +134,27 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: moderateScale(12),
   },
-  balanceBox: {
+  flexBox: {
     flex: 1,
+  },
+  /* --- 3D Button Styles --- */
+  buttonBase: {
+    backgroundColor: "#CBD5E1", // Darker border color simulating the inset shadow/bottom lip
+    borderRadius: moderateScale(12),
+    flex: 1,
+  },
+  buttonFace: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFFFFF", // Main button color
     borderRadius: moderateScale(12),
     padding: moderateScale(12),
     gap: moderateScale(12),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    marginBottom: PUSH_DISTANCE, // Creates the initial gap so the darker base shows at the bottom
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
   },
+  /* ------------------------ */
   iconCircle: {
     width: moderateScale(36),
     height: moderateScale(36),

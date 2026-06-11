@@ -4,6 +4,8 @@ import { moderateScale } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, FONTS } from '@/constants/theme';
 import UniversalButton from '@/components/buttons/UniversalButton';
+import CustomBottomModal from './CustomBottomModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface LedgerToken {
     _id: string;
@@ -15,13 +17,20 @@ export interface LedgerToken {
 interface LedgerTokenDetailsProps {
     tokens: LedgerToken[];
     leaveType: string;
+    isVisible: boolean;
     onClose: () => void;
 }
 
-export default function LedgerTokenDetails({ tokens, leaveType, onClose }: LedgerTokenDetailsProps) {
+export default function LedgerTokenDetails({ tokens, leaveType, isVisible, onClose }: LedgerTokenDetailsProps) {
+    const insets = useSafeAreaInsets();
+
+    if (!isVisible) {
+        return null;
+    }
+
     if (tokens.length === 0) {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, moderateScale(25)) }]}>
                 <Text style={styles.emptyText}>No active {leaveType} tokens found.</Text>
                 <UniversalButton
                     title="Close"
@@ -34,7 +43,11 @@ export default function LedgerTokenDetails({ tokens, leaveType, onClose }: Ledge
     }
 
     return (
-        <View style={styles.container}>
+        <CustomBottomModal
+            title="Leave Request Details"
+            isVisible={isVisible}
+            onClose={onClose}
+        >
             <ScrollView 
                 showsVerticalScrollIndicator={false} 
                 contentContainerStyle={styles.scrollContent}
@@ -67,19 +80,23 @@ export default function LedgerTokenDetails({ tokens, leaveType, onClose }: Ledge
                 ))}
             </ScrollView>
 
-            <UniversalButton
-                title="Close"
-                color={colors.Brand_Blue}
-                onPress={onClose}
-                style={styles.closeButton}
-            />
-        </View>
+            {/* Wrap the button and apply the dynamic bottom inset */}
+            <View style={{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }}>
+                <UniversalButton
+                    title="Close"
+                    color={colors.Brand_Blue}
+                    onPress={onClose}
+                    style={styles.closeButton}
+                />
+            </View>
+        </CustomBottomModal>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        maxHeight: moderateScale(400), // Ensures it doesn't grow infinitely inside the bottom sheet
+        maxHeight: moderateScale(400), 
+        // paddingBottom: moderateScale(25) <-- REMOVED from here, handled dynamically above
     },
     scrollContent: {
         paddingBottom: moderateScale(16),

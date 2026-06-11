@@ -30,6 +30,7 @@ const AttendanceSummaryScreen: React.FC = () => {
     goToNextMonth,
     goToPrevMonth,
     refetch,
+    markCorrectionAsRequested
   } = useAttendanceSummary();
 
   const handleOpenDetails = (record: AttendanceDayRecord) => {
@@ -41,6 +42,7 @@ const AttendanceSummaryScreen: React.FC = () => {
     setModalVisible(false);
     setTimeout(() => setSelectedRecord(null), 300); // Clear after slide animation finishes
   };
+
 
   const renderHeader = () => (
     <View>
@@ -104,14 +106,17 @@ const AttendanceSummaryScreen: React.FC = () => {
           title={
             selectedRecord
               ? new Date(selectedRecord.date).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })
               : ""
           }
         >
-          {selectedRecord && <AttendanceDetails data={selectedRecord} />}
+          {selectedRecord && <AttendanceDetails
+            data={selectedRecord}
+            onCorrectionSuccess={markCorrectionAsRequested}
+          />}
         </CustomBottomModal>
       </View>
     </SafeAreaView>

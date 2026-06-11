@@ -37,11 +37,11 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, loading }) => {
     <View style={styles.container}>
       <StatItem value={stats.present} label="PRESENT" color={colors.Success_Green} />
       <StatItem value={stats.absent} label="ABSENT" color={colors.Danger_Red} />
-      <StatItem value={stats.late} label="LATE" color={colors.Warning_Yellow} />
+      <StatItem value={stats.halfDay} label="HALF DAY" color={colors.Warning_Yellow} />
       <StatItem
-        value={`${stats.totalHours.toFixed(1)}h`}
-        label="TOTAL HRS"
-        color="#6366F1"
+        value={stats.weekOffHoliday}
+        label="Week Off/Holiday"
+        color={colors.Magic_Violet}
       />
     </View>
   );

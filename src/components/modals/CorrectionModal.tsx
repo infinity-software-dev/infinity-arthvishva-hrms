@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -11,9 +11,11 @@ import {
 import { moderateScale } from "react-native-size-matters";
 import { colors, FONTS } from "@/constants/theme";
 import UniversalButton from "../buttons/UniversalButton";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import ActionModal from "./AlertModal";
+import { useCorrectionModal } from "@/hooks/useCorrectionModal";
 
 interface CorrectionModalProps {
   attendanceId: string;
@@ -24,76 +26,44 @@ interface CorrectionModalProps {
     reason: string;
     requestedInTime: Date;
     requestedOutTime: Date;
-    proofUrl?: string; // <-- Added proofUrl to the submit payload
+    proofUrl?: string;
   }) => Promise<void>;
   onCancel: () => void;
 }
 
 export default function CorrectionModal({
-  attendanceId,
   recordDate,
   defaultInTime,
   defaultOutTime,
   onSubmit,
   onCancel,
 }: CorrectionModalProps) {
-  const [reason, setReason] = useState("");
-  const [proofUrl, setProofUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const insets = useSafeAreaInsets();
 
-  const baseDate = new Date(recordDate);
-  const initialIn = defaultInTime
-    ? new Date(defaultInTime)
-    : new Date(baseDate.setHours(9, 0, 0, 0));
-  const initialOut = defaultOutTime
-    ? new Date(defaultOutTime)
-    : new Date(baseDate.setHours(18, 0, 0, 0));
-
-  const [inTime, setInTime] = useState<Date>(initialIn);
-  const [outTime, setOutTime] = useState<Date>(initialOut);
-
-  const [showInPicker, setShowInPicker] = useState(false);
-  const [showOutPicker, setShowOutPicker] = useState(false);
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  const handleInTimeChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === "android") setShowInPicker(false);
-    if (selectedDate) setInTime(selectedDate);
-  };
-
-  const handleOutTimeChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === "android") setShowOutPicker(false);
-    if (selectedDate) setOutTime(selectedDate);
-  };
-
-  const handleDismiss = (type: "in" | "out") => {
-    type === "in" ? setShowInPicker(false) : setShowOutPicker(false);
-  };
-
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await onSubmit({
-        reason: reason.trim(),
-        requestedInTime: inTime,
-        requestedOutTime: outTime,
-        proofUrl: proofUrl.trim(),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Only reason is mandatory for correction requests
-  const isFormIncomplete = !reason.trim();
+  // Destructure everything from our custom hook
+  const {
+    reason,
+    setReason,
+    proofUrl,
+    setProofUrl,
+    isLoading,
+    hasModifiedTime,
+    isConfirmModalVisible,
+    setConfirmModalVisible,
+    inTime,
+    outTime,
+    isPickerVisible,
+    activePicker,
+    isFormIncomplete,
+    formattedInTime,
+    formattedOutTime,
+    workingDuration,
+    showPicker,
+    hidePicker,
+    handleConfirmTime,
+    handlePreSubmit,
+    handleFinalSubmit,
+  } = useCorrectionModal({ recordDate, defaultInTime, defaultOutTime, onSubmit });
 
   return (
     <View
@@ -116,7 +86,7 @@ export default function CorrectionModal({
             <Text style={styles.label}>Requested In-Time *</Text>
             <TouchableOpacity
               style={styles.timeInput}
-              onPress={() => setShowInPicker(true)}
+              onPress={() => showPicker("in")}
               activeOpacity={0.7}
             >
               <Ionicons
@@ -124,25 +94,15 @@ export default function CorrectionModal({
                 size={moderateScale(18)}
                 color="#64748B"
               />
-              <Text style={styles.timeText}>{formatTime(inTime)}</Text>
+              <Text style={styles.timeText}>{formattedInTime}</Text>
             </TouchableOpacity>
-
-            {showInPicker && (
-              <DateTimePicker
-                value={inTime}
-                mode="time"
-                display="default"
-                onValueChange={handleInTimeChange}
-                onDismiss={() => handleDismiss("in")}
-              />
-            )}
           </View>
 
           <View style={styles.timeGroup}>
             <Text style={styles.label}>Requested Out-Time *</Text>
             <TouchableOpacity
               style={styles.timeInput}
-              onPress={() => setShowOutPicker(true)}
+              onPress={() => showPicker("out")}
               activeOpacity={0.7}
             >
               <Ionicons
@@ -150,18 +110,8 @@ export default function CorrectionModal({
                 size={moderateScale(18)}
                 color="#64748B"
               />
-              <Text style={styles.timeText}>{formatTime(outTime)}</Text>
+              <Text style={styles.timeText}>{formattedOutTime}</Text>
             </TouchableOpacity>
-
-            {showOutPicker && (
-              <DateTimePicker
-                value={outTime}
-                mode="time"
-                display="default"
-                onValueChange={handleOutTimeChange}
-                onDismiss={() => handleDismiss("out")}
-              />
-            )}
           </View>
         </View>
 
@@ -194,6 +144,12 @@ export default function CorrectionModal({
         </View>
       </ScrollView>
 
+      {!hasModifiedTime && (
+        <Text style={styles.warningText}>
+          * Please explicitly select your corrected In-Time or Out-Time.
+        </Text>
+      )}
+
       <View style={styles.footer}>
         <UniversalButton
           title="Cancel"
@@ -206,38 +162,58 @@ export default function CorrectionModal({
           title="Submit Request"
           variant="solid"
           color={colors.Brand_Blue}
-          onPress={handleSubmit}
+          onPress={handlePreSubmit}
           disabled={isFormIncomplete || isLoading}
           isLoading={isLoading}
           style={{ flex: 1.5 }}
         />
       </View>
+
+      <DateTimePickerModal
+        isVisible={isPickerVisible}
+        mode="time"
+        date={activePicker === "in" ? inTime : outTime}
+        onConfirm={handleConfirmTime}
+        onCancel={hidePicker}
+        display={Platform.OS === "ios" ? "spinner" : "default"}
+      />
+
+      <ActionModal
+        visible={isConfirmModalVisible}
+        title="Confirm Times"
+        message={`Are you sure you want to submit this correction?\n\nIn-Time: ${formattedInTime}\nOut-Time: ${formattedOutTime}\nTotal Working Hours: ${workingDuration}`}
+        confirmText="Confirm & Submit"
+        cancelText="Review Again"
+        onConfirm={handleFinalSubmit}
+        onCancel={() => setConfirmModalVisible(false)}
+        icon={
+          <Ionicons
+            name="help-circle-outline"
+            size={moderateScale(30)}
+            color={colors.Brand_Blue}
+          />
+        }
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
+  container: { width: "100%" },
   subtitle: {
     fontSize: moderateScale(12),
     fontFamily: FONTS.semiBold,
     color: "#6B7280",
     marginBottom: moderateScale(20),
   },
-  scrollView: {
-    flexShrink: 1,
-  },
+  scrollView: { flexShrink: 1 },
   timeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: moderateScale(16),
     gap: moderateScale(15),
   },
-  timeGroup: {
-    flex: 1,
-  },
+  timeGroup: { flex: 1 },
   label: {
     fontSize: moderateScale(12),
     fontFamily: FONTS.bold,
@@ -259,9 +235,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semiBold,
     color: "#1F2937",
   },
-  inputGroup: {
-    marginBottom: moderateScale(20),
-  },
+  inputGroup: { marginBottom: moderateScale(20) },
   textInput: {
     backgroundColor: "#F9FAFB",
     borderWidth: 1,
@@ -271,6 +245,13 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: FONTS.semiBold,
     color: "#1F2937",
+  },
+  warningText: {
+    fontSize: moderateScale(11),
+    fontFamily: FONTS.medium,
+    color: "#EF4444",
+    marginBottom: moderateScale(5),
+    textAlign: "center",
   },
   footer: {
     flexDirection: "row",

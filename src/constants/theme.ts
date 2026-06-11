@@ -1,6 +1,8 @@
 export const colors = {
   // Brand Colors
   Brand_Blue: "#2076C7",
+  Brand_Blue_Dark: "#185E9F",
+  Brand_Blue_Extra_Dark:'#145087',
   Brand_Green: "#1CADA3",
   Brand_Green_Dark: "#158C84",
 

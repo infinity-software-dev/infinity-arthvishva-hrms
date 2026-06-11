@@ -11,6 +11,7 @@ import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
 import UniversalButton from "../buttons/UniversalButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ChangePasswordFormProps {
   onCancel: () => void;
@@ -21,6 +22,7 @@ const ChangePasswordModal = ({
   onCancel,
   onSubmit,
 }: ChangePasswordFormProps) => {
+  const insets = useSafeAreaInsets();
   // Input states
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -136,7 +138,7 @@ const ChangePasswordModal = ({
         )}
       </View>
 
-      <View style={styles.buttonRow}>
+      <View style={[styles.buttonRow,{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }]}>
         <UniversalButton
           title="Cancel"
           onPress={onCancel}

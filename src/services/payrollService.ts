@@ -1,7 +1,6 @@
 import apiClient from "@/apis/client";
 
 export interface GeneratePayrollPayload {
-  employeeId: string;
   month?: number;
   year?: number;
   startDate?: string; // Expected format: "YYYY-MM-DD"
@@ -48,28 +47,27 @@ export async function generateEmployeePayroll(
   payload: GeneratePayrollPayload,
 ): Promise<PayrollResponse> {
   try {
-    const response = await apiClient.post("/api/payroll/generate", payload);
+    const response = await apiClient.post("/api/app/payroll/preview", payload);
 
     // The backend uses ApiResponse, so the actual data is inside response.data.data
     return response.data.data;
   } catch (error: any) {
-    console.error("Error generating payroll:", error);
+    // console.error("Error generating payroll:", error);
     throw new Error(
       error.response?.data?.message || "Failed to generate payroll"
     );
   }
 }
 
-
 export async function getPayrollList(
   params: GetPayrollListParams
 ): Promise<PayrollListResponse> {
   try {
     // Adjust the endpoint URL if needed (assuming GET /api/payroll)
-    const response = await apiClient.get("/api/payroll/list", { params });
+    const response = await apiClient.get("/api/app/payroll/list", { params });
 
     // The backend uses ApiResponse, so data is inside response.data.data
-    return response.data.data;
+    return response.data.data.payrolls;
   } catch (error: any) {
     console.error("Error fetching payroll list:", error);
     throw new Error(
@@ -77,3 +75,6 @@ export async function getPayrollList(
     );
   }
 }
+
+//3670.97
+//3187.1

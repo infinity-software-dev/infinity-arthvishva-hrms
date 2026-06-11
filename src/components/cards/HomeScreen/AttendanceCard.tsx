@@ -107,7 +107,7 @@ export default function AttendanceCard() {
             {isLoadingLocation ? (
               <ActivityIndicator
                 size={moderateScale(12)}
-                color={colors.Brand_Blue}
+                color={colors.Brand_Green}
                 style={{ marginRight: moderateScale(4) }}
               />
             ) : (
@@ -210,7 +210,7 @@ export default function AttendanceCard() {
                 <Text
                   style={[
                     styles.totalTimeHighlight,
-                    status === "blocked" && { color: colors.Brand_Blue },
+                    status === "blocked" && { color: colors.Danger_Red },
                   ]}
                 >
                   {status === "blocked" ? statusMessage : getTotalTimeLogged()}
@@ -262,10 +262,10 @@ export default function AttendanceCard() {
               <Ionicons
                 name="calendar-outline"
                 size={moderateScale(30)}
-                color={colors.Brand_Blue}
+                color={colors.Brand_Green}
               />
               <Text
-                style={[styles.completedText, { color: colors.Brand_Blue }]}
+                style={[styles.completedText, { color: colors.Brand_Green }]}
               >
                 {statusMessage}
               </Text>
