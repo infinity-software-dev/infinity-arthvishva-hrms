@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl } f
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
-import { fetchMyLeaves } from "@/services/leavesService";
+import { cancelLeaveRequest, fetchMyLeaves } from "@/services/leavesService";
 import LeaveBalanceCard from "./LeaveBalanceCard";
 import LeaveDetailsModal from "@/components/modals/LeaveDetailsModal";
 import LeaveHistoryCard from "./LeaveHistoryCard";
@@ -20,6 +20,7 @@ export default function LeavesHistory() {
   // 1. Separate your loading states
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Modal State
   const [selectedLeave, setSelectedLeave] = useState<any>(null);
@@ -43,6 +44,8 @@ export default function LeavesHistory() {
     }
   }, []);
 
+
+
   // 3. Smart Focus Trigger
   useEffect(() => {
     if (isFocused) {
@@ -57,6 +60,26 @@ export default function LeavesHistory() {
   const handlePullToRefresh = () => {
     setIsRefreshing(true);
     loadLeaves(true);
+  };
+
+  const handleCancelLeave = async (leaveId: string) => {
+    setIsCancelling(true);
+    try {
+      await cancelLeaveRequest(leaveId);
+
+      // Close the modal
+      setSelectedLeave(null);
+
+      // Hard-refresh the list so the status changes to "Cancelled" and tokens update
+      loadLeaves(false);
+
+      // Optional: Show a success toast here if you have a toast manager
+    } catch (error) {
+      console.error(error);
+      // Optional: Show error alert
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   // 5. Update the conditional render to use the new initial load state
@@ -109,6 +132,8 @@ export default function LeavesHistory() {
         isVisible={!!selectedLeave}
         onClose={() => setSelectedLeave(null)}
         leaveData={selectedLeave}
+        onCancel={handleCancelLeave}
+        isCancelling={isCancelling}
       />
     </View>
   );

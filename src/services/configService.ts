@@ -1,6 +1,6 @@
+import apiClient from "@/apis/client";
 import { useConfigStore } from "@/store/useConfigStore";
 
-// Define the shape of your expected NestJS response
 interface ApiConfigResponse {
   office_lat: number;
   office_lon: number;
@@ -8,36 +8,17 @@ interface ApiConfigResponse {
   shift_hours: number;
 }
 
-/**
- * Fetches dynamic application configurations from the backend
- * and hydrates the global Zustand store.
- */
 export async function initializeAppConfigs(): Promise<void> {
   try {
-    // Replace this with your actual NestJS endpoint
-    // const response = await fetch('https://api.yourdomain.com/v1/settings/app-configs');
+    // 1. Fetch from your new NestJS endpoint
+    const response = await apiClient.get('/api/v1/settings/system-configs');
 
-    // if (!response.ok) {
-    //   throw new Error(`API Error: ${response.status}`);
-    // }
-    // const data: ApiConfigResponse = await response.json();
+    // Extract the nested data object
+    const data: ApiConfigResponse = response.data.data;
 
-    // Check if today is Saturday (6)
-    const isSaturday = new Date().getDay() === 6;
-    const currentShiftHours = isSaturday ? 7 : 0.5;
+    // console.log("🌟 Fetched system configs:", data);
 
-    // --- SIMULATED API DELAY AND RESPONSE FOR TESTING ---
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    const data: ApiConfigResponse = {
-      office_lat: 18.5339582, // Your testing coordinates
-      office_lon: 73.839535,
-      radius_meters: 50,
-      shift_hours: currentShiftHours,
-    };
-    // ----------------------------------------------------
-
-    // Inject the payload directly into Zustand
-    // .getState() allows us to update the store outside of a React component
+    // 2. Inject into Zustand
     useConfigStore.getState().setConfigs({
       officeCoords: {
         latitude: data.office_lat,
@@ -47,23 +28,19 @@ export async function initializeAppConfigs(): Promise<void> {
       shiftHours: data.shift_hours,
     });
 
-    // console.log("✅ App Configs loaded successfully.");
   } catch (error) {
-    console.error("❌ Failed to fetch app configs:", error);
+    console.error("❌ Failed to fetch system configs:", error);
 
-    const isSaturday = new Date().getDay() === 6;
-    const currentShiftHours = isSaturday ? 7 : 8.5;
+    // Frontend fallback only used if the server is offline
+    const isSaturdayFallback = new Date().getDay() === 6;
 
-    // Enterprise Fallback: If the API fails (e.g., bad network),
-    // inject safe default coordinates so the app doesn't freeze on the splash screen.
     useConfigStore.getState().setConfigs({
       officeCoords: {
-        latitude: 18.5339582, // Generic Pune fallback
+        latitude: 18.5339582,
         longitude: 73.839535,
       },
       geofenceRadius: 50,
-      shiftHours: currentShiftHours,
+      shiftHours: isSaturdayFallback ? 7 : 8.5,
     });
   }
 }
-

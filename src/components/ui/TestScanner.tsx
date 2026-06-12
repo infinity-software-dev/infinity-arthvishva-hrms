@@ -3,25 +3,27 @@ import { View, Button, Text, ScrollView, StyleSheet } from "react-native";
 import { useScannerStore } from "@/store/useScannerStore";
 import { moderateScale } from "react-native-size-matters";
 
-export default function TestScannerScreen() {
+export default function ScannerRegistrationScreen() {
   const openScanner = useScannerStore((state) => state.openScanner);
-  const [capturedDescriptor, setCapturedDescriptor] = useState<number[] | null>(
-    null,
-  );
+
+  // Update state to hold the array of arrays
+  const [capturedDescriptors, setCapturedDescriptors] = useState<number[][] | null>(null);
 
   const handleTestRegister = () => {
     openScanner(
-      "register", // 'register' skips the matching phase and just returns your live face
+      "register",
       null,
-      (newDescriptor, imageBase64) => {
+      (newDescriptors, imageBase64) => {
         // SUCCESS CALLBACK
-        console.log("============= FACE DETECTED =============");
-        console.log("Array Length:", newDescriptor.length); // Should be 128
-        console.log("Raw Descriptor Data:", newDescriptor);
-        console.log("=========================================");
+        console.log("============= FACE BURST DETECTED =============");
+        console.log("Profiles Captured:", newDescriptors.length); // Should be 3
+        if (newDescriptors.length > 0) {
+          console.log("Array 1 Length:", newDescriptors[0].length); // Should be 128
+        }
+        console.log("===============================================");
 
-        setCapturedDescriptor(newDescriptor);
-        alert("Check your console! Array captured.");
+        setCapturedDescriptors(newDescriptors);
+        alert(`Success! Captured ${newDescriptors.length} face profiles.`);
       },
       (errorMsg) => {
         // ERROR CALLBACK
@@ -33,22 +35,23 @@ export default function TestScannerScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Button
-        title="Test Face Registration"
+        title="Test Face Burst Registration"
         onPress={handleTestRegister}
         color="#573CFF"
       />
 
-      {capturedDescriptor && (
+      {capturedDescriptors && (
         <View style={styles.resultBox}>
-          <Text style={styles.title}>Captured 128-D Array:</Text>
-          <Text style={styles.codeText}>
-            [{" "}
-            {capturedDescriptor
-              .slice(0, 5)
-              .map((n) => n.toFixed(3))
-              .join(", ")}{" "}
-            ... ]
-          </Text>
+          <Text style={styles.title}>Captured Profiles ({capturedDescriptors.length}):</Text>
+
+          {capturedDescriptors.map((desc, index) => (
+            <View key={index} style={styles.profileRow}>
+              <Text style={styles.subTitle}>Profile {index + 1}:</Text>
+              <Text style={styles.codeText}>
+                [ {desc.slice(0, 5).map((n) => n.toFixed(3)).join(", ")} ... ]
+              </Text>
+            </View>
+          ))}
         </View>
       )}
     </ScrollView>
@@ -63,6 +66,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
   },
-  title: { fontWeight: "bold", marginBottom: 10 },
-  codeText: { fontFamily: "monospace", fontSize: moderateScale(12) },
+  title: { fontWeight: "bold", marginBottom: 15, fontSize: moderateScale(16) },
+  subTitle: { fontWeight: "600", marginTop: 10, color: "#573CFF" },
+  profileRow: { marginBottom: 10 },
+  codeText: { fontFamily: "monospace", fontSize: moderateScale(12), color: "#333" },
 });

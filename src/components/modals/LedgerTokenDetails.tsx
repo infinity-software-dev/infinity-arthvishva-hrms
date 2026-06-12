@@ -12,6 +12,7 @@ export interface LedgerToken {
     leaveType: string;
     createdAt: string;
     expiryDate?: string;
+    value?: number;
 }
 
 interface LedgerTokenDetailsProps {
@@ -28,75 +29,76 @@ export default function LedgerTokenDetails({ tokens, leaveType, isVisible, onClo
         return null;
     }
 
-    if (tokens.length === 0) {
-        return (
-            <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, moderateScale(25)) }]}>
-                <Text style={styles.emptyText}>No active {leaveType} tokens found.</Text>
-                <UniversalButton
-                    title="Close"
-                    color={colors.Brand_Blue}
-                    onPress={onClose}
-                    style={styles.closeButton}
-                />
-            </View>
-        );
-    }
-
     return (
         <CustomBottomModal
             title="Leave Request Details"
             isVisible={isVisible}
             onClose={onClose}
         >
-            <ScrollView 
-                showsVerticalScrollIndicator={false} 
-                contentContainerStyle={styles.scrollContent}
-            >
-                {tokens.map((token) => (
-                    <View key={token._id} style={styles.tokenRow}>
-                        <View style={styles.leftSection}>
-                            <Ionicons name="ticket-outline" size={moderateScale(20)} color={colors.Brand_Blue} />
-                            <View>
-                                <Text style={styles.tokenTitle}>1 Day Token</Text>
-                                <Text style={styles.dateText}>
-                                    Added: {new Date(token.createdAt).toLocaleDateString()}
-                                </Text>
+            {tokens.length === 0 ? (
+                /* EMPTY STATE */
+                <View style={{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }}>
+                    <Text style={styles.emptyText}>No active {leaveType} tokens found.</Text>
+                    <UniversalButton
+                        title="Close"
+                        color={colors.Brand_Blue}
+                        onPress={onClose}
+                        style={styles.closeButton}
+                    />
+                </View>
+            ) : (
+                <>
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.scrollContent}
+                    >
+                        {tokens.map((token) => (
+                            <View key={token._id} style={styles.tokenRow}>
+                                <View style={styles.leftSection}>
+                                    <Ionicons name="ticket-outline" size={moderateScale(20)} color={colors.Brand_Blue} />
+                                    <View>
+                                        {/*  NEW: Dynamically render 0.5 Day or 1 Day */}
+                                        <Text style={styles.tokenTitle}>{token.value || 1} Day Token</Text>
+                                        <Text style={styles.dateText}>
+                                            Added: {new Date(token.createdAt).toLocaleDateString()}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.rightSection}>
+                                    {token.expiryDate ? (
+                                        <>
+                                            <Text style={styles.expiresLabel}>Expires</Text>
+                                            <Text style={styles.expiryDateText}>
+                                                {new Date(token.expiryDate).toLocaleDateString()}
+                                            </Text>
+                                        </>
+                                    ) : (
+                                        <Text style={styles.neverExpiresText}>Never Expires</Text>
+                                    )}
+                                </View>
                             </View>
-                        </View>
+                        ))}
+                    </ScrollView>
 
-                        <View style={styles.rightSection}>
-                            {token.expiryDate ? (
-                                <>
-                                    <Text style={styles.expiresLabel}>Expires</Text>
-                                    <Text style={styles.expiryDateText}>
-                                        {new Date(token.expiryDate).toLocaleDateString()}
-                                    </Text>
-                                </>
-                            ) : (
-                                <Text style={styles.neverExpiresText}>Never Expires</Text>
-                            )}
-                        </View>
+                    {/* Button with dynamic bottom inset */}
+                    <View style={{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }}>
+                        <UniversalButton
+                            title="Close"
+                            color={colors.Brand_Blue}
+                            onPress={onClose}
+                            style={styles.closeButton}
+                        />
                     </View>
-                ))}
-            </ScrollView>
-
-            {/* Wrap the button and apply the dynamic bottom inset */}
-            <View style={{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }}>
-                <UniversalButton
-                    title="Close"
-                    color={colors.Brand_Blue}
-                    onPress={onClose}
-                    style={styles.closeButton}
-                />
-            </View>
+                </>
+            )}
         </CustomBottomModal>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        maxHeight: moderateScale(400), 
-        // paddingBottom: moderateScale(25) <-- REMOVED from here, handled dynamically above
+        maxHeight: moderateScale(400),
     },
     scrollContent: {
         paddingBottom: moderateScale(16),

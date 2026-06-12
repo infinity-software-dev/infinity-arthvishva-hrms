@@ -8,9 +8,10 @@ export const useFaceVerification = () => {
   const verifyFaceAction = (
     operation: "checkin" | "checkout",
     onSuccessAction: () => void,
-    onErrorAction: (title: string, message: string) => void, // Let the component handle the error UI!
+    onErrorAction: (title: string, message: string) => void,
   ) => {
-    if (!user?.faceDescriptor || user.faceDescriptor.length !== 128) {
+
+    if (!user?.faceDescriptors || user.faceDescriptors.length === 0) {
       onErrorAction(
         "Face ID Required",
         "You must register your biometric profile in the settings before proceeding.",
@@ -20,7 +21,7 @@ export const useFaceVerification = () => {
 
     openScanner(
       operation,
-      user.faceDescriptor,
+      user.faceDescriptors,
       () => onSuccessAction(),
       (errorMsg) =>
         onErrorAction(

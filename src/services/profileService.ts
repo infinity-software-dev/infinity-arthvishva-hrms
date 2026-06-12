@@ -13,13 +13,6 @@ export const getMyProfile = async (): Promise<Employee | null> => {
   }
 };
 
-// export const updateFaceDescriptor = async (faceDescriptor: number[]) => {
-//   const response = await apiClient.put('/profile/face-descriptor', {
-//     faceDescriptor: faceDescriptor,
-//   });
-//   return response.data;
-// };
-
 export const updatePassword = async (
   currentPassword: string,
   newPassword: string,
@@ -36,6 +29,23 @@ export const updatePassword = async (
       throw new Error(
         error.response.data.message || "Failed to change password",
       );
+    }
+    throw new Error("Network error. Please try again later.");
+  }
+};
+
+// Update your API function to accept the descriptors and the base64 image
+export const addFaceDescriptor = async (faceDescriptors: number[][], imageBase64: string) => {
+  try {
+    const response = await apiClient.post("/api/app/employee/face", {
+      faceDescriptors: faceDescriptors,
+      image: imageBase64, // Sends the "data:image/jpeg;base64,..." string
+    });
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || "Failed to add face");
     }
     throw new Error("Network error. Please try again later.");
   }

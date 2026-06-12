@@ -12,6 +12,7 @@ export type WorkMode = "Office" | "Field" | "WFH";
 
 export function useAttendanceSession() {
   const [status, setStatus] = useState<AttendanceStatus>("loading");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [workMode, setWorkMode] = useState<WorkMode>("Office");
   const [checkInTime, setCheckInTime] = useState<Date | null>(null);
   const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
@@ -39,6 +40,12 @@ export function useAttendanceSession() {
       setModalVisible(true);
       setStatus("pending");
     }
+  };
+
+  const refreshSession = async () => {
+    setIsRefreshing(true);
+    await loadSession();
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
@@ -167,10 +174,11 @@ export function useAttendanceSession() {
     modalVisible,
     modalTitle,
     modalMessage,
-    setWorkMode,
     currentTime,
     checkInTime,
     checkOutTime,
+    isRefreshing,
+    setWorkMode,
     setModalVisible,
     setModalTitle,
     setModalMessage,
@@ -178,5 +186,6 @@ export function useAttendanceSession() {
     handleCheckOutPunch,
     getTotalTimeLogged,
     formatPunchTime,
+    refreshSession,
   };
 }

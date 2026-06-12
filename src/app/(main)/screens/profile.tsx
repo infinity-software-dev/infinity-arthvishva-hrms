@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -64,7 +64,7 @@ export default function ProfileScreen() {
           }
         >
           <ProfileHero profile={profile} />
-          <QuickStats profile={profile} />
+          <QuickStats />
 
           <View style={styles.accordionsWrapper}>
             {/* ── PERSONAL & FAMILY ── */}
@@ -217,7 +217,7 @@ export default function ProfileScreen() {
                 label="Relation & Phone"
                 value={
                   profile?.emergencyContactRelationship &&
-                  profile?.emergencyContactMobile
+                    profile?.emergencyContactMobile
                     ? `${profile.emergencyContactRelationship} - ${profile.emergencyContactMobile}`
                     : "N/A"
                 }
@@ -266,7 +266,6 @@ export default function ProfileScreen() {
               title="Documents & Certificates"
               iconName="document-text-outline"
             >
-              {/* Note: Aadhaar must always remain fully redacted/masked for compliance */}
               <DetailRow
                 label="Aadhaar Number"
                 value={profile?.aadhaarNumber ? "[Aadhaar Redacted]" : "N/A"}
@@ -307,6 +306,17 @@ export default function ProfileScreen() {
                 actions.setIsChangePasswordModalVisible(true);
               }}
             />
+
+            {/* ── CONDITIONAL FACE ID SETUP ── */}
+            {(!profile?.faceDescriptors || profile.faceDescriptors.length === 0) && (
+              <ProfileAccordion
+                title="Set Up Face ID"
+                iconName="camera-outline" // or "scan-outline" depending on your icon pack
+                isAccordion={false}
+                onActionPress={actions.handleFaceIdRegistration}
+              />
+            )}
+
           </View>
 
           <ProfileLogoutSection />
@@ -324,7 +334,6 @@ export default function ProfileScreen() {
           </CustomBottomModal>
         </ScrollView>
       )}
-      {/* Render the icon here instead! */}
       <ActionModal
         visible={state.isActionModalVisible}
         title={state.actionModalConfig.title}

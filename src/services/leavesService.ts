@@ -90,3 +90,18 @@ export const submitLeaveRequest = async (payload: LeaveRequestPayload) => {
     throw new Error(errorMessage);
   }
 };
+
+export const cancelLeaveRequest = async (leaveId: string) => {
+  try {
+    const response = await apiClient.patch(`/api/app/leaves/cancel/${leaveId}`);
+    return {
+      success: true,
+      message: response.data?.message || "Leave cancelled successfully",
+    };
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Failed to cancel leave request. Please try again.";
+    throw new Error(errorMessage);
+  }
+};

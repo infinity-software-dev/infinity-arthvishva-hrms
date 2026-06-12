@@ -1,9 +1,11 @@
-import { fetchMyLeaves, submitLeaveRequest, fetchActiveLedgers } from "@/services/leavesService";
+import { submitLeaveRequest, fetchActiveLedgers } from "@/services/leavesService";
 import { useState, useEffect } from "react";
 import { Platform } from "react-native";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { useIsFocused } from "expo-router";
 
 export const useApplyLeave = () => {
+  const isFocused = useIsFocused();
   // --- Form State ---
   const [isOptionVisible, setOptionVisible] = useState(false);
   const [ledgerInfoModal, setLedgerInfoModal] = useState({
@@ -25,34 +27,26 @@ export const useApplyLeave = () => {
     type: "success" as "success" | "error",
   });
 
-  // --- Data & Loading State ---
-  const [balances, setBalances] = useState({
-    approved: 0,
-    pending: 0,
-    total: 0,
-    rejected: 0,
-    cancelled: 0,
-  });
 
-  //  NEW: Ledger Token States
   const [activeLedgerTokens, setActiveLedgerTokens] = useState<any[]>([]);
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- Effects ---
   useEffect(() => {
     const loadData = async () => {
-      try {
-        // Load Active Ledger Tokens for the Vault UI
-        const ledgerData = await fetchActiveLedgers();
-        setActiveLedgerTokens(ledgerData);
+      if (isFocused) {
+        try {
+          const ledgerData = await fetchActiveLedgers();
+          setActiveLedgerTokens(ledgerData);
 
-      } catch (error) {
-        console.error("Failed to fetch leave data", error);
+        } catch (error) {
+          console.error("Failed to fetch leave data", error);
+        }
       }
     };
     loadData();
-  }, []);
+  }, [isFocused]);
+
 
   const openLedgerInfo = (type: string) => {
     setLedgerInfoModal({ visible: true, leaveType: type });
@@ -159,6 +153,10 @@ export const useApplyLeave = () => {
 
   const totalDays = calculateDuration();
 
+  const selectedTokenValueSum = activeLedgerTokens
+    .filter(t => selectedTokenIds.includes(t._id))
+    .reduce((sum, t) => sum + (t.value || 1), 0);
+
   const handleSubmit = async () => {
     if (!selectedValue) {
       setActionModal({ visible: true, title: "Error", message: "Please select a leave type.", type: "error" });
@@ -169,23 +167,16 @@ export const useApplyLeave = () => {
       return;
     }
 
-    //  NEW: Strict Token Selection Validation
     if (selectedValue === 'CompOff' || selectedValue === 'Paid') {
-      if (selectedTokenIds.length !== totalDays) {
-        // Wait, what if they request a half day (0.5)? 
-        // In a strictly 1 Document = 1 Day system, consuming 1 token for a 0.5 day request is normal.
-        // We use Math.ceil() so a 0.5 day request strictly demands 1 token.
-        const requiredTokens = Math.ceil(totalDays);
-
-        if (selectedTokenIds.length !== requiredTokens) {
-          setActionModal({
-            visible: true,
-            title: "Incomplete Selection",
-            message: `You requested ${totalDays} day(s) off. Please select ${requiredTokens} token(s) from your vault.`,
-            type: "error",
-          });
-          return;
-        }
+      // Instead of checking array length, we check if the selected sum is enough to cover the requested days
+      if (selectedTokenValueSum < totalDays) {
+        setActionModal({
+          visible: true,
+          title: "Incomplete Selection",
+          message: `You requested ${totalDays} day(s) off, but only selected ${selectedTokenValueSum} day(s) worth of tokens.`,
+          type: "error",
+        });
+        return;
       }
     }
 
@@ -247,16 +238,16 @@ export const useApplyLeave = () => {
       reason,
       isHalfDay,
       halfDayShift,
-      balances,
-      activeLedgerTokens, //  Exported for the Vault UI
-      selectedTokenIds,   //  Exported for the Vault UI
+      activeLedgerTokens,
+      selectedTokenIds,
       isSubmitting,
       totalDays,
       actionModal,
+      selectedTokenValueSum,
     },
     actions: {
       setOptionVisible,
-      setSelectedValue: handleLeaveTypeChange, //  Use the wrapper
+      setSelectedValue: handleLeaveTypeChange,
       openLedgerInfo,
       closeLedgerInfo,
       setShowFromPicker,
@@ -270,7 +261,7 @@ export const useApplyLeave = () => {
       handleFromDateChange,
       handleToDateChange,
       handleDismiss,
-      toggleTokenSelection, // Exported for the Vault UI
+      toggleTokenSelection,
       handleSubmit,
       closeActionModal,
     },

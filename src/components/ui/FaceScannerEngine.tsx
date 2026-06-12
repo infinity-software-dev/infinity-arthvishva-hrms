@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Vibration } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { useScannerStore } from "@/store/useScannerStore";
 
@@ -8,7 +8,7 @@ export default function FaceScannerEngine() {
   const {
     isOpen,
     operation,
-    storedDescriptor,
+    storedDescriptors, // Ensure this matches your updated Zustand store
     onSuccess,
     onError,
     closeScanner,
@@ -16,8 +16,8 @@ export default function FaceScannerEngine() {
 
   useEffect(() => {
     if (isOpen && operation && webviewRef.current) {
-      const descriptorArg = storedDescriptor
-        ? JSON.stringify(storedDescriptor)
+      const descriptorArg = storedDescriptors
+        ? JSON.stringify(storedDescriptors)
         : "null";
       webviewRef.current.injectJavaScript(`
         if (window.startCamera) window.startCamera('${operation}', ${descriptorArg});
@@ -29,14 +29,15 @@ export default function FaceScannerEngine() {
         true;
       `);
     }
-  }, [isOpen, operation, storedDescriptor]);
+  }, [isOpen, operation, storedDescriptors]);
 
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       switch (data.type) {
         case "descriptor":
-          if (onSuccess) onSuccess(data.descriptor, data.image);
+          // Passing the array of arrays (data.descriptors)
+          if (onSuccess) onSuccess(data.descriptors, data.image);
           closeScanner();
           break;
         case "error":
@@ -45,6 +46,9 @@ export default function FaceScannerEngine() {
           break;
         case "cancel":
           closeScanner();
+          break;
+        case "vibrate":
+          Vibration.vibrate(150);
           break;
       }
     } catch (error) {
@@ -62,12 +66,12 @@ export default function FaceScannerEngine() {
         *{margin:0;padding:0;box-sizing:border-box}
         :root{
           --rc:#374151;--rg:rgba(55,65,81,0.15);
-          --blue:#2076C7;--teal:#1CADA3;--amber:#F59E0B;--green:#10B981;--red:#EF4444;
+          --blue:#573CFF;--teal:#1CADA3;--amber:#F59E0B;--green:#10B981;--red:#EF4444;
         }
         body{
           background:#080C14; display:flex;flex-direction:column;align-items:center;
           min-height:100vh;overflow:hidden;
-          font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
+          font-family:'Ubuntu', -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
           color:#F9FAFB;
         }
         #loadingOverlay{
@@ -96,6 +100,7 @@ export default function FaceScannerEngine() {
         .ring-glow{
           position:absolute;inset:0;border-radius:50%;
           background:radial-gradient(circle,var(--rg) 0%,transparent 70%); pointer-events:none;z-index:2;
+          transition: background 0.3s ease;
         }
         .ring-svg{
           position:absolute;top:-5px;left:-5px; width:calc(100% + 10px);height:calc(100% + 10px);
@@ -114,7 +119,7 @@ export default function FaceScannerEngine() {
         }
         .face-oval.lit{border-color:var(--green);border-style:solid}
         .status-wrap{margin-top:30px;text-align:center;padding:0 24px;min-height:70px}
-        .s-text{font-size:16px;font-weight:700;color:#F9FAFB}
+        .s-text{font-size:16px;font-weight:700;color:#F9FAFB; transition: color 0.3s;}
         .s-sub{font-size:13px;color:#6B7280;margin-top:6px}
         .prog-wrap{width:min(240px,65vw);height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:15px;overflow:hidden}
         .prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));width:0%;transition:width .15s ease}
@@ -167,17 +172,21 @@ export default function FaceScannerEngine() {
       const hdrTitle = document.getElementById('hdrTitle');
 
       let stream = null, isProcessing = false;
-      let detInterval = null;
+      let isCameraActive = false;
       
-      // Using public CDN for testing purposes
+      // Burst capture variables
+      let registrationFrames = [];
+      let captureCount = 0;
+      let registrationTimer = null;
+      
       const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
-      const SCAN_OPTS = new faceapi.TinyFaceDetectorOptions({ inputSize: 128, scoreThreshold: 0.5 });
+      const SCAN_OPTS = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
 
       function postRN(obj) { try { window.ReactNativeWebView.postMessage(JSON.stringify(obj)); } catch(e) {} }
 
       function setUI(txt, sub, p, color) {
         sTxt.textContent = txt; sSub.textContent = sub; prog.style.width = p + '%';
-        if (color) { document.documentElement.style.setProperty('--rc', color); arc.style.stroke = color; }
+        if (color) { document.documentElement.style.setProperty('--rc', color); arc.style.stroke = color; sTxt.style.color = color; }
       }
 
       async function prewarmModels() {
@@ -190,21 +199,176 @@ export default function FaceScannerEngine() {
           ]);
           lo.classList.add('hidden');
           setUI('AI Offline', 'Waiting for check-in action...', 100, '#10B981');
-          postRN({ type: 'ready' });
         } catch (e) {
           loText.textContent = "AI Offline: " + e.message;
-          postRN({ type: 'error', error: 'AI Core model pre-loading failed: ' + e.message });
+          postRN({ type: 'error', error: 'AI Core model failed: ' + e.message });
         }
       }
 
-      let isCameraActive = false; // Add this flag to track intended state
+      async function detectionLoop() {
+        if (!isCameraActive || !video.srcObject) return;
 
-      window.startCamera = async (op, savedDescriptor) => {
+        if (!isProcessing && video.readyState >= 2) {
+          try {
+            const det = await faceapi.detectSingleFace(video, SCAN_OPTS);
+            if (det && det.score > 0.7) { 
+              isProcessing = true; 
+              
+              if (window.FACE_OP === 'register') {
+                // Kick off burst capture if registering
+                runRegistrationBurst();
+              } else {
+                // Standard verification
+                await capture(); 
+              }
+              return; 
+            }
+          } catch (err) {}
+        }
+        requestAnimationFrame(detectionLoop);
+      }
+
+      // --- BURST CAPTURE LOGIC FOR REGISTRATION ---
+      async function runRegistrationBurst() {
+        if (captureCount >= 3) {
+          processRegistrationFrames();
+          return;
+        }
+
         try {
-          isCameraActive = true; // Mark that we WANT the camera on
+          const det = await faceapi.detectSingleFace(video, SCAN_OPTS);
+          if (det && det.score > 0.8) { 
+            const canvas = document.createElement('canvas');
+            canvas.width = 300; canvas.height = 300;
+            canvas.getContext('2d').drawImage(video, 0, 0, 300, 300);
+            registrationFrames.push(canvas);
+            
+            captureCount++;
+            
+            if (captureCount === 1) setUI('Capturing...', 'Now tilt your phone slightly up', 33, '#2076C7');
+            if (captureCount === 2) setUI('Almost Done...', 'Now tilt your phone slightly down', 66, '#2076C7');
+            
+            postRN({ type: 'vibrate' });
+          }
+        } catch (e) {}
+
+        // Schedule next frame check
+        registrationTimer = setTimeout(runRegistrationBurst, 600);
+      }
+
+      async function processRegistrationFrames() {
+        setUI('Securing Profile', 'Generating mathematical models...', 90, '#F59E0B');
+        arc.classList.add('spinning');
+        
+        // Pause video to free CPU resources
+        if (video) video.pause();
+        
+        const finalDescriptors = [];
+        
+        for (let i = 0; i < registrationFrames.length; i++) {
+          const frameDet = await faceapi.detectSingleFace(registrationFrames[i], SCAN_OPTS)
+                                       .withFaceLandmarks()
+                                       .withFaceDescriptor();
+          if (frameDet) {
+            finalDescriptors.push(Array.from(frameDet.descriptor));
+          }
+        }
+
+        if (finalDescriptors.length > 0) {
+          setUI('Registration Complete ✓', 'Identity secured', 100, '#10B981');
+          postRN({ 
+            type: 'descriptor', 
+            descriptors: finalDescriptors, // Return the array of arrays
+            image: registrationFrames[0].toDataURL('image/jpeg', 0.5) 
+          });
+        } else {
+          setUI('Registration Failed', 'Could not generate model. Try again.', 0, '#EF4444');
+          setTimeout(() => { 
+            captureCount = 0; 
+            registrationFrames = []; 
+            isProcessing = false;
+            if (video) video.play();
+            requestAnimationFrame(detectionLoop); 
+          }, 2000);
+        }
+      }
+
+      // --- STANDARD VERIFICATION LOGIC ---
+      async function capture() {
+        setUI('Verifying Identity...', 'Matching structural descriptor', 85, '#F59E0B');
+        faceOval.classList.add('lit'); arc.classList.remove('spinning');
+        
+        try {
+          const det = await faceapi.detectSingleFace(video, SCAN_OPTS).withFaceLandmarks().withFaceDescriptor();
+          
+          if (!det) {
+            postRN({ type: 'vibrate' });
+            isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning');
+            setUI('Face Lost', 'Re-align face inside the oval', 45, '#2076C7');
+            requestAnimationFrame(detectionLoop);
+            return;
+          }
+          
+          if (window.USER_FACE_DESCRIPTORS && window.USER_FACE_DESCRIPTORS.length > 0) {
+            let isMatch = false;
+            let bestDistance = 1.0;
+
+            // Loop through the saved ensemble (array of arrays)
+            for (let i = 0; i < window.USER_FACE_DESCRIPTORS.length; i++) {
+              const savedArray = new Float32Array(Object.values(window.USER_FACE_DESCRIPTORS[i]));
+              const dist = faceapi.euclideanDistance(det.descriptor, savedArray);
+              
+              if (dist < bestDistance) bestDistance = dist;
+              
+              // 🔴 CHANGE THIS LINE: Lower the threshold from 0.60 to 0.50
+              // 0.50 is the optimal strict boundary for face-api.js
+              if (dist <= 0.50) { 
+                isMatch = true;
+                break;
+              }
+            }
+            
+            if (!isMatch) {
+              postRN({ type: 'vibrate' });
+              setUI('Verification Failed', 'Faces do not match', 0, '#EF4444');
+              
+              setTimeout(() => { 
+                if(!isCameraActive) return;
+                isProcessing = false; 
+                faceOval.classList.remove('lit'); 
+                arc.classList.add('spinning'); 
+                setUI('Scanning...', 'Align face again', 45, '#2076C7'); 
+                requestAnimationFrame(detectionLoop);
+              }, 2000);
+              return;
+            }
+          }
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = 300; canvas.height = 300;
+          canvas.getContext('2d').drawImage(video, 0, 0, 300, 300);
+          setUI('Identity Verified ✓', 'Syncing secure logs...', 100, '#10B981');
+          
+          // Return the verified match
+          postRN({ type: 'descriptor', descriptors: [Array.from(det.descriptor)], image: canvas.toDataURL('image/jpeg', 0.5) });
+          
+        } catch (e) {
+          postRN({ type: 'vibrate' });
+          isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning');
+          setUI('Scan Error', 'Please hold still', 45, '#2076C7');
+          requestAnimationFrame(detectionLoop);
+        }
+      }
+
+      window.startCamera = async (op, savedDescriptors) => {
+        try {
+          isCameraActive = true;
           isProcessing = false; 
+          captureCount = 0;
+          registrationFrames = [];
           window.FACE_OP = op; 
-          window.USER_FACE_DESCRIPTOR = savedDescriptor;
+          // Note the plural naming convention passed from React Native
+          window.USER_FACE_DESCRIPTORS = savedDescriptors; 
           
           hdrTitle.textContent = op === 'register' ? 'Register Face ID' : 'Identity Verification';
           faceOval.classList.remove('lit'); 
@@ -214,13 +378,11 @@ export default function FaceScannerEngine() {
           
           setUI('Starting Camera...', 'Initializing capture stream', 20, '#2076C7');
           
-          // Fetch the stream into a temporary variable
           const newStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'user', width: { ideal: 360 }, height: { ideal: 360 } }, 
+            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, 
             audio: false 
           });
 
-          // CRITICAL FIX: If stopCamera() was called while we were waiting for userMedia, kill it immediately.
           if (!isCameraActive) {
             newStream.getTracks().forEach(t => t.stop());
             return;
@@ -230,12 +392,8 @@ export default function FaceScannerEngine() {
           video.srcObject = stream;
           setUI('Position Face', 'Fit inside the dashed oval', 45, '#2076C7');
           
-          if (detInterval) clearInterval(detInterval);
-          detInterval = setInterval(async () => {
-            if (isProcessing || video.readyState < 2) return;
-            const det = await faceapi.detectSingleFace(video, SCAN_OPTS);
-            if (det && det.score > 0.7) { isProcessing = true; capture(); }
-          }, 100);
+          requestAnimationFrame(detectionLoop);
+          
         } catch (e) {
           setUI('Camera Offline', e.message, 0, '#EF4444');
           postRN({ type: 'error', error: 'Camera access failed: ' + e.message });
@@ -243,59 +401,23 @@ export default function FaceScannerEngine() {
       };
 
       window.stopCamera = () => {
-        isCameraActive = false; // Instantly invalidate any pending camera startups
+        isCameraActive = false;
         isProcessing = false; 
+        clearTimeout(registrationTimer);
         faceOval.classList.remove('lit');
-        
-        if (detInterval) { clearInterval(detInterval); detInterval = null; }
         
         if (stream) { 
           stream.getTracks().forEach(t => t.stop()); 
           stream = null; 
         }
-        
-        // CRITICAL FIX: Force the mobile WebView to release the hardware lock
         if (video) {
           video.pause();
           video.removeAttribute('src');
           video.load();
           video.srcObject = null;
         }
-        
         setUI('Standby', 'Camera deactivated safely', 0, '#374151');
       };
-
-      async function capture() {
-        setUI('Verifying Identity...', 'Matching structural descriptor', 85, '#F59E0B');
-        faceOval.classList.add('lit'); arc.classList.remove('spinning');
-        try {
-          const det = await faceapi.detectSingleFace(video, SCAN_OPTS).withFaceLandmarks().withFaceDescriptor();
-          if (!det) {
-            isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning');
-            setUI('Face Lost', 'Re-align face inside the oval', 45, '#2076C7'); return;
-          }
-          if (window.FACE_OP !== 'register' && window.USER_FACE_DESCRIPTOR) {
-            const savedDescriptorArray = new Float32Array(Object.values(window.USER_FACE_DESCRIPTOR));
-            const dist = faceapi.euclideanDistance(det.descriptor, savedDescriptorArray);
-            if (dist > 0.55) {
-              setUI('Verification Failed', 'Faces do not match', 0, '#EF4444');
-              postRN({ type: 'error', error: 'Face ID does not match registered profile. Try again.' });
-              setTimeout(() => { isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning'); setUI('Scanning...', 'Align face again', 45, '#2076C7'); }, 2000);
-              return;
-            }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = 300; canvas.height = 300;
-          canvas.getContext('2d').drawImage(video, 0, 0, 300, 300);
-          setUI('Identity Verified ✓', 'Syncing secure logs...', 100, '#10B981');
-          
-          // SEND THE DESCRIPTOR BACK TO REACT NATIVE
-          postRN({ type: 'descriptor', descriptor: Array.from(det.descriptor), image: canvas.toDataURL('image/jpeg', 0.5) });
-        } catch (e) {
-          isProcessing = false; faceOval.classList.remove('lit'); arc.classList.add('spinning');
-          setUI('Scan Timeout', 'Failed to calculate facial descriptors', 45, '#2076C7');
-        }
-      }
 
       document.getElementById('cancelBtn').onclick = () => { stopCamera(); postRN({ type: 'cancel' }); };
       prewarmModels();

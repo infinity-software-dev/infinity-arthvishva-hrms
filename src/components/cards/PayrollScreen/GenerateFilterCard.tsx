@@ -4,6 +4,7 @@ import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
 import GradientButton from "@/components/buttons/GradientButton";
+import ThreeDButton from "@/components/buttons/ThreeDButton";
 
 interface GenerateFilterCardProps {
   fromDate: Date;
@@ -26,20 +27,17 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
   onShowCycleModal,
   isGenerating,
 }) => {
-  const buttonColors: [string, string] = [
-    colors.Brand_Green,
-    colors.Brand_Green_Dark,
-  ];
-
   return (
     <View style={styles.filterCard}>
       <View style={styles.headerRow}>
         <Text style={styles.sectionTitle}>Generate Statement</Text>
 
-        <TouchableOpacity onPress={onShowCycleModal} style={styles.quickSelectBtn}>
-          <Ionicons name="list" size={moderateScale(14)} color={colors.Brand_Blue} />
-          <Text style={styles.quickSelectText}>Standard Cycles</Text>
-        </TouchableOpacity>
+        {/* Simply drop the component in here and pass the props */}
+        <ThreeDButton
+          title="Monthly Cycles"
+          icon="list"
+          onPress={onShowCycleModal}
+        />
       </View>
 
       <View style={styles.row}>
@@ -51,11 +49,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
             activeOpacity={0.7}
           >
             <Text style={styles.inputText}>{formatDateForUI(fromDate)}</Text>
-            <Ionicons
-              name="calendar-outline"
-              size={moderateScale(16)}
-              color={colors.Brand_Blue}
-            />
+            <Ionicons name="calendar-outline" size={moderateScale(16)} color={colors.Brand_Blue} />
           </TouchableOpacity>
         </View>
 
@@ -67,11 +61,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
             activeOpacity={0.7}
           >
             <Text style={styles.inputText}>{formatDateForUI(toDate)}</Text>
-            <Ionicons
-              name="calendar-outline"
-              size={moderateScale(16)}
-              color={colors.Brand_Blue}
-            />
+            <Ionicons name="calendar-outline" size={moderateScale(16)} color={colors.Brand_Blue} />
           </TouchableOpacity>
         </View>
       </View>
@@ -81,7 +71,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
         onPress={onGenerate}
         disabled={isGenerating}
         customStyles={{
-          colors: buttonColors,
+          colors: [colors.Brand_Green, colors.Brand_Green_Dark],
           borderRadius: moderateScale(12),
           marginVertical: 0,
           marginTop: moderateScale(4),
@@ -106,25 +96,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: moderateScale(16),
+    height: moderateScale(36),
   },
   sectionTitle: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(15),
     color: "#0F172A",
-  },
-  quickSelectBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: moderateScale(10),
-    paddingVertical: moderateScale(6),
-    borderRadius: moderateScale(20),
-  },
-  quickSelectText: {
-    fontFamily: FONTS.semiBold,
-    fontSize: moderateScale(11),
-    color: colors.Brand_Blue,
-    marginLeft: moderateScale(4),
   },
   row: { flexDirection: "row", justifyContent: "space-between" },
   inputGroup: { marginBottom: moderateScale(16) },

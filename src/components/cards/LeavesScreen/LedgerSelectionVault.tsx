@@ -9,7 +9,7 @@ interface LedgerVaultProps {
     allTokens: any[];
     selectedTokenIds: string[];
     onToggleToken: (id: string) => void;
-    requiredDays: number; // The calculated `totalDays` they need to cover
+    requiredDays: number; // The exact float value (e.g., 0.5, 1, 1.5)
 }
 
 export default function LedgerSelectionVault({
@@ -23,20 +23,20 @@ export default function LedgerSelectionVault({
     // 1. Filter down to the correct leave type
     const relevantTokens = allTokens.filter(t => t.leaveType === leaveType);
 
-    //  2. Sort tokens: Earliest expiry date first
+    // 2. Sort tokens: Earliest expiry date first
     const sortedTokens = [...relevantTokens].sort((a, b) => {
-        // If both tokens have an expiry date, compare them
         if (a.expiryDate && b.expiryDate) {
             return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
         }
-        // If only 'a' has an expiry date, it should come first
         if (a.expiryDate) return -1;
-        // If only 'b' has an expiry date, it should come first
         if (b.expiryDate) return 1;
-
-        // If neither expires, leave them in their original order
         return 0;
     });
+
+    //  NEW: Calculate the exact mathematical sum of currently selected tokens
+    const currentSelectedValueSum = sortedTokens
+        .filter(t => selectedTokenIds.includes(t._id))
+        .reduce((sum, t) => sum + (t.value || 1), 0);
 
     if (sortedTokens.length === 0) {
         return (
@@ -50,15 +50,16 @@ export default function LedgerSelectionVault({
         <View style={styles.vaultContainer}>
             <Text style={styles.vaultTitle}>Select {leaveType} Tokens to Consume</Text>
             <Text style={styles.vaultSubtitle}>
-                You need to select {requiredDays} token(s) to cover your requested dates.
+                Need: {requiredDays} Day(s) | Selected: {currentSelectedValueSum} Day(s)
             </Text>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                {/*  3. Map over the sorted array instead of the raw relevant array */}
                 {sortedTokens.map((token) => {
                     const isSelected = selectedTokenIds.includes(token._id);
-                    // If they need 2 days, and have already selected 2 tokens, disable the unselected ones.
-                    const isMaxReached = selectedTokenIds.length >= requiredDays;
+                    const tokenValue = token.value || 1;
+
+                    //  NEW: Disable unselected tokens ONLY if the required sum is met
+                    const isMaxReached = currentSelectedValueSum >= requiredDays;
                     const isDisabled = !isSelected && isMaxReached;
 
                     return (
@@ -79,16 +80,24 @@ export default function LedgerSelectionVault({
                                     size={moderateScale(20)}
                                     color={isSelected ? colors.Brand_Green : "#94A3B8"}
                                 />
+                                {/*  NEW: Dynamically show 0.5 Day or 1 Day */}
                                 <Text style={[styles.tokenType, isSelected && styles.tokenTypeActive]}>
-                                    1 Day
+                                    {tokenValue} Day
                                 </Text>
                             </View>
 
                             <View style={styles.tokenDetails}>
-                                {token.expiryDate && (
-                                    <Text style={styles.expiryText}>
-                                        Expires: {new Date(token.expiryDate).toLocaleDateString()}
+                                {/*  NEW: Paid shows origin month, CompOff shows expiry */}
+                                {leaveType === 'Paid' ? (
+                                    <Text style={styles.createdText}>
+                                        Earned: {token.fixedAllowanceMonth || new Date(token.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
                                     </Text>
+                                ) : (
+                                    token.expiryDate && (
+                                        <Text style={styles.expiryText}>
+                                            Expires: {new Date(token.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                        </Text>
+                                    )
                                 )}
                             </View>
                         </TouchableOpacity>
@@ -119,6 +128,7 @@ const styles = StyleSheet.create({
     tokenTypeActive: { color: colors.Brand_Green },
     tokenDetails: { marginTop: moderateScale(4) },
     expiryText: { fontFamily: FONTS.medium, fontSize: moderateScale(10), color: colors.Danger_Red },
+    createdText: { fontFamily: FONTS.medium, fontSize: moderateScale(10), color: colors.Brand_Blue },
     emptyContainer: { marginTop: moderateScale(16), marginBottom: moderateScale(24) },
     emptyText: { fontFamily: FONTS.medium, fontSize: moderateScale(12), color: "#64748B" },
 });

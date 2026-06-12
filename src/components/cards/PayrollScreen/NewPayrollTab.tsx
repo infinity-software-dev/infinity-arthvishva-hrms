@@ -43,7 +43,7 @@ const NewPayrollTab = () => {
                 />
 
                 <PayrollDetailModal
-                    isVisible={!!state.latestSlip}
+                    isVisible={!!state.selectedSlip}
                     onClose={() => actions.setSelectedSlip(null)}
                     slip={state.latestSlip}
                 />

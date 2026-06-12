@@ -2,7 +2,7 @@ import apiClient from "@/apis/client";
 import { WorkMode } from "@/hooks/useAttendanceSession";
 import { AttendanceApiResponse } from "@/types/attendance";
 
-export type BackendAttendanceStatus =  "P" | "A" | "WO" | "L" | "CompOff" | "AUTO" | "H" | "Half";
+export type BackendAttendanceStatus = "P" | "A" | "WO" | "L" | "HalfCompOff" | "CompOff" | "AUTO" | "H" | "Half";
 
 export interface DailyAttendanceRecord {
   uiStatus: "pending" | "in" | "completed" | "blocked";
@@ -19,6 +19,7 @@ const STATUS_LABELS: Record<BackendAttendanceStatus, string> = {
   WO: "Week Off",
   L: "On Leave",
   CompOff: "Comp. Off",
+  HalfCompOff: "Half Comp. Off",
   AUTO: "Auto Logged-Out",
   H: "Holiday",
   Half: "Half Day",

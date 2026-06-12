@@ -42,7 +42,7 @@ export interface Employee {
   dateOfBirth?: string; // Standardized to string (ISO Date) for frontend
   maritalStatus?: "Single" | "Married" | "Divorced" | "Widowed";
   profileImageUrl?: string;
-  faceDescriptor?: number[];
+  faceDescriptors?: number[][];
 
   // ── PERSONAL DETAILS ──
   fatherName?: string;

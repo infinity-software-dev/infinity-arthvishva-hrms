@@ -25,9 +25,15 @@ import LedgerTokenDetails from "@/components/modals/LedgerTokenDetails";
 export default function ApplyLeaves() {
   const { state, actions } = useApplyLeave();
 
-  // Basic validation retains existing checks
+  // 1. Basic Form Validation
   const isFormValid = state.selectedValue !== "" && state.reason.trim() !== "";
-  const isDisabled = state.isSubmitting || !isFormValid;
+
+  // 2.NEW: Token Validation
+  const needsTokens = state.selectedValue === "CompOff" || state.selectedValue === "Paid";
+  const hasEnoughTokens = state.selectedTokenValueSum >= state.totalDays;
+
+  // 3. Final Button State (Disabled if form is empty, submitting, OR if they haven't picked enough tokens)
+  const isDisabled = state.isSubmitting || !isFormValid || (needsTokens && !hasEnoughTokens);
 
   return (
     <>
@@ -41,8 +47,14 @@ export default function ApplyLeaves() {
       >
         <LedgerBalanceCard
           balances={{
-            paid: state.activeLedgerTokens.filter(t => t.leaveType === 'Paid').length,
-            compOff: state.activeLedgerTokens.filter(t => t.leaveType === 'CompOff').length
+            paid: state.activeLedgerTokens
+              .filter(t => t.leaveType === 'Paid')
+              .reduce((sum, token) => sum + (token.value || 1), 0),
+
+            // Sum the 'value' of all CompOff tokens (so two 0.5 tokens equal 1.0)
+            compOff: state.activeLedgerTokens
+              .filter(t => t.leaveType === 'CompOff')
+              .reduce((sum, token) => sum + (token.value || 1), 0)
           }}
           onViewDetails={actions.openLedgerInfo}
         />
@@ -72,14 +84,14 @@ export default function ApplyLeaves() {
             </TouchableOpacity>
           </View>
 
-          {/*  NEW: Ledger Selection Vault rendered dynamically  */}
+          {/* NEW: Ledger Selection Vault rendered dynamically  */}
           {(state.selectedValue === "CompOff" || state.selectedValue === "Paid") && (
             <LedgerSelectionVault
               leaveType={state.selectedValue}
               allTokens={state.activeLedgerTokens}
               selectedTokenIds={state.selectedTokenIds}
               onToggleToken={actions.toggleTokenSelection}
-              requiredDays={Math.ceil(state.totalDays)} // Use Math.ceil to require 1 token even for 0.5 days
+              requiredDays={state.totalDays}
             />
           )}
 
@@ -308,18 +320,13 @@ export default function ApplyLeaves() {
         />
       </CustomBottomModal>
 
-      {/* <CustomBottomModal
-        title={`${state.ledgerInfoModal.leaveType} Token Details`}
+
+      <LedgerTokenDetails
+        tokens={state.activeLedgerTokens.filter(t => t.leaveType === state.ledgerInfoModal.leaveType)}
+        leaveType={state.ledgerInfoModal.leaveType}
         onClose={actions.closeLedgerInfo}
-        
-      > */}
-        <LedgerTokenDetails
-          tokens={state.activeLedgerTokens.filter(t => t.leaveType === state.ledgerInfoModal.leaveType)}
-          leaveType={state.ledgerInfoModal.leaveType}
-          onClose={actions.closeLedgerInfo}
-          isVisible={state.ledgerInfoModal.visible}
-        />
-      {/* </CustomBottomModal> */}
+        isVisible={state.ledgerInfoModal.visible}
+      />
 
       {/* iOS ONLY: Render DatePickers safely inside Bottom Sheets */}
       {Platform.OS === "ios" && (

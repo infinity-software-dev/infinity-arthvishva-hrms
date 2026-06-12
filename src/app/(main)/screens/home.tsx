@@ -1,10 +1,9 @@
 import React from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 import QuickActions from "@/components/cards/HomeScreen/QuickActionsCard";
-import MonthlyTarget from "@/components/cards/HomeScreen/MonthlyTargetCard";
 import ActionModal from "@/components/modals/AlertModal";
 import HomeNavbar from "@/components/navbar/HomeNavbar";
 import HighlightsFeed from "@/components/cards/HomeScreen/HighlightsFeedCard";
@@ -20,6 +19,7 @@ export default function HomeScreen() {
 
   // Consume our extracted location logic
   const { isVisible, requiresSettings, handleModalConfirm } = useLocationPermission();
+
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -5,14 +5,16 @@ type OperationType = "register" | "checkin" | "checkout" | null;
 interface ScannerState {
   isOpen: boolean;
   operation: OperationType;
-  storedDescriptor: number[] | null;
-  onSuccess: ((descriptor: number[], imageBase64: string) => void) | null;
+  // Updated to hold multiple face profiles (array of arrays)
+  storedDescriptors: number[][] | null;
+  // Updated success callback to return the array of arrays
+  onSuccess: ((descriptors: number[][], imageBase64: string) => void) | null;
   onError: ((errorMsg: string) => void) | null;
 
   openScanner: (
     operation: OperationType,
-    storedDescriptor: number[] | null,
-    onSuccess: (descriptor: number[], imageBase64: string) => void,
+    storedDescriptors: number[][] | null,
+    onSuccess: (descriptors: number[][], imageBase64: string) => void,
     onError: (errorMsg: string) => void,
   ) => void;
   closeScanner: () => void;
@@ -21,18 +23,18 @@ interface ScannerState {
 export const useScannerStore = create<ScannerState>((set) => ({
   isOpen: false,
   operation: null,
-  storedDescriptor: null,
+  storedDescriptors: null,
   onSuccess: null,
   onError: null,
 
-  openScanner: (operation, storedDescriptor, onSuccess, onError) =>
-    set({ isOpen: true, operation, storedDescriptor, onSuccess, onError }),
+  openScanner: (operation, storedDescriptors, onSuccess, onError) =>
+    set({ isOpen: true, operation, storedDescriptors, onSuccess, onError }),
 
   closeScanner: () =>
     set({
       isOpen: false,
       operation: null,
-      storedDescriptor: null,
+      storedDescriptors: null,
       onSuccess: null,
       onError: null,
     }),

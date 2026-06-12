@@ -107,7 +107,7 @@ const HomeNavbar: React.FC<HomeNavbarProps> = ({ userName = "User" }) => {
               <Text style={styles.dateText}> • {formattedDate}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.userName} numberOfLines={1}>
+              <Text style={styles.userName} numberOfLines={1} onPress={()=>{}}>
                 {toTitleCase(userName.split(" ")[0])}
               </Text>
               {isFocused && <HelloWave />}

@@ -2,17 +2,15 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { colors, FONTS } from "@/constants/theme";
-import { EmployeeProfile } from "@/services/profileService";
+import { useProfile } from "@/hooks/useProfile";
 
-interface QuickStatsProps {
-  profile: EmployeeProfile;
-}
 
-export default function QuickStats({ profile }: QuickStatsProps) {
+export default function QuickStats() {
+  const { state } = useProfile();
   return (
     <View style={styles.container}>
       <View style={styles.statBox}>
-        <Text style={styles.statValue}>{profile.paidLeaveBalance || 0}</Text>
+        <Text style={styles.statValue}>{state.activeLedgerTokens.filter(t => t.leaveType === 'Paid').length || 0}</Text>
         <Text style={styles.statLabel}>Paid Leaves</Text>
       </View>
 
@@ -20,7 +18,7 @@ export default function QuickStats({ profile }: QuickStatsProps) {
 
       <View style={styles.statBox}>
         <Text style={[styles.statValue, { color: colors.Magic_Violet }]}>
-          {profile.compOffBalance || 0}
+          {state.activeLedgerTokens.filter(t => t.leaveType === 'CompOff').length || 0}
         </Text>
         <Text style={styles.statLabel}>Comp-Offs</Text>
       </View>
