@@ -86,6 +86,15 @@ export const ACTIONS: QuickAction[] = [
     route: "/(main)/screens/gurukul",
   },
   {
+    id: "resignation",
+    title: "Resignation",
+    icon: "exit-outline", // Or "document-text-outline" if you prefer a form icon
+    iconFamily: "Ionicons",
+    bgColor: "#FFE4E6",   // Soft Rose background
+    iconColor: "#E11D48", // Deep Red/Rose icon
+    route: "/(main)/screens/resignation",
+  },
+  {
     id: "helpdesk",
     title: "Helpdesk",
     icon: "headset",
@@ -94,15 +103,7 @@ export const ACTIONS: QuickAction[] = [
     iconColor: "#4B5563",
     route: "/(main)/screens/helpdesk",
   },
-  //   {
-  //     id: "regularize",
-  //     title: "Regularize",
-  //     icon: "timer-outline",
-  //     iconFamily: "Ionicons",
-  //     bgColor: "#FFEDD5",
-  //     iconColor: "#EA580C",
-  //     route: "/(main)/regularize",
-  //   },
+
   //   {
   //     id: "assets",
   //     title: "My Assets",

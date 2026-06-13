@@ -103,15 +103,7 @@ const AttendanceSummaryScreen: React.FC = () => {
         <CustomBottomModal
           isVisible={isModalVisible}
           onClose={handleCloseModal}
-          title={
-            selectedRecord
-              ? new Date(selectedRecord.date).toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })
-              : ""
-          }
+          title='Attendance Details'
         >
           {selectedRecord && <AttendanceDetails
             data={selectedRecord}

@@ -10,42 +10,34 @@ import {
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
-
-// Components
 import CustomBottomModal from "@/components/modals/CustomBottomModal";
 import NewComplaintModal from "@/components/modals/NewComplaintModal";
 import UniversalButton from "@/components/buttons/UniversalButton";
-import ComplaintCard from "./ComplaintCard"; // Ensure this matches your file structure
-
-// Hooks
-import { useComplaintsHistory } from "@/hooks/useComplaintsHistory";
-import { useHelpDeskGeneral } from "@/hooks/useHelpDeskGeneral";
+import ComplaintCard from "./ComplaintCard";
+import { useHelpDesk } from "@/hooks/useHelpDesk";
 
 export default function ComplaintHistory() {
-  // 1. Data Fetching Hook
-  const { state: historyState, actions: historyActions } = useComplaintsHistory();
-
-  // 2. UI & Modal Hook
-  const { state: generalState, actions: generalActions } = useHelpDeskGeneral();
+  // Use the newly unified hook
+  const { state, actions } = useHelpDesk();
 
   return (
     <View style={styles.container}>
       {/* List Content */}
-      {historyState.isLoading && !historyState.isRefreshing ? (
+      {state.isLoadingHistory && !state.isRefreshing ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.Brand_Green} />
         </View>
       ) : (
         <FlatList
-          data={historyState.complaints}
+          data={state.complaints}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => <ComplaintCard complaint={item} />}
+          renderItem={({ item }) => <ComplaintCard complaint={item} onWithdraw={(id) => actions.handleWithdraw(id)} />}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              refreshing={historyState.isRefreshing}
-              onRefresh={historyActions.handleRefresh}
+              refreshing={state.isRefreshing}
+              onRefresh={actions.handleRefresh}
               tintColor={colors.Brand_Green}
               colors={[colors.Brand_Green]}
             />
@@ -68,7 +60,7 @@ export default function ComplaintHistory() {
       {/* Floating Action Button */}
       <UniversalButton
         title="Raise Ticket"
-        onPress={generalActions.openModal}
+        onPress={actions.openModal}
         color={colors.Brand_Green}
         icon={<Ionicons name="add" size={moderateScale(24)} color="#FFFFFF" />}
         style={styles.fab}
@@ -76,20 +68,15 @@ export default function ComplaintHistory() {
 
       {/* New Complaint Modal */}
       <CustomBottomModal
-        onClose={generalActions.closeModal}
+        onClose={actions.closeModal}
         title="Raise new complaint"
-        isVisible={generalState.isModalVisible}
+        isVisible={state.isModalVisible}
       >
         <NewComplaintModal
-          isSubmitting={generalState.isSubmitting}
+          isSubmitting={state.isSubmitting}
           onSubmit={async (payload) => {
-            // 1. Submit the complaint
-            const result = await generalActions.submitComplaint(payload);
-
-            // 2. If successful, silently refresh the list behind the scenes
-            if (result.success) {
-              historyActions.refreshComplaints(true);
-            }
+            // Simply call submit; the hook already handles the background refresh!
+            const result = await actions.submitComplaint(payload);
             return result;
           }}
         />

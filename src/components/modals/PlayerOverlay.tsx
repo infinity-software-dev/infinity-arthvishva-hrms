@@ -1,10 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, Modal, TouchableOpacity, StatusBar } from "react-native";
+import { View, Text, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { colors, FONTS } from "@/constants/theme";
 import { VideoProps } from "@/components/cards/GurukulScreen/VideoCard";
+import { StatusBar } from "expo-status-bar";
 
 interface PlayerOverlayProps {
     video: VideoProps | null;
@@ -28,7 +29,7 @@ export default function PlayerOverlay({ video, onClose }: PlayerOverlayProps) {
             onRequestClose={onClose}
         >
             {/* Dynamic light status bar items against the dark modal background */}
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" />
 
             <View style={styles.modalWrapper}>
                 {/* Top Handle Decorator for PageSheet feel */}

@@ -16,7 +16,7 @@ export async function initializeAppConfigs(): Promise<void> {
     // Extract the nested data object
     const data: ApiConfigResponse = response.data.data;
 
-    // console.log("🌟 Fetched system configs:", data);
+    // console.log(" Fetched system configs:", data);
 
     // 2. Inject into Zustand
     useConfigStore.getState().setConfigs({

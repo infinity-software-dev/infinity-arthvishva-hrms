@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
-import { ComplaintProps } from "@/hooks/useComplaintsHistory";
+import { ComplaintProps } from "@/hooks/useHelpDesk";
 
 interface ComplaintCardProps {
   complaint: ComplaintProps;
+  onWithdraw?: (id: string) => void;
 }
 
-export default function ComplaintCard({ complaint }: ComplaintCardProps) {
+export default function ComplaintCard({ complaint, onWithdraw }: ComplaintCardProps) {
   // Helper to format MongoDB dates beautifully
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -31,6 +32,9 @@ export default function ComplaintCard({ complaint }: ComplaintCardProps) {
       case "Acknowledged":
         return { bg: `${colors.Brand_Blue}15`, text: colors.Brand_Blue };
       case "Pending":
+        return { bg: `${colors.Warning_Yellow}15`, text: colors.Warning_Yellow };
+      case "Withdrawn":
+        return { bg: "#F1F5F9", text: "#64748B" };
       default:
         return { bg: `${colors.Warning_Yellow}20`, text: colors.Warning_Yellow };
     }
@@ -39,40 +43,44 @@ export default function ComplaintCard({ complaint }: ComplaintCardProps) {
   const statusStyle = getStatusStyle(complaint.status);
 
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+    <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.categoryPill}>
-          <Text style={styles.categoryText}>{complaint.category}</Text>
+          <Ionicons name="pricetag-outline" size={moderateScale(12)} color="#64748B" />
+          <Text style={styles.categoryText}> {complaint.category}</Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-          <Text style={[styles.statusText, { color: statusStyle.text }]}>
-            {complaint.status}
-          </Text>
+          <Text style={[styles.statusText, { color: statusStyle.text }]}>{complaint.status}</Text>
         </View>
       </View>
 
-      <Text style={styles.title} numberOfLines={2}>
-        {complaint.title}
-      </Text>
+      {/* Content */}
+      <Text style={styles.title}>{complaint.title}</Text>
+      <Text style={styles.description} numberOfLines={2}>{complaint.description}</Text>
 
-      <Text style={styles.description} numberOfLines={2}>
-        {complaint.description}
-      </Text>
-
+      {/* Unified Footer */}
       <View style={styles.footerRow}>
-        <View style={styles.metaData}>
-          <Ionicons name="calendar-outline" size={moderateScale(14)} color="#94A3B8" />
-          <Text style={styles.dateText}>{formatDate(complaint.createdAt)}</Text>
+        <View style={styles.metaContainer}>
+          <View style={styles.metaData}>
+            <Ionicons name="calendar-outline" size={moderateScale(13)} color="#94A3B8" />
+            <Text style={styles.dateText}>{formatDate(complaint.createdAt)}</Text>
+          </View>
+
+          {complaint.priority === "High" && (
+            <View style={[styles.metaData, styles.highPriority]}>
+              <Ionicons name="flame" size={moderateScale(13)} color={colors.Danger_Red} />
+              <Text style={styles.highPriorityText}>High</Text>
+            </View>
+          )}
         </View>
 
-        {complaint.priority === "High" && (
-          <View style={styles.metaData}>
-            <Ionicons name="alert-circle" size={moderateScale(14)} color={colors.Danger_Red} />
-            <Text style={[styles.dateText, { color: colors.Danger_Red }]}>High Priority</Text>
-          </View>
+        {complaint.status === 'Pending' && onWithdraw && (
+          <TouchableOpacity onPress={() => onWithdraw(complaint._id)} style={styles.withdrawBtn}>
+            <Text style={styles.withdrawText}>Withdraw</Text>
+          </TouchableOpacity>
         )}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -83,26 +91,26 @@ const styles = StyleSheet.create({
     padding: moderateScale(16),
     marginBottom: moderateScale(12),
     borderWidth: 1,
-    borderColor: "#F1F5F9",
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    borderColor: "#F8FAFC",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 3,
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: moderateScale(10),
+    marginBottom: moderateScale(12),
   },
   categoryPill: {
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: moderateScale(10),
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#F1F5F9",
+    paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(4),
     borderRadius: moderateScale(6),
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
   },
   categoryText: {
     fontFamily: FONTS.semiBold,
@@ -138,9 +146,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: moderateScale(16),
     paddingTop: moderateScale(12),
     borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+    borderTopColor: "#F8FAFC",
+  },
+  metaContainer: {
+    flexDirection: 'row',
+    gap: moderateScale(12),
   },
   metaData: {
     flexDirection: "row",
@@ -151,5 +164,27 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.medium,
     fontSize: moderateScale(12),
     color: "#94A3B8",
+  },
+  highPriority: {
+    backgroundColor: `${colors.Danger_Red}10`,
+    paddingHorizontal: moderateScale(6),
+    paddingVertical: moderateScale(2),
+    borderRadius: moderateScale(4),
+  },
+  highPriorityText: {
+    fontFamily: FONTS.bold,
+    fontSize: moderateScale(11),
+    color: colors.Danger_Red,
+  },
+  withdrawBtn: {
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6),
+    backgroundColor: '#FFF1F2',
+    borderRadius: moderateScale(8),
+  },
+  withdrawText: {
+    fontFamily: FONTS.bold,
+    fontSize: moderateScale(11),
+    color: colors.Danger_Red,
   },
 });

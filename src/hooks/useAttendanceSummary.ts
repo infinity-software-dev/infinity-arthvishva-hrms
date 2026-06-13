@@ -31,7 +31,7 @@ export const useAttendanceSummary = () => {
     fetchMonthData(currentDate);
   }, [currentDate, fetchMonthData]);
 
-  // 🌟 NEW: Create the function HERE where setRecords exists
+  //  NEW: Create the function HERE where setRecords exists
   const markCorrectionAsRequested = useCallback((attendanceId: string) => {
     setRecords((prevRecords) =>
       prevRecords.map((day) => {
@@ -72,6 +72,6 @@ export const useAttendanceSummary = () => {
     goToNextMonth,
     goToPrevMonth,
     refetch: () => fetchMonthData(currentDate),
-    markCorrectionAsRequested, // 🌟 Export it so the screen can use it!
+    markCorrectionAsRequested, //  Export it so the screen can use it!
   };
 };

@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 import { colors, FONTS } from "@/constants/theme";
 import * as Haptics from "expo-haptics";
+import { StatusBar } from "expo-status-bar";
 
 interface CustomHeaderProps {
   title: string;
@@ -17,7 +18,6 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
 
   const handleBack = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
     router.back();
   };
 
@@ -28,8 +28,8 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
       end={{ x: 1, y: 0 }}
       style={[styles.container, { paddingTop: insets.top }]}
     >
+      <StatusBar style="light" />
       <View style={styles.headerContent}>
-        {/* Back Button */}
         <TouchableOpacity
           onPress={handleBack}
           style={styles.backButton}
@@ -47,12 +47,10 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
           />
         </TouchableOpacity>
 
-        {/* Title */}
         <Text style={styles.title} numberOfLines={1}>
           {title}
         </Text>
 
-        {/* Invisible placeholder to ensure the title remains perfectly centered */}
         <View style={styles.rightPlaceholder} />
       </View>
     </LinearGradient>
