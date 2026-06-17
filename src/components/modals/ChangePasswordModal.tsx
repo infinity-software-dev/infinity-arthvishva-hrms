@@ -5,13 +5,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Alert,
 } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
 import UniversalButton from "../buttons/UniversalButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ActionModal from "./AlertModal";
 
 interface ChangePasswordFormProps {
   onCancel: () => void;
@@ -23,55 +23,73 @@ const ChangePasswordModal = ({
   onSubmit,
 }: ChangePasswordFormProps) => {
   const insets = useSafeAreaInsets();
-  // Input states
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Visibility states
-  const [showOld, setShowOld] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // Consolidated Object-Based State
+  const [state, setState] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+    showOld: false,
+    showNew: false,
+    showConfirm: false,
+    loading: false,
+    modalVisible: false,
+    modalTitle: "",
+    modalMessage: "",
+  });
+
+  // Helper function to update individual state properties
+  const updateState = (key: keyof typeof state, value: string | boolean) => {
+    setState((prev) => ({ ...prev, [key]: value }));
+  };
 
   // Validation Logic
-  // Only show the mismatch error if they have typed something in confirmPassword
   const isMismatch =
-    confirmPassword.length > 0 && newPassword !== confirmPassword;
+    state.confirmPassword.length > 0 && state.newPassword !== state.confirmPassword;
 
-  // Disable button if any field is empty OR if passwords don't match
   const isSubmitDisabled =
-    !oldPassword ||
-    !newPassword ||
-    !confirmPassword ||
-    newPassword !== confirmPassword;
+    !state.oldPassword ||
+    !state.newPassword ||
+    !state.confirmPassword ||
+    state.newPassword !== state.confirmPassword;
 
   const handleSubmit = () => {
-    // Extra safety net just in case
     if (isSubmitDisabled) return;
 
-    if (newPassword.length < 6) {
-      Alert.alert("Error", "New password must be at least 6 characters.");
+    if (state.newPassword.length < 6) {
+      setState((prev) => ({
+        ...prev,
+        modalTitle: "Error",
+        modalMessage: "New password must be at least 6 characters.",
+        modalVisible: true,
+      }));
       return;
     }
-    setLoading(true);
+
+    updateState("loading", true);
 
     // Pass data up to ProfileScreen, then clear the form
-    onSubmit(oldPassword, newPassword);
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    onSubmit(state.oldPassword, state.newPassword);
+
+    // Reset specific form fields after submission
+    setState((prev) => ({
+      ...prev,
+      oldPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+      loading: false,
+    }));
   };
 
   // Reusable Password Input Component
   const renderPasswordInput = (
     label: string,
     value: string,
-    setValue: (val: string) => void,
+    stateKey: "oldPassword" | "newPassword" | "confirmPassword",
     isShowing: boolean,
-    toggleShowing: () => void,
+    showStateKey: "showOld" | "showNew" | "showConfirm",
     placeholder: string,
-    hasError?: boolean, // Optional prop to highlight input in red if there's an error
+    hasError?: boolean,
   ) => (
     <View style={styles.inputGroup}>
       <Text style={styles.label}>{label}</Text>
@@ -79,7 +97,7 @@ const ChangePasswordModal = ({
         <TextInput
           style={styles.input}
           value={value}
-          onChangeText={setValue}
+          onChangeText={(val) => updateState(stateKey, val)}
           placeholder={placeholder}
           placeholderTextColor="#94A3B8"
           secureTextEntry={!isShowing}
@@ -87,7 +105,7 @@ const ChangePasswordModal = ({
         />
         <TouchableOpacity
           style={styles.eyeButton}
-          onPress={toggleShowing}
+          onPress={() => updateState(showStateKey, !isShowing)}
           activeOpacity={0.7}
         >
           <Ionicons
@@ -105,40 +123,38 @@ const ChangePasswordModal = ({
       <View style={styles.formContainer}>
         {renderPasswordInput(
           "Old Password",
-          oldPassword,
-          setOldPassword,
-          showOld,
-          () => setShowOld(!showOld),
-          "Enter current password",
+          state.oldPassword,
+          "oldPassword",
+          state.showOld,
+          "showOld",
+          "Enter current password"
         )}
 
         {renderPasswordInput(
           "New Password",
-          newPassword,
-          setNewPassword,
-          showNew,
-          () => setShowNew(!showNew),
-          "Enter new password",
+          state.newPassword,
+          "newPassword",
+          state.showNew,
+          "showNew",
+          "Enter new password"
         )}
 
-        {/* Added the hasError flag to turn border red when mismatching */}
         {renderPasswordInput(
           "Confirm New Password",
-          confirmPassword,
-          setConfirmPassword,
-          showConfirm,
-          () => setShowConfirm(!showConfirm),
+          state.confirmPassword,
+          "confirmPassword",
+          state.showConfirm,
+          "showConfirm",
           "Re-enter new password",
-          isMismatch,
+          isMismatch
         )}
 
-        {/* The note that appears if passwords don't match */}
         {isMismatch && (
           <Text style={styles.errorNote}>* Passwords do not match</Text>
         )}
       </View>
 
-      <View style={[styles.buttonRow,{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }]}>
+      <View style={[styles.buttonRow, { paddingBottom: Math.max(insets.bottom, moderateScale(16)) }]}>
         <UniversalButton
           title="Cancel"
           onPress={onCancel}
@@ -153,9 +169,16 @@ const ChangePasswordModal = ({
           variant="solid"
           color={colors.Brand_Green}
           disabled={isSubmitDisabled}
-          isLoading={loading}
+          isLoading={state.loading}
         />
       </View>
+
+      <ActionModal
+        title={state.modalTitle}
+        message={state.modalMessage}
+        visible={state.modalVisible}
+        onConfirm={() => updateState("modalVisible", false)}
+      />
     </View>
   );
 };

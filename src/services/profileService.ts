@@ -14,17 +14,18 @@ export const getMyProfile = async (): Promise<Employee | null> => {
 };
 
 export const updatePassword = async (
-  currentPassword: string,
+  oldPassword: string,
   newPassword: string,
 ) => {
   try {
-    const response = await apiClient.post("/api/auth/change-password", {
-      currentPassword,
+    const response = await apiClient.post("/api/app/employee/change-password", {
+      oldPassword,
       newPassword,
     });
 
     return response.data;
   } catch (error: any) {
+    // console.error("Failed to change password", error);
     if (error.response && error.response.data) {
       throw new Error(
         error.response.data.message || "Failed to change password",

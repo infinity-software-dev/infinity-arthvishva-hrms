@@ -66,6 +66,7 @@ export async function getFcmToken(): Promise<string | null> {
     const messaging = getMessaging();
     // The modular way: pass the messaging instance as the first argument
     const token = await getToken(messaging);
+    // console.log(token)
 
     return token;
   } catch (err) {
