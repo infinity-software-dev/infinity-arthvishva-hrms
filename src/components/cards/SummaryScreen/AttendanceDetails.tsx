@@ -235,7 +235,7 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
           }
           onPress={() => setCorrectionModalVisible(true)}
           style={{ marginTop: moderateScale(10) }}
-          disabled={isRequested || !att.inTime || !att.outTime}
+          disabled={isRequested}
         />
       </ScrollView>
       <CustomBottomModal

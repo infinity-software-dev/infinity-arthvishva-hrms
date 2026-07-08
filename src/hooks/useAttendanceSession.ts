@@ -6,11 +6,13 @@ import {
   submitCheckOut,
 } from "@/services/attendanceService";
 import { getCurrentLocation } from "@/utils/LocationHelper";
+import { useIsFocused } from "expo-router";
 
 export type AttendanceStatus = "pending" | "in" | "loading" | "completed" | "blocked";
 export type WorkMode = "Office" | "Field" | "WFH";
 
 export function useAttendanceSession() {
+  const isFocused = useIsFocused();
   const [status, setStatus] = useState<AttendanceStatus>("loading");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [workMode, setWorkMode] = useState<WorkMode>("Office");
@@ -49,8 +51,8 @@ export function useAttendanceSession() {
   };
 
   useEffect(() => {
-    loadSession();
-  }, []);
+    if (isFocused) loadSession();
+  }, [isFocused]);
 
   useEffect(() => {
     const timer = setInterval(() => {

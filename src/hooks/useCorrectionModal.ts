@@ -20,12 +20,33 @@ export const useCorrectionModal = ({
 }: UseCorrectionModalProps) => {
     // --- Initialization ---
     const baseDate = new Date(recordDate);
+
     const initialIn = defaultInTime
         ? new Date(defaultInTime)
         : new Date(baseDate.setHours(9, 0, 0, 0));
-    const initialOut = defaultOutTime
-        ? new Date(defaultOutTime)
-        : new Date(baseDate.setHours(18, 0, 0, 0));
+
+    // Dynamic Out-Time Calculation Logic
+    let initialOut: Date;
+    if (defaultOutTime) {
+        initialOut = new Date(defaultOutTime);
+    } else {
+        // Clone the initialIn date so we don't mutate it
+        initialOut = new Date(initialIn.getTime());
+
+        // getDay() returns 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+        const dayOfWeek = initialOut.getDay();
+        const isSaturday = dayOfWeek === 6;
+
+        if (isSaturday) {
+            // Saturday: 7.1 hours = 7 hours and 6 minutes (0.1 * 60)
+            initialOut.setHours(initialOut.getHours() + 7);
+            initialOut.setMinutes(initialOut.getMinutes() + 6);
+        } else {
+            // Mon-Fri (and Sunday fallback): 8.6 hours = 8 hours and 36 minutes (0.6 * 60)
+            initialOut.setHours(initialOut.getHours() + 8);
+            initialOut.setMinutes(initialOut.getMinutes() + 36);
+        }
+    }
 
     // --- State ---
     const [reason, setReason] = useState("");
@@ -81,6 +102,7 @@ export const useCorrectionModal = ({
             setOutTime(date);
         }
         setHasModifiedTime(true);
+
         hidePicker();
     };
 
@@ -104,7 +126,9 @@ export const useCorrectionModal = ({
     };
 
     // --- Derived State ---
-    const isFormIncomplete = !reason.trim() || !hasModifiedTime;
+    // const isFormIncomplete = !reason.trim() || !hasModifiedTime;
+    const isFormIncomplete = !reason.trim();
+
 
     return {
         // State values & setters

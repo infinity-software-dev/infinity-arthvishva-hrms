@@ -1,5 +1,5 @@
-import { View, StyleSheet } from "react-native";
-import React from "react";
+import { View, StyleSheet, Keyboard } from "react-native";
+import React, { useEffect } from "react";
 import { CustomHeader } from "@/components/navbar/CustomHeader";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { ModernTopTabBar } from "@/components/navbar/ModernTopBar";
@@ -11,6 +11,12 @@ import HistoryTab from "@/components/cards/ResignationScreen/HistoryTab";
 const Tab = createMaterialTopTabNavigator();
 
 const ResignationScreen = () => {
+    // Clean layout context on component destruction
+    useEffect(() => {
+        return () => {
+            Keyboard.dismiss();
+        };
+    }, []);
     return (
         <SafeAreaView
             style={{ flex: 1, backgroundColor: colors.Base_Background }}

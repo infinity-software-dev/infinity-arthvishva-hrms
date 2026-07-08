@@ -42,16 +42,25 @@ export default function Index() {
 
     const initializeApp = async () => {
       try {
-        // Check for Global Alerts FIRST
+        // 1. Check for Global Alerts FIRST
         const isAlertActive = await checkGlobalAlertStatus(versionCode);
         if (!isMounted) return;
 
         if (isAlertActive) {
-          setTimeout(() => resetAndNavigate("/globalAlert/GlobalAlert"), 1000);
+          // Fetch the profile quickly before redirecting, if an access token exists
+          const accessToken = await SecureStore.getItemAsync("accessToken");
+          if (accessToken) {
+            await Promise.all([
+              initializeAppConfigs(),
+              fetchLatestProfile() // Run this so the alert screen has user context
+            ]).catch(err => console.log("Silent profile fetch failed:", err));
+          }
+
+          setTimeout(() => resetAndNavigate("/globalAlert"), 1000);
           return;
         }
 
-        // If no alert, proceed to check Auth Status
+        // 2. If no alert, proceed with normal initialization flow
         const [_, accessToken] = await Promise.all([
           initializeAppConfigs(),
           SecureStore.getItemAsync("accessToken"),
@@ -64,7 +73,6 @@ export default function Index() {
           if (report.allMandatoryGranted) {
             resetAndNavigate("/(main)/screens/home");
           } else {
-            // Missing mandatory setup -> Force Setup Screen
             resetAndNavigate("/(setup)/permissions");
           }
         } else {

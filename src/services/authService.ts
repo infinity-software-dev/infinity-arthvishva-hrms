@@ -1,4 +1,3 @@
-import apiClient from "@/apis/client";
 import { DOMAIN_URL } from "@/apis/url";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
@@ -21,7 +20,7 @@ export const loginEmployee = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("Login API failed", error);
+    // console.error("Login API failed", error);
     throw error.response?.data || { message: "Failed to connect to server" };
   }
 };

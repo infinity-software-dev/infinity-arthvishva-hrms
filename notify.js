@@ -9,7 +9,7 @@ import { Platform } from "react-native";
 // Changing these constants later is all you need to do for future updates.
 const CHANNEL_ID = "infinity-hrms-alerts";
 const CHANNEL_NAME = "Attendance & Shift Alerts";
-const CUSTOM_SOUND_NAME = null; // 👈 Future: Set to "brand_sound" (no extension)
+const CUSTOM_SOUND_NAME = null; // Future: Set to "brand_sound" (no extension)
 // ----------------------------------
 
 // 1️⃣ Initialize Firebase Messaging (Modular)
@@ -31,7 +31,7 @@ if (Platform.OS === "android") {
 // This function MUST be exported and return a Promise.
 export async function handleBackgroundMessage(remoteMessage) {
   // 1. Log for debugging
-  // console.log("🌙 Background FCM Received:", remoteMessage);
+  // console.log(" Background FCM Received:", remoteMessage);
 
   const { notification, data } = remoteMessage;
 

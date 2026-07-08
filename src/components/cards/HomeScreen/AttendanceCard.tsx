@@ -131,7 +131,7 @@ export default function AttendanceCard() {
                 styles.badgeText,
                 {
                   color: isLoadingLocation
-                    ? colors.Brand_Blue
+                    ? colors.Brand_Green
                     : workMode !== "Office" || isInsideOffice
                       ? colors.Brand_Green
                       : colors.Danger_Red,

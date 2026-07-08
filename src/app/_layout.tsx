@@ -92,7 +92,7 @@ export default function RootLayout() {
         />
 
         <Stack.Screen
-          name="globalAlert/GlobalAlert"
+          name="globalAlert/index" // Remove the "/index" part
           options={{
             headerShown: false,
             presentation: "modal",

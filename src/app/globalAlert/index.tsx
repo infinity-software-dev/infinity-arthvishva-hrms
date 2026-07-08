@@ -19,9 +19,9 @@ import DeviceInfo from "react-native-device-info";
 // Import your internal helpers and services
 import { AlertData } from "@/apis/types";
 import { fetchGlobalAlertData } from "@/services/appService";
-import { getMyProfile } from "@/services/authService";
 import { resetAndNavigate } from "@/utils/NavigationHelper";
 import { colors, FONTS } from "@/constants/theme";
+import { getMyProfile } from "@/services/profileService";
 
 const GlobalAlertScreen = () => {
   const [loading, setLoading] = useState(true);

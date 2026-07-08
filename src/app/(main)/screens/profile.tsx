@@ -225,7 +225,7 @@ export default function ProfileScreen() {
             </ProfileAccordion>
 
             {/* ── LEAVE BALANCES ── */}
-            <ProfileAccordion
+            {/* <ProfileAccordion
               title="Leave Balances"
               iconName="calendar-outline"
             >
@@ -241,7 +241,7 @@ export default function ProfileScreen() {
                 label="Last Accrual"
                 value={actions.formatDate(profile?.lastLeaveAccrualDate)}
               />
-            </ProfileAccordion>
+            </ProfileAccordion> */}
 
             {/* ── BANK & VERIFICATION ── */}
             <ProfileAccordion title="Bank Details" iconName="card-outline">

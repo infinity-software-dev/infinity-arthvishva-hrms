@@ -58,13 +58,6 @@ export const useGurukulVideos = () => {
     loadVideosData(1, debouncedSearch);
   }, [debouncedSearch, loadVideosData]);
 
-  // Clean layout context on component destruction
-  useEffect(() => {
-    return () => {
-      Keyboard.dismiss();
-    };
-  }, []);
-
   // UI Event Handlers
   const handleRefresh = () => {
     setIsRefreshing(true);
