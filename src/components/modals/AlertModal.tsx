@@ -32,7 +32,7 @@ export default function ActionModal({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-  confirmColor = colors.Brand_Blue || "#2076C7",
+  confirmColor = colors.BRAND_PRIMARY || "#2076C7",
 }: ActionModalProps) {
   return (
     <Modal

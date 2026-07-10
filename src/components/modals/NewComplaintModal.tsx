@@ -153,13 +153,13 @@ export default function NewComplaintModal({
                         ? colors.Danger_Red
                         : pri === "Medium"
                           ? colors.Rise_Orange || "#F97316"
-                          : colors.Brand_Green,
+                          : colors.BRAND_SECONDARY,
                     backgroundColor:
                       pri === "High"
                         ? `${colors.Danger_Red}10`
                         : pri === "Medium"
                           ? `${colors.Rise_Orange || "#F97316"}10`
-                          : `${colors.Brand_Green}10`,
+                          : `${colors.BRAND_SECONDARY}10`,
                   },
                 ]}
                 onPress={() => setPriority(pri)}
@@ -174,7 +174,7 @@ export default function NewComplaintModal({
                           ? colors.Danger_Red
                           : pri === "Medium"
                             ? colors.Rise_Orange || "#F97316"
-                            : colors.Brand_Green,
+                            : colors.BRAND_SECONDARY,
                       fontFamily: FONTS.bold,
                     },
                   ]}
@@ -221,7 +221,7 @@ export default function NewComplaintModal({
         title="Submit Ticket"
         onPress={handleSubmit}
         isLoading={isSubmitting}
-        color={colors.Brand_Green}
+        color={colors.BRAND_SECONDARY}
         style={styles.submitBtn}
       />
     </ScrollView>
@@ -283,8 +283,8 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(20),
   },
   activePill: {
-    backgroundColor: colors.Brand_Blue,
-    borderColor: colors.Brand_Blue,
+    backgroundColor: colors.BRAND_PRIMARY,
+    borderColor: colors.BRAND_PRIMARY,
   },
   pillText: {
     fontFamily: FONTS.semiBold,

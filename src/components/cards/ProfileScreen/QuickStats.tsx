@@ -4,21 +4,33 @@ import { moderateScale } from "react-native-size-matters";
 import { colors, FONTS } from "@/constants/theme";
 import { useProfile } from "@/hooks/useProfile";
 
-
 export default function QuickStats() {
   const { state } = useProfile();
+
+  // Safe fallback to an empty array if activeLedgerTokens is undefined
+  const tokens = state?.activeLedgerTokens || [];
+
+  // Calculate sums by reducing the matching token values
+  const paidLeavesValue = tokens.reduce((acc, token) => {
+    return token.leaveType === "Paid" ? acc + (token.value || 0) : acc;
+  }, 0);
+
+  const compOffsValue = tokens.reduce((acc, token) => {
+    return token.leaveType === "CompOff" ? acc + (token.value || 0) : acc;
+  }, 0);
+
   return (
     <View style={styles.container}>
       <View style={styles.statBox}>
-        <Text style={styles.statValue}>{state.activeLedgerTokens.filter(t => t.leaveType === 'Paid').length || 0}</Text>
+        <Text style={styles.statValue}>{paidLeavesValue}</Text>
         <Text style={styles.statLabel}>Paid Leaves</Text>
       </View>
 
       <View style={styles.divider} />
 
       <View style={styles.statBox}>
-        <Text style={[styles.statValue, { color: colors.Magic_Violet }]}>
-          {state.activeLedgerTokens.filter(t => t.leaveType === 'CompOff').length || 0}
+        <Text style={[styles.statValue, { color: colors.BRAND_SECONDARY }]}>
+          {compOffsValue}
         </Text>
         <Text style={styles.statLabel}>Comp-Offs</Text>
       </View>
@@ -51,7 +63,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(22),
-    color: colors.Brand_Green,
+    color: colors.BRAND_SECONDARY,
     marginBottom: moderateScale(4),
   },
   statLabel: {

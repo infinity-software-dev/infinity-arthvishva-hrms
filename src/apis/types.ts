@@ -21,6 +21,19 @@ export interface LeaveBalanceHistoryItem {
   usedDate?: string;
 }
 
+export interface AddressDetails {
+  address: string;
+  pinCode: string;
+  state: string;
+  district: string;
+  city: string;
+}
+
+export interface MultiResidencyAddress {
+  current: AddressDetails;
+  permanent: AddressDetails;
+}
+
 export interface Employee {
   // ── CORE IDENTITY ──
   _id: string;
@@ -28,18 +41,18 @@ export interface Employee {
   employeeCode: string;
   name: string;
   email: string;
-  password?: string; // Optional since it's stripped in toSafeObject()
-  role: "Director" | "HR" | "Employee"; // Synced with schema enum
-  isAppAdmin?: boolean;
+  password?: string;
+  role: "Employee" | "Intern";
+  isAppAdmin: boolean;
   status: "Active" | "Inactive";
   deactivateReason?: string;
 
   // ── BASIC DETAILS ──
   mobileNumber: string;
   alternateMobileNumber?: string;
-  gender?: "Male" | "Female" | "Other";
+  gender: "Male" | "Female" | "Other";
   bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
-  dateOfBirth?: string; // Standardized to string (ISO Date) for frontend
+  dateOfBirth?: string;
   maritalStatus?: "Single" | "Married" | "Divorced" | "Widowed";
   profileImageUrl?: string;
   faceDescriptors?: number[][];
@@ -47,6 +60,9 @@ export interface Employee {
   // ── PERSONAL DETAILS ──
   fatherName?: string;
   motherName?: string;
+  address: MultiResidencyAddress;
+
+  // Legacy Address Fields
   currentAddress?: string;
   permanentAddress?: string;
   district?: string;
@@ -56,11 +72,12 @@ export interface Employee {
   // ── JOB DETAILS ──
   department?: string;
   position?: string;
-  isLeadershipRole: boolean; // Synced from Schema
+  isLeadershipRole: boolean;
   joiningDate?: string;
   lastWorkingDate?: string | null;
-  salary?: number;
-  managerId?: string; // Represents ObjectId as string in frontend
+  salary: number;
+  fixedAllowance: number;
+  managerId?: string;
 
   // ── EXPERIENCE ──
   experienceType?: "Fresher" | "Experienced";
@@ -75,7 +92,7 @@ export interface Employee {
   postGraduationCourse?: string;
   postGraduationPercent?: number;
 
-  // ── DOCS (Cloudinary URLs) ──
+  // ── DOCS ──
   aadhaarNumber?: string;
   panNumber?: string;
   aadhaarFileUrl?: string;
@@ -93,12 +110,12 @@ export interface Employee {
   accountNumber?: string;
   ifsc?: string;
   branch?: string;
-  bankVerified?: boolean;
+  bankVerified: boolean;
   bankVerifiedDate?: string;
 
   // ── VERIFICATION ──
-  aadhaarVerified?: boolean;
-  panVerified?: boolean;
+  aadhaarVerified: boolean;
+  panVerified: boolean;
   aadhaarVerifiedDate?: string;
   panVerifiedDate?: string;
 
@@ -109,7 +126,7 @@ export interface Employee {
   emergencyContactAddress?: string;
 
   // ── HEALTH ──
-  hasDisease?: "Yes" | "No";
+  hasDisease: "Yes" | "No";
   diseaseName?: string;
   diseaseType?: string;
   diseaseSince?: string;
@@ -117,15 +134,13 @@ export interface Employee {
   doctorName?: string;
   doctorContact?: string;
 
-  // ── LEAVE BALANCES (Legacy / Deprecated) ──
-  // Note: These are in your schema, but modern ledger architecture 
-  // calculates active balances from the LeaveLedger collection.
-  compOffBalance?: number; 
-  paidLeaveBalance?: number;
+  // ── LEAVE BALANCES ──
+  compOffBalance: number;
+  paidLeaveBalance: number;
   lastLeaveAccrualDate?: string;
 
   // ── TOKENS & NOTIFICATIONS ──
-  refreshToken?: string; // Optional since it's stripped in toSafeObject()
+  refreshToken?: string;
   fcmToken?: string;
 
   // ── TIMESTAMPS ──

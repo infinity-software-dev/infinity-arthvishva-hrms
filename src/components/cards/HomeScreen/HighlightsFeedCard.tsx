@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   viewAll: {
     fontFamily: FONTS.semiBold,
     fontSize: moderateScale(12),
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   card: {
     backgroundColor: "#FFFFFF",

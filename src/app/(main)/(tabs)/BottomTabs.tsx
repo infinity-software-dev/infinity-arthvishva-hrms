@@ -21,7 +21,7 @@ const BottomTabs = () => {
           tabBarHideOnKeyboard: true,
           // When focused, we handle the color via GradientIcon,
           // so we set this to transparent or a matching green
-          tabBarActiveTintColor: colors.Brand_Green,
+          tabBarActiveTintColor: colors.BRAND_SECONDARY,
           tabBarInactiveTintColor: "rgba(0,0,0,0.4)",
           tabBarStyle: {
             height: moderateScale(60),

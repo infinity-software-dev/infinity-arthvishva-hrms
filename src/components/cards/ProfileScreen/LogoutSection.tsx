@@ -4,7 +4,7 @@ import { moderateScale } from "react-native-size-matters";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "@/constants/theme";
 import UniversalButton from "@/components/buttons/UniversalButton";
-import { logoutEmployee } from "@/services/authService"; // Adjust path to where your function lives
+import { logoutEmployee } from "@/services/authService";
 import { resetAndNavigate } from "@/utils/NavigationHelper";
 
 export default function ProfileLogoutSection() {
@@ -13,8 +13,7 @@ export default function ProfileLogoutSection() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await logoutEmployee();
-
+      await logoutEmployee()
       resetAndNavigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);

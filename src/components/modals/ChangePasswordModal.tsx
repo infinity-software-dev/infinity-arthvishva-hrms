@@ -167,7 +167,7 @@ const ChangePasswordModal = ({
           title="Update"
           onPress={handleSubmit}
           variant="solid"
-          color={colors.Brand_Green}
+          color={colors.BRAND_SECONDARY}
           disabled={isSubmitDisabled}
           isLoading={state.loading}
         />

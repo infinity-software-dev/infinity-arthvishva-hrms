@@ -37,7 +37,7 @@ export default function LeaveBalanceCard({
           <Ionicons
             name={iconName}
             size={moderateScale(24)}
-            color={colors.Brand_Blue}
+            color={colors.BRAND_PRIMARY}
           />
         </View>
       </View>
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(20),
     padding: moderateScale(20),
     marginBottom: moderateScale(24),
-    shadowColor: colors.Brand_Green_Dark,
+    shadowColor: colors.BRAND_SECONDARY_Dark,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.06,
     shadowRadius: 16,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     width: moderateScale(44),
     height: moderateScale(44),
     borderRadius: moderateScale(22),
-    backgroundColor: `${colors.Brand_Blue}15`,
+    backgroundColor: `${colors.BRAND_PRIMARY}15`,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   balanceCount: {
     fontFamily: FONTS.extraBold,
     fontSize: moderateScale(16), // Slightly reduced to fit 4 items
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     marginBottom: moderateScale(2),
   },
   balanceLabel: {

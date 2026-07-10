@@ -26,7 +26,7 @@ const OldPayrollTab = () => {
     <View style={styles.historyHeader}>
       <Text style={styles.sectionTitle}>Statement History</Text>
       {state.isLoading && (
-        <ActivityIndicator size="small" color={colors.Brand_Green} />
+        <ActivityIndicator size="small" color={colors.BRAND_SECONDARY} />
       )}
     </View>
   );
@@ -49,8 +49,8 @@ const OldPayrollTab = () => {
           <RefreshControl
             refreshing={state.isLoading && !state.isGenerating}
             onRefresh={actions.fetchPayrolls}
-            colors={[colors.Brand_Green]}
-            tintColor={colors.Brand_Green}
+            colors={[colors.BRAND_SECONDARY]}
+            tintColor={colors.BRAND_SECONDARY}
           />
         }
         ListEmptyComponent={

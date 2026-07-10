@@ -15,10 +15,14 @@ interface LeaveDetailsModalProps {
     isCancelling?: boolean;
 }
 
-export default function LeaveDetailsModal({ isVisible, onClose, leaveData,onCancel, isCancelling }: LeaveDetailsModalProps) {
+export default function LeaveDetailsModal({ isVisible, onClose, leaveData, onCancel, isCancelling }: LeaveDetailsModalProps) {
     if (!leaveData) return null;
 
     const usedTokensCount = leaveData.consumedLedgerIds?.length || 0;
+
+    // Find the rejection remarks from the workflow steps if any step was rejected
+    const rejectionStep = leaveData.workflowSteps?.find((step: any) => step.status === 'Rejected');
+    const rejectionRemarks = rejectionStep?.remarks;
 
     return (
         <CustomBottomModal
@@ -36,7 +40,18 @@ export default function LeaveDetailsModal({ isVisible, onClose, leaveData,onCanc
                     </View>
                 </View>
 
-                {/*  UPDATED: Ledger Token Usage  */}
+                {/* DYNAMIC: Rejection Remarks Section */}
+                {leaveData.overallStatus === 'Rejected' && rejectionRemarks && (
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, { color: colors.Danger_Red }]}>Rejection Reason</Text>
+                        <View style={[styles.infoBox, styles.rejectionBox]}>
+                            <Ionicons name="alert-circle-outline" size={moderateScale(16)} color={colors.Danger_Red} style={styles.rejectionIcon} />
+                            <Text style={styles.rejectionText}>{rejectionRemarks}</Text>
+                        </View>
+                    </View>
+                )}
+
+                {/* Ledger Token Usage */}
                 {(leaveData.leaveCategory === 'Paid' || leaveData.leaveCategory === 'CompOff') && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Tokens {leaveData.overallStatus === 'Approved' ? 'Consumed' : 'Locked'}</Text>
@@ -50,9 +65,8 @@ export default function LeaveDetailsModal({ isVisible, onClose, leaveData,onCanc
                                 {leaveData.consumedLedgerIds.map((token: any, index: number) => (
                                     <View key={token._id || index} style={styles.tokenCard}>
                                         <View style={styles.tokenLeft}>
-                                            <Ionicons name="ticket-outline" size={moderateScale(18)} color={colors.Brand_Blue} />
+                                            <Ionicons name="ticket-outline" size={moderateScale(18)} color={colors.BRAND_PRIMARY} />
                                             <View>
-                                                {/*  NEW: Dynamically render 0.5 Day or 1 Day based on token value */}
                                                 <Text style={styles.tokenTitle}>
                                                     {token.value || 1} Day {token.leaveType || leaveData.leaveCategory} Token
                                                 </Text>
@@ -80,7 +94,7 @@ export default function LeaveDetailsModal({ isVisible, onClose, leaveData,onCanc
                     </View>
                 )}
 
-                {/* Approval Workflow (Remains exactly the same) */}
+                {/* Approval Workflow */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Approval Routing</Text>
                     <View style={styles.workflowBox}>
@@ -163,7 +177,24 @@ const styles = StyleSheet.create({
         color: "#334155",
         lineHeight: moderateScale(20),
     },
-    //  NEW TOKEN STYLES 
+    rejectionBox: {
+        backgroundColor: "#FEF2F2",
+        borderWidth: 1,
+        borderColor: "#FEE2E2",
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    rejectionIcon: {
+        marginRight: moderateScale(8),
+        marginTop: moderateScale(2),
+    },
+    rejectionText: {
+        fontFamily: FONTS.semiBold,
+        fontSize: moderateScale(14),
+        color: colors.Danger_Red,
+        lineHeight: moderateScale(20),
+        flex: 1,
+    },
     tokensWrapper: {
         gap: moderateScale(8),
     },
@@ -206,9 +237,8 @@ const styles = StyleSheet.create({
     neverExpires: {
         fontFamily: FONTS.bold,
         fontSize: moderateScale(11),
-        color: colors.Brand_Green,
+        color: colors.BRAND_SECONDARY,
     },
-    // Workflow Styles
     workflowBox: {
         backgroundColor: "#FFFFFF",
         borderRadius: moderateScale(12),

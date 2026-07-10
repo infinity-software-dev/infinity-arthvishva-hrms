@@ -20,7 +20,7 @@ const GradientIcon: React.FC<GradientIconProps> = ({
       maskElement={<IconComponent name={name} size={size} color="white" />}
     >
       <LinearGradient
-        colors={[colors.Brand_Green, colors.Brand_Green_Dark]} // Using your brand colors
+        colors={[colors.BRAND_SECONDARY, colors.BRAND_SECONDARY_Dark]} // Using your brand colors
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}

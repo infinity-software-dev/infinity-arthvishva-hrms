@@ -95,7 +95,7 @@ export const useHighlights = () => {
               desc: "Coming up in two days. Plan ahead!",
               time: "Upcoming",
               icon: "calendar-outline",
-              theme: colors.Brand_Blue,
+              theme: colors.BRAND_PRIMARY,
             });
           });
         }

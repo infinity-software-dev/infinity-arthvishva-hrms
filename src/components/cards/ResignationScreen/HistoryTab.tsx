@@ -161,7 +161,7 @@ const HistoryTab = () => {
     if (isLoading && !isRefreshing) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={colors.Brand_Blue} />
+                <ActivityIndicator size="large" color={colors.BRAND_PRIMARY} />
                 <Text style={styles.loadingText}>Fetching history...</Text>
             </View>
         );
@@ -188,8 +188,8 @@ const HistoryTab = () => {
                     <RefreshControl
                         refreshing={isRefreshing}
                         onRefresh={onRefresh}
-                        colors={[colors.Brand_Blue]}
-                        tintColor={colors.Brand_Blue}
+                        colors={[colors.BRAND_PRIMARY]}
+                        tintColor={colors.BRAND_PRIMARY}
                     />
                 }
             />

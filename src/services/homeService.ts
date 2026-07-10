@@ -44,3 +44,19 @@ export const fetchPerformanceInsights = async () => {
     throw error;
   }
 };
+
+
+/**
+ * Fetch approval metrics (isLeadership role check and pending approvals counter) for a manager
+ * @param managerId The database ObjectId of the employee/manager
+ */
+export const fetchManagerApprovalMetrics = async (managerId: string) => {
+  try {
+    // Hits the endpoint created in your EmployeeController
+    const res = await apiClient.get(`/api/app/employee/${managerId}/approval-metrics`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching manager approval metrics:", error);
+    throw error;
+  }
+};

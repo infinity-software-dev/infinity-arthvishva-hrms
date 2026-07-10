@@ -8,7 +8,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { resetAndNavigate } from "@/utils/NavigationHelper";
 import { getAppPermissionReport } from "@/utils/PermissionCheck";
 import { LinearGradient } from "expo-linear-gradient";
-import { SplashScreen } from "expo-router";
+import { router, SplashScreen } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -67,7 +67,14 @@ export default function Index() {
         ]);
 
         if (accessToken) {
-          fetchLatestProfile();
+          await fetchLatestProfile();
+
+          const currentUser = useAuthStore.getState().user;
+          if (currentUser?.status === 'Inactive') {
+            resetAndNavigate("/deactivedAccount/DeactivatedAccountScreen");
+            return;
+          }
+
           const report = await getAppPermissionReport();
 
           if (report.allMandatoryGranted) {

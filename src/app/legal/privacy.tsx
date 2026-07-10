@@ -277,6 +277,6 @@ const styles = StyleSheet.create({
   },
   link: {
     fontFamily: FONTS.semiBold,
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
 });

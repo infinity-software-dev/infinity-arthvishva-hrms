@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   prefixText: {
     fontSize: moderateScale(14),
     fontFamily: FONTS.bold,
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   input: {
     height: moderateScale(48),
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(24),
   },
   agreementText: {
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     fontSize: moderateScale(14),
     fontFamily: FONTS.semiBold,
   },

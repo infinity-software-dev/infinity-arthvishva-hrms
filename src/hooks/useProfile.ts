@@ -18,7 +18,7 @@ export const useProfile = () => {
     title: "",
     message: "",
     iconName: "checkmark-circle",
-    iconColor: colors.Brand_Green,
+    iconColor: colors.BRAND_SECONDARY,
   });
   const [activeLedgerTokens, setActiveLedgerTokens] = useState<any[]>([]);
 
@@ -77,7 +77,7 @@ export const useProfile = () => {
         title: "Success",
         message: result.message || "Password changed successfully.",
         iconName: "checkmark-circle",
-        iconColor: colors.Brand_Green,
+        iconColor: colors.BRAND_SECONDARY,
       });
       setActionModalVisible(true);
     } catch (error: any) {
@@ -112,7 +112,7 @@ export const useProfile = () => {
             title: "Security Updated",
             message: "Your Face ID profile has been secured successfully.\n\nPlease completely close and reopen the app to activate your biometric check-ins.",
             iconName: "checkmark-circle",
-            iconColor: colors.Brand_Green,
+            iconColor: colors.BRAND_SECONDARY,
           });
           setActionModalVisible(true);
 

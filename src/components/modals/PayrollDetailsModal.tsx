@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     netSalary: {
         fontFamily: FONTS.bold,
         fontSize: moderateScale(28),
-        color: colors.Brand_Green,
+        color: colors.BRAND_SECONDARY,
         marginBottom: moderateScale(4),
     },
     dateRange: {

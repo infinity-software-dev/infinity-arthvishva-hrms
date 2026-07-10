@@ -217,7 +217,7 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
         <UniversalButton
           title={isRequested ? "Correction Requested" : "Request Correction"}
           variant="soft"
-          color={isRequested ? colors.Success_Green : colors.Brand_Blue}
+          color={isRequested ? colors.Success_Green : colors.BRAND_PRIMARY}
           icon={
             isRequested ? (
               <Ionicons
@@ -229,7 +229,7 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
               <Ionicons
                 name="create-outline"
                 size={moderateScale(18)}
-                color={colors.Brand_Blue}
+                color={colors.BRAND_PRIMARY}
               />
             )
           }
@@ -433,6 +433,6 @@ const styles = StyleSheet.create({
   correctionButtonText: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(14),
-    color: colors.Brand_Blue, // Assuming you have Brand_Blue in your theme
+    color: colors.BRAND_PRIMARY, // Assuming you have BRAND_PRIMARY in your theme
   },
 });

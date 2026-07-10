@@ -75,7 +75,7 @@ export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBal
           onPress={() => onViewDetails('Paid')}
         >
           <View style={styles.iconCircle}>
-            <Ionicons name="calendar" size={moderateScale(20)} color={colors.Brand_Blue} />
+            <Ionicons name="calendar" size={moderateScale(20)} color={colors.BRAND_PRIMARY} />
           </View>
           <View>
             <Text style={styles.countText}>{balances.paid}</Text>
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     width: moderateScale(36),
     height: moderateScale(36),
     borderRadius: moderateScale(18),
-    backgroundColor: `${colors.Brand_Blue}15`,
+    backgroundColor: `${colors.BRAND_PRIMARY}15`,
     justifyContent: "center",
     alignItems: "center",
   },

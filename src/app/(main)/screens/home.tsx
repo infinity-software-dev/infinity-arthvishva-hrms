@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, Text } from "react-native";
+import { ScrollView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -9,17 +9,14 @@ import HomeNavbar from "@/components/navbar/HomeNavbar";
 import HighlightsFeed from "@/components/cards/HomeScreen/HighlightsFeedCard";
 import AttendanceCard from "@/components/cards/HomeScreen/AttendanceCard";
 import PerformanceInsights from "@/components/cards/HomeScreen/PerformanceInsights";
-import { useAuthStore } from "@/store/useAuthStore";
 import { colors } from "@/constants/theme";
 import { getFirstName } from "@/utils/TextHelpers";
 import { useLocationPermission } from "@/hooks/useLocationPermission";
+import { useHomeMetrics } from "@/hooks/useHomeMetrics";
 
 export default function HomeScreen() {
-  const user = useAuthStore((state) => state.user);
-
-  // Consume our extracted location logic
+  const { user, metrics } = useHomeMetrics();
   const { isVisible, requiresSettings, handleModalConfirm } = useLocationPermission();
-
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -35,13 +32,16 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: moderateScale(10) }}
         >
           <AttendanceCard />
-          <QuickActions />
+
+          <QuickActions
+            isLeadershipRole={metrics.isLeadership}
+            pendingApprovalsCount={metrics.pendingApprovalsCount}
+          />
+
           <HighlightsFeed />
 
           <PerformanceInsights />
         </ScrollView>
-        {/* <MonthlyTarget />  */}
-
 
         <ActionModal
           visible={isVisible}

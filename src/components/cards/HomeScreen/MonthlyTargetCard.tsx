@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   percentageText: {
     fontFamily: FONTS.extraBold,
     fontSize: moderateScale(22),
-    color: colors.Brand_Green,
+    color: colors.BRAND_SECONDARY,
   },
   progressBarBackground: {
     width: "100%",
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: "100%",
-    backgroundColor: colors.Brand_Green,
+    backgroundColor: colors.BRAND_SECONDARY,
     borderRadius: moderateScale(4),
   },
 });

@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   activeBackground: {
     backgroundColor: "#FFFFFF",
     borderRadius: moderateScale(20),
-    shadowColor: colors.Brand_Green_Dark,
+    shadowColor: colors.BRAND_SECONDARY_Dark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     fontFamily: FONTS.bold,
-    color: colors.Brand_Green_Dark,
+    color: colors.BRAND_SECONDARY_Dark,
   },
 });

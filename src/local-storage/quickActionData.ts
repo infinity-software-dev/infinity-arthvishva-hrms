@@ -1,17 +1,28 @@
 import { Href } from "expo-router";
 
-export interface QuickAction {
+export interface QuickActionItem {
   id: string;
   title: string;
+  route: Href;
   icon: string;
   iconFamily: "Ionicons" | "MaterialCommunityIcons";
   bgColor: string;
   iconColor: string;
-  route: Href;
+  showBadge?: boolean;      // For a simple dot
+  badgeCount?: number;      // Or a numeric counter (Optional)
 }
 
-export const ACTIONS: QuickAction[] = [
+export const ACTIONS: QuickActionItem[] = [
   // --- PAGE 1 ---
+  {
+    id: "approvals",
+    title: "Approvals",
+    route: "/(main)/screens/approvals",
+    icon: "checkbox-marked-circle-outline", // Universally recognized approval vector
+    iconFamily: "MaterialCommunityIcons",
+    bgColor: "#E6F4EA", // Calm mint background tint
+    iconColor: "#137333", // Strong operational validation green
+  },
   {
     id: "summary",
     title: "Summary",

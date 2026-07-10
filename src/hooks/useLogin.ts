@@ -50,6 +50,11 @@ export const useLogin = () => {
       const response = await loginEmployee(employeeCode, password);
 
       if (response.success) {
+
+        if (response.data.employee.status === 'Inactive') {
+          resetAndNavigate("/deactivedAccount/DeactivatedAccountScreen");
+          return;
+        }
         // Save tokens
         await SecureStore.setItemAsync(
           "accessToken",

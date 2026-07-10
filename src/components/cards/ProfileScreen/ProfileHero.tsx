@@ -50,7 +50,7 @@ export default function ProfileHero({ profile }: ProfileHeroProps) {
               {
                 color:
                   profile.status === "Active"
-                    ? colors.Brand_Blue
+                    ? colors.BRAND_PRIMARY
                     : colors.Danger_Red,
               },
             ]}
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     height: moderateScale(100),
     borderRadius: moderateScale(50),
     borderWidth: 3,
-    borderColor: colors.Brand_Green,
+    borderColor: colors.BRAND_SECONDARY,
     padding: 2,
     marginBottom: moderateScale(12),
   },

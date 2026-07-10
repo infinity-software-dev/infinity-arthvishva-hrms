@@ -54,7 +54,7 @@ export default function RootLayout() {
             presentation: "modal",
             headerTitle: "Terms of Service",
             headerStyle: {
-              backgroundColor: colors.Brand_Blue,
+              backgroundColor: colors.BRAND_PRIMARY,
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
@@ -68,7 +68,7 @@ export default function RootLayout() {
             presentation: "modal",
             headerTitle: "Privacy Policy",
             headerStyle: {
-              backgroundColor: colors.Brand_Green,
+              backgroundColor: colors.BRAND_SECONDARY,
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
@@ -82,7 +82,7 @@ export default function RootLayout() {
             presentation: "modal",
             headerTitle: "Open Source Licenses",
             headerStyle: {
-              backgroundColor: colors.Brand_Green,
+              backgroundColor: colors.BRAND_SECONDARY,
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
@@ -92,7 +92,16 @@ export default function RootLayout() {
         />
 
         <Stack.Screen
-          name="globalAlert/index" // Remove the "/index" part
+          name="globalAlert/index"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+            animation: "fade",
+          }}
+        />
+
+        <Stack.Screen
+          name="deactivedAccount/DeactivatedAccountScreen"
           options={{
             headerShown: false,
             presentation: "modal",

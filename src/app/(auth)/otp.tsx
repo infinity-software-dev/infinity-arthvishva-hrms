@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   otpBoxActive: {
-    borderColor: colors.Brand_Green, // Gives a subtle purple border when a digit is entered
+    borderColor: colors.BRAND_SECONDARY, // Gives a subtle purple border when a digit is entered
     backgroundColor: "#fff", // Brightens the background of filled boxes
   },
   resendContainer: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
   },
   resendText: {
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     fontSize: moderateScale(14),
     fontFamily: "Nunito_600SemiBold",
   },

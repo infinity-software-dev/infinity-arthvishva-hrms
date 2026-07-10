@@ -207,7 +207,7 @@ export default function PermissionSetupScreen() {
         <View style={styles.iconWrapper}>
           <activeStep.icon
             size={moderateScale(42)}
-            color={colors.Brand_Green}
+            color={colors.BRAND_SECONDARY}
             strokeWidth={1.5}
           />
           {currentStep > 0 && (
@@ -257,7 +257,7 @@ export default function PermissionSetupScreen() {
           modalType === "exit" ? () => setModalVisible(false) : undefined
         }
         confirmColor={
-          modalType === "exit" ? colors.Danger_Red : colors.Brand_Blue
+          modalType === "exit" ? colors.Danger_Red : colors.BRAND_PRIMARY
         }
         icon={
           modalType === "exit" ? (
@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(2),
     backgroundColor: "#E2E8F0",
   },
-  progressActive: { backgroundColor: colors.Brand_Green },
-  progressComplete: { backgroundColor: colors.Brand_Blue },
+  progressActive: { backgroundColor: colors.BRAND_SECONDARY },
+  progressComplete: { backgroundColor: colors.BRAND_PRIMARY },
   content: {
     flex: 1,
     justifyContent: "center",
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   footer: { padding: moderateScale(24), paddingBottom: moderateScale(40) },
   primaryBtn: {
-    backgroundColor: colors.Brand_Green,
+    backgroundColor: colors.BRAND_SECONDARY,
     height: moderateScale(58),
     borderRadius: moderateScale(18),
     flexDirection: "row",
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: moderateScale(10),
     elevation: 4,
-    shadowColor: colors.Brand_Green,
+    shadowColor: colors.BRAND_SECONDARY,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

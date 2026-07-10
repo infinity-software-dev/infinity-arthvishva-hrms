@@ -58,7 +58,7 @@ export default function LeaveTypesList({
               <Ionicons
                 name="checkmark-circle"
                 size={moderateScale(22)}
-                color={colors.Brand_Green}
+                color={colors.BRAND_SECONDARY}
               />
             )}
           </TouchableOpacity>

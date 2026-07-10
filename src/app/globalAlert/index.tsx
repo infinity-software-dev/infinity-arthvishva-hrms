@@ -133,7 +133,7 @@ const GlobalAlertScreen = () => {
           onPress={handlePrimaryAction}
         >
           <LinearGradient
-            colors={[colors.Brand_Blue, colors.Brand_Green]}
+            colors={[colors.BRAND_PRIMARY, colors.BRAND_SECONDARY]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.actionButton}

@@ -25,7 +25,7 @@ export default function GurukulScreen() {
     if (!state.isFetchingMore) return null;
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={colors.Brand_Green} />
+        <ActivityIndicator size="small" color={colors.BRAND_SECONDARY} />
       </View>
     );
   };
@@ -82,7 +82,7 @@ export default function GurukulScreen() {
         {/* Main List */}
         {state.isLoading && state.page === 1 ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color={colors.Brand_Green} />
+            <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
           </View>
         ) : (
           <FlatList
@@ -99,8 +99,8 @@ export default function GurukulScreen() {
               <RefreshControl
                 refreshing={state.isRefreshing}
                 onRefresh={actions.handleRefresh}
-                tintColor={colors.Brand_Green}
-                colors={[colors.Brand_Green]}
+                tintColor={colors.BRAND_SECONDARY}
+                colors={[colors.BRAND_SECONDARY]}
               />
             }
             ListEmptyComponent={renderEmptyState}

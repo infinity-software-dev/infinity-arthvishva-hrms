@@ -161,7 +161,7 @@ export default function CorrectionModal({
         <UniversalButton
           title="Submit Request"
           variant="solid"
-          color={colors.Brand_Blue}
+          color={colors.BRAND_PRIMARY}
           onPress={handlePreSubmit}
           disabled={isFormIncomplete || isLoading}
           isLoading={isLoading}
@@ -190,7 +190,7 @@ export default function CorrectionModal({
           <Ionicons
             name="help-circle-outline"
             size={moderateScale(30)}
-            color={colors.Brand_Blue}
+            color={colors.BRAND_PRIMARY}
           />
         }
       />

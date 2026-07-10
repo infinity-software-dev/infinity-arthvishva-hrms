@@ -34,7 +34,7 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
           <Ionicons
             name="calendar-outline"
             size={14}
-            color={colors.Brand_Blue}
+            color={colors.BRAND_PRIMARY}
           />
           <Text style={styles.periodText}>
             {formattedFromDate} - {formattedToDate}
@@ -58,7 +58,7 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
           <Ionicons
             name="chevron-forward"
             size={20}
-            color={colors.Brand_Blue}
+            color={colors.BRAND_PRIMARY}
           />
         </View>
       </View>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     color: "#475569",
   },
   statusBadge: {
-    backgroundColor: `${colors.Brand_Green}15`,
+    backgroundColor: `${colors.BRAND_SECONDARY}15`,
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(4),
     borderRadius: moderateScale(6),
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(9),
-    color: colors.Brand_Green,
+    color: colors.BRAND_SECONDARY,
   },
   mainInfo: {
     flexDirection: "row",

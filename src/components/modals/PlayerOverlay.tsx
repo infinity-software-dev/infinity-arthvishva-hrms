@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     categoryBadge: {
         fontFamily: FONTS.extraBold,
         fontSize: moderateScale(10),
-        color: colors.Brand_Green,
+        color: colors.BRAND_SECONDARY,
         letterSpacing: 1,
         marginBottom: moderateScale(4),
     },

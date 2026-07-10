@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   libraryUrl: {
     fontSize: moderateScale(12),
     fontFamily: FONTS.medium,
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     marginBottom: moderateScale(8),
   },
   licenseText: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(18),
   },
   emailLink: {
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   legalLinksContainer: {
     flexDirection: "row",
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   link: {
     fontSize: moderateScale(13),
     fontFamily: FONTS.semiBold,
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   separator: {
     fontSize: moderateScale(14),

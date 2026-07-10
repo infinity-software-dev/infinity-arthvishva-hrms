@@ -58,7 +58,7 @@ const NewPayrollTab = () => {
                 confirmText="Got it"
                 confirmColor={
                     state.actionModal.type === "success"
-                        ? colors.Brand_Green
+                        ? colors.BRAND_SECONDARY
                         : colors.Danger_Red
                 }
                 icon={
@@ -66,7 +66,7 @@ const NewPayrollTab = () => {
                         <Ionicons
                             name="checkmark-circle"
                             size={moderateScale(32)}
-                            color={colors.Brand_Green}
+                            color={colors.BRAND_SECONDARY}
                         />
                     ) : (
                         <Ionicons

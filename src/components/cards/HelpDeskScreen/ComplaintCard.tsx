@@ -30,7 +30,7 @@ export default function ComplaintCard({ complaint, onWithdraw }: ComplaintCardPr
         return { bg: `${colors.Danger_Red}15`, text: colors.Danger_Red };
       case "In Review":
       case "Acknowledged":
-        return { bg: `${colors.Brand_Blue}15`, text: colors.Brand_Blue };
+        return { bg: `${colors.BRAND_PRIMARY}15`, text: colors.BRAND_PRIMARY };
       case "Pending":
         return { bg: `${colors.Warning_Yellow}15`, text: colors.Warning_Yellow };
       case "Withdrawn":

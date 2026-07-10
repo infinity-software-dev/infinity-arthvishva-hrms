@@ -1,10 +1,10 @@
 export const colors = {
   // Brand Colors
-  Brand_Blue: "#2076C7",
-  Brand_Blue_Dark: "#185E9F",
-  Brand_Blue_Extra_Dark:'#145087',
-  Brand_Green: "#1CADA3",
-  Brand_Green_Dark: "#158C84",
+  BRAND_PRIMARY: "#2076C7",
+  BRAND_PRIMARY_Dark: "#185E9F",
+  BRAND_PRIMARY_Extra_Dark:'#145087',
+  BRAND_SECONDARY: "#1CADA3",
+  BRAND_SECONDARY_Dark: "#158C84",
 
   // Base Colors
   Base_Background: "#F8FAFC",

@@ -50,7 +50,7 @@ export default function ProfileAccordion({
             <Ionicons
               name={iconName}
               size={moderateScale(18)}
-              color={colors.Brand_Blue}
+              color={colors.BRAND_SECONDARY}
             />
           </View>
           <Text style={styles.title}>{title}</Text>
@@ -106,7 +106,7 @@ export const DetailRow = ({
           <Ionicons
             name="open-outline"
             size={moderateScale(14)}
-            color={colors.Brand_Blue}
+            color={colors.BRAND_PRIMARY}
             style={styles.linkIcon}
           />
         )}
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     width: moderateScale(32),
     height: moderateScale(32),
     borderRadius: moderateScale(8),
-    backgroundColor: `${colors.Brand_Blue}15`,
+    backgroundColor: `${colors.BRAND_SECONDARY}15`,
     justifyContent: "center",
     alignItems: "center",
     marginRight: moderateScale(12),
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   linkText: {
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     textDecorationLine: "underline",
   },
   linkIcon: {

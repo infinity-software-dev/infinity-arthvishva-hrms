@@ -16,7 +16,7 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({ slip, onPress }) => {
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
       <LinearGradient
-        colors={[colors.Brand_Blue, "#2563EB"]}
+        colors={[colors.BRAND_PRIMARY, "#2563EB"]}
         style={styles.spotlightCard}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

@@ -43,7 +43,7 @@ const HolidayScreen = () => {
             const isNational = item.type === "National";
 
             // Base colors for the active state
-            const baseAccent = isNational ? colors.Danger_Red : colors.Brand_Green;
+            const baseAccent = isNational ? colors.Danger_Red : colors.BRAND_SECONDARY;
 
             // The left border dictates the visual hierarchy
             const accentColor = isPast ? "#CBD5E1" : baseAccent;
@@ -96,8 +96,8 @@ const HolidayScreen = () => {
             <RefreshControl
               refreshing={state.refreshing}
               onRefresh={() => actions.loadData(true)}
-              tintColor={colors.Brand_Green}
-              colors={[colors.Brand_Green]}
+              tintColor={colors.BRAND_SECONDARY}
+              colors={[colors.BRAND_SECONDARY]}
             />
           }
         />

@@ -13,7 +13,7 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, loading }) => {
   if (loading || !stats) {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="small" color={colors.Brand_Green} />
+        <ActivityIndicator size="small" color={colors.BRAND_SECONDARY} />
       </View>
     );
   }

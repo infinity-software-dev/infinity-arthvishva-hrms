@@ -41,7 +41,7 @@ export default function LedgerTokenDetails({ tokens, leaveType, isVisible, onClo
                     <Text style={styles.emptyText}>No active {leaveType} tokens found.</Text>
                     <UniversalButton
                         title="Close"
-                        color={colors.Brand_Blue}
+                        color={colors.BRAND_PRIMARY}
                         onPress={onClose}
                         style={styles.closeButton}
                     />
@@ -55,7 +55,7 @@ export default function LedgerTokenDetails({ tokens, leaveType, isVisible, onClo
                         {tokens.map((token) => (
                             <View key={token._id} style={styles.tokenRow}>
                                 <View style={styles.leftSection}>
-                                    <Ionicons name="ticket-outline" size={moderateScale(20)} color={colors.Brand_Blue} />
+                                    <Ionicons name="ticket-outline" size={moderateScale(20)} color={colors.BRAND_PRIMARY} />
                                     <View>
                                         {/*  NEW: Dynamically render 0.5 Day or 1 Day */}
                                         <Text style={styles.tokenTitle}>{token.value || 1} Day Token</Text>
@@ -85,7 +85,7 @@ export default function LedgerTokenDetails({ tokens, leaveType, isVisible, onClo
                     <View style={{ paddingBottom: Math.max(insets.bottom, moderateScale(16)) }}>
                         <UniversalButton
                             title="Close"
-                            color={colors.Brand_Blue}
+                            color={colors.BRAND_PRIMARY}
                             onPress={onClose}
                             style={styles.closeButton}
                         />
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     neverExpiresText: {
         fontFamily: FONTS.bold,
-        color: colors.Brand_Green,
+        color: colors.BRAND_SECONDARY,
         fontSize: moderateScale(11),
     },
     emptyText: {

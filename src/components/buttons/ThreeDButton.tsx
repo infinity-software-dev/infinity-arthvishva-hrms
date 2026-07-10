@@ -53,7 +53,7 @@ const ThreeDButton: React.FC<ThreeDButtonProps> = ({ title, icon, onPress }) => 
                 ]}
             >
                 {icon && (
-                    <Ionicons name={icon} size={moderateScale(14)} color={colors.Brand_Green} />
+                    <Ionicons name={icon} size={moderateScale(14)} color={colors.BRAND_SECONDARY} />
                 )}
                 <Text style={styles.buttonText}>{title}</Text>
             </Animated.View>
@@ -65,18 +65,18 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: `${colors.Brand_Green}10`,
+        backgroundColor: `${colors.BRAND_SECONDARY}10`,
         paddingHorizontal: moderateScale(12),
         paddingVertical: moderateScale(8),
         borderRadius: moderateScale(12),
         borderWidth: 1,
-        borderColor: `${colors.Brand_Green}50`,
-        borderBottomColor: colors.Brand_Green,
+        borderColor: `${colors.BRAND_SECONDARY}50`,
+        borderBottomColor: colors.BRAND_SECONDARY,
     },
     buttonText: {
         fontFamily: FONTS.semiBold,
         fontSize: moderateScale(11),
-        color: colors.Brand_Green,
+        color: colors.BRAND_SECONDARY,
         marginLeft: moderateScale(4),
         transform: [{ translateY: -1 }],
     },

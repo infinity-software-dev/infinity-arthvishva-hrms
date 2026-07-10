@@ -16,6 +16,7 @@ export default function MainLayout() {
       <Stack.Screen name="screens/gurukul" />
       <Stack.Screen name="screens/helpdesk" />
       <Stack.Screen name="screens/resignation" />
+      <Stack.Screen name="screens/approvals" />
       <Stack.Screen
         options={{ animation: "fade", headerShown: false }}
         name="(tabs)/BottomTabs"

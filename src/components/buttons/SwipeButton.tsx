@@ -94,7 +94,7 @@ export default function CustomSwipeButton({
     const backgroundColor = interpolateColor(
       translateX.value,
       [0, maxTranslateX],
-      [colors.Brand_Green, colors.Brand_Blue],
+      [colors.BRAND_SECONDARY, colors.BRAND_PRIMARY],
     );
     return { backgroundColor };
   });
@@ -122,7 +122,7 @@ export default function CustomSwipeButton({
           <MaterialIcons
             name={toggled ? "check" : disabled ? "lock" : "chevron-right"}
             size={knobSize * 0.6}
-            color={toggled ? colors.Brand_Blue : disabled ? "#9CA3AF" : colors.Brand_Green}
+            color={toggled ? colors.BRAND_PRIMARY : disabled ? "#9CA3AF" : colors.BRAND_SECONDARY}
           />
         </Animated.View>
       </GestureDetector>

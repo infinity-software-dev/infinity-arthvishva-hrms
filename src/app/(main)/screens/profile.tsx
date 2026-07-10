@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   View,
   StyleSheet,
@@ -49,7 +49,7 @@ export default function ProfileScreen() {
 
       {!profile ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.Brand_Green} />
+          <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
         </View>
       ) : (
         <ScrollView
@@ -58,8 +58,8 @@ export default function ProfileScreen() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={actions.refreshProfile}
-              tintColor={colors.Brand_Green}
-              colors={[colors.Brand_Green]}
+              tintColor={colors.BRAND_SECONDARY}
+              colors={[colors.BRAND_SECONDARY]}
             />
           }
         >
@@ -104,21 +104,21 @@ export default function ProfileScreen() {
               <DetailRow label="Email" value={profile?.email || "N/A"} />
               <DetailRow
                 label="Current Address"
-                value={profile?.currentAddress || "N/A"}
+                value={profile?.address?.current?.address || "N/A"}
               />
               <DetailRow
                 label="Permanent Address"
-                value={profile?.permanentAddress || "N/A"}
+                value={profile?.address?.permanent?.address || "N/A"}
               />
               <DetailRow
                 label="State & District"
                 value={
-                  profile?.state && profile?.district
-                    ? `${profile.district}, ${profile.state}`
+                  profile?.address?.current?.state && profile?.address?.current?.district
+                    ? `${profile.address.current.district}, ${profile.address.current.state}`
                     : "N/A"
                 }
               />
-              <DetailRow label="Pincode" value={profile?.pincode || "N/A"} />
+              <DetailRow label="Pincode" value={profile?.address?.current?.pinCode || "N/A"} />
             </ProfileAccordion>
 
             {/* ── EMPLOYMENT & EXPERIENCE ── */}
@@ -143,18 +143,23 @@ export default function ProfileScreen() {
                 label="Experience Type"
                 value={profile?.experienceType || "N/A"}
               />
-              <DetailRow
-                label="Total Experience"
-                value={
-                  profile?.totalExperienceYears
-                    ? `${profile.totalExperienceYears} Years`
-                    : "N/A"
-                }
-              />
-              <DetailRow
-                label="Previous Company"
-                value={profile?.lastCompanyName || "N/A"}
-              />
+              {/* Render only if the profile is not a Fresher and has experience details */}
+              {profile?.experienceType !== "Fresher" && (
+                <>
+                  <DetailRow
+                    label="Total Experience"
+                    value={
+                      profile?.totalExperienceYears
+                        ? `${profile.totalExperienceYears} Years`
+                        : "N/A"
+                    }
+                  />
+                  <DetailRow
+                    label="Previous Company"
+                    value={profile?.lastCompanyName || "N/A"}
+                  />
+                </>
+              )}
             </ProfileAccordion>
 
             {/* ── EDUCATION ── */}
@@ -255,10 +260,10 @@ export default function ProfileScreen() {
                 }
               />
               <DetailRow label="IFSC Code" value={profile?.ifsc || "N/A"} />
-              <DetailRow
+              {/* <DetailRow
                 label="Status"
                 value={profile?.bankVerified ? "Verified" : "Pending"}
-              />
+              /> */}
             </ProfileAccordion>
 
             {/* ── DOCUMENTS & CERTIFICATES ── */}
@@ -268,7 +273,8 @@ export default function ProfileScreen() {
             >
               <DetailRow
                 label="Aadhaar Number"
-                value={profile?.aadhaarNumber ? "[Aadhaar Redacted]" : "N/A"}
+                value={profile?.aadhaarNumber ? `•••••••• ${profile.aadhaarNumber.slice(-4)}`
+                  : "N/A"}
               />
               <DetailRow
                 label="PAN Number"

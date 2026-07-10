@@ -49,7 +49,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
             activeOpacity={0.7}
           >
             <Text style={styles.inputText}>{formatDateForUI(fromDate)}</Text>
-            <Ionicons name="calendar-outline" size={moderateScale(16)} color={colors.Brand_Blue} />
+            <Ionicons name="calendar-outline" size={moderateScale(16)} color={colors.BRAND_PRIMARY} />
           </TouchableOpacity>
         </View>
 
@@ -61,7 +61,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
             activeOpacity={0.7}
           >
             <Text style={styles.inputText}>{formatDateForUI(toDate)}</Text>
-            <Ionicons name="calendar-outline" size={moderateScale(16)} color={colors.Brand_Blue} />
+            <Ionicons name="calendar-outline" size={moderateScale(16)} color={colors.BRAND_PRIMARY} />
           </TouchableOpacity>
         </View>
       </View>
@@ -71,7 +71,7 @@ const GenerateFilterCard: React.FC<GenerateFilterCardProps> = ({
         onPress={onGenerate}
         disabled={isGenerating}
         customStyles={{
-          colors: [colors.Brand_Green, colors.Brand_Green_Dark],
+          colors: [colors.BRAND_SECONDARY, colors.BRAND_SECONDARY_Dark],
           borderRadius: moderateScale(12),
           marginVertical: 0,
           marginTop: moderateScale(4),

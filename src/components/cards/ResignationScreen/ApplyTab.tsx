@@ -36,7 +36,7 @@ const ApplyTab = () => {
             >
                 {/* Info Banner */}
                 <View style={styles.infoBanner}>
-                    <Ionicons name="information-circle" size={moderateScale(24)} color={colors.Brand_Blue} />
+                    <Ionicons name="information-circle" size={moderateScale(24)} color={colors.BRAND_PRIMARY} />
                     <Text style={styles.infoText}>
                         Your resignation request will be routed directly to HR and the Director. Please ensure you select a last working day that complies with your notice period.
                     </Text>
@@ -157,19 +157,19 @@ const styles = StyleSheet.create({
     },
     infoBanner: {
         flexDirection: "row",
-        backgroundColor: `${colors.Brand_Blue}15`,
+        backgroundColor: `${colors.BRAND_PRIMARY}15`,
         padding: moderateScale(16),
         borderRadius: moderateScale(12),
         marginBottom: moderateScale(24),
         alignItems: "flex-start",
         borderLeftWidth: 4,
-        borderLeftColor: colors.Brand_Blue,
+        borderLeftColor: colors.BRAND_PRIMARY,
     },
     infoText: {
         flex: 1,
         fontFamily: FONTS.medium,
         fontSize: moderateScale(12),
-        color: colors.Brand_Blue_Dark,
+        color: colors.BRAND_PRIMARY_Dark,
         marginLeft: moderateScale(10),
         lineHeight: moderateScale(18),
     },

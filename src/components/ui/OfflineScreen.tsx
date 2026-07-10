@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: moderateScale(30),
     overflow: "hidden",
-    shadowColor: colors.Brand_Blue,
+    shadowColor: colors.BRAND_PRIMARY,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

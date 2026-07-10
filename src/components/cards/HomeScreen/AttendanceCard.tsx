@@ -107,7 +107,7 @@ export default function AttendanceCard() {
             {isLoadingLocation ? (
               <ActivityIndicator
                 size={moderateScale(12)}
-                color={colors.Brand_Green}
+                color={colors.BRAND_SECONDARY}
                 style={{ marginRight: moderateScale(4) }}
               />
             ) : (
@@ -120,7 +120,7 @@ export default function AttendanceCard() {
                 size={moderateScale(14)}
                 color={
                   workMode !== "Office" || isInsideOffice
-                    ? colors.Brand_Green
+                    ? colors.BRAND_SECONDARY
                     : colors.Danger_Red
                 }
               />
@@ -131,9 +131,9 @@ export default function AttendanceCard() {
                 styles.badgeText,
                 {
                   color: isLoadingLocation
-                    ? colors.Brand_Green
+                    ? colors.BRAND_SECONDARY
                     : workMode !== "Office" || isInsideOffice
-                      ? colors.Brand_Green
+                      ? colors.BRAND_SECONDARY
                       : colors.Danger_Red,
                 },
               ]}
@@ -239,7 +239,7 @@ export default function AttendanceCard() {
         <View style={styles.buttonContainer}>
           {status === "loading" && (
             <View style={styles.loaderWrapper}>
-              <ActivityIndicator size="large" color={colors.Brand_Blue} />
+              <ActivityIndicator size="large" color={colors.BRAND_PRIMARY} />
               <Text style={styles.loadingText}>Verifying...</Text>
             </View>
           )}
@@ -249,7 +249,7 @@ export default function AttendanceCard() {
               <Ionicons
                 name="checkmark-circle"
                 size={moderateScale(30)}
-                color={colors.Brand_Green}
+                color={colors.BRAND_SECONDARY}
               />
               <Text style={styles.completedText}>
                 {statusMessage || "Shift Completed"}
@@ -262,10 +262,10 @@ export default function AttendanceCard() {
               <Ionicons
                 name="calendar-outline"
                 size={moderateScale(30)}
-                color={colors.Brand_Green}
+                color={colors.BRAND_SECONDARY}
               />
               <Text
-                style={[styles.completedText, { color: colors.Brand_Green }]}
+                style={[styles.completedText, { color: colors.BRAND_SECONDARY }]}
               >
                 {statusMessage}
               </Text>
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: "#6B7280",
   },
-  activeModeText: { color: colors.Brand_Blue, fontFamily: FONTS.bold },
+  activeModeText: { color: colors.BRAND_PRIMARY, fontFamily: FONTS.bold },
   infoBox: {
     flexDirection: "row",
     backgroundColor: "#F9FAFB",
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   totalTimeHighlight: {
     fontFamily: FONTS.extraBold,
     fontSize: moderateScale(20),
-    color: colors.Brand_Green,
+    color: colors.BRAND_SECONDARY,
     marginTop: moderateScale(2),
   },
   horizontalDivider: {
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: moderateScale(8),
     fontFamily: FONTS.semiBold,
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   completedWrapper: {
     height: moderateScale(60),
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   completedText: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(16),
-    color: colors.Brand_Green,
+    color: colors.BRAND_SECONDARY,
     marginTop: moderateScale(4),
   },
 });

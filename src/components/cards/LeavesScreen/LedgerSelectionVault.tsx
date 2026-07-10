@@ -78,7 +78,7 @@ export default function LedgerSelectionVault({
                                 <Ionicons
                                     name={isSelected ? "checkmark-circle" : "ellipse-outline"}
                                     size={moderateScale(20)}
-                                    color={isSelected ? colors.Brand_Green : "#94A3B8"}
+                                    color={isSelected ? colors.BRAND_SECONDARY : "#94A3B8"}
                                 />
                                 {/*  NEW: Dynamically show 0.5 Day or 1 Day */}
                                 <Text style={[styles.tokenType, isSelected && styles.tokenTypeActive]}>
@@ -121,14 +121,14 @@ const styles = StyleSheet.create({
         borderRadius: moderateScale(12),
         padding: moderateScale(12),
     },
-    tokenCardActive: { borderColor: colors.Brand_Green, backgroundColor: `${colors.Brand_Green}05` },
+    tokenCardActive: { borderColor: colors.BRAND_SECONDARY, backgroundColor: `${colors.BRAND_SECONDARY}05` },
     tokenCardDisabled: { opacity: 0.5 },
     tokenHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: moderateScale(8) },
     tokenType: { fontFamily: FONTS.semiBold, fontSize: moderateScale(12), color: "#475569" },
-    tokenTypeActive: { color: colors.Brand_Green },
+    tokenTypeActive: { color: colors.BRAND_SECONDARY },
     tokenDetails: { marginTop: moderateScale(4) },
     expiryText: { fontFamily: FONTS.medium, fontSize: moderateScale(10), color: colors.Danger_Red },
-    createdText: { fontFamily: FONTS.medium, fontSize: moderateScale(10), color: colors.Brand_Blue },
+    createdText: { fontFamily: FONTS.medium, fontSize: moderateScale(10), color: colors.BRAND_PRIMARY },
     emptyContainer: { marginTop: moderateScale(16), marginBottom: moderateScale(24) },
     emptyText: { fontFamily: FONTS.medium, fontSize: moderateScale(12), color: "#64748B" },
 });

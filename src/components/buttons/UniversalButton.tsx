@@ -29,7 +29,7 @@ const UniversalButton: React.FC<UniversalButtonProps> = ({
   title,
   onPress,
   variant = "solid",
-  color = colors.Brand_Blue,
+  color = colors.BRAND_PRIMARY,
   icon,
   isLoading = false,
   disabled = false,

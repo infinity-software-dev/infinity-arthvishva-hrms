@@ -88,8 +88,8 @@ const AttendanceSummaryScreen: React.FC = () => {
             <RefreshControl
               refreshing={loading}
               onRefresh={refetch}
-              tintColor={colors.Brand_Green}
-              colors={[colors.Brand_Green]}
+              tintColor={colors.BRAND_SECONDARY}
+              colors={[colors.BRAND_SECONDARY]}
             />
           }
           renderItem={({ item }) => (

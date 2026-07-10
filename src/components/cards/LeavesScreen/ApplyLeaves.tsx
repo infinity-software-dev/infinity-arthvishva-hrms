@@ -116,7 +116,7 @@ export default function ApplyLeaves() {
                 <Ionicons
                   name="calendar-outline"
                   size={moderateScale(18)}
-                  color={colors.Brand_Blue}
+                  color={colors.BRAND_PRIMARY}
                 />
               </TouchableOpacity>
             </View>
@@ -135,7 +135,7 @@ export default function ApplyLeaves() {
                 <Ionicons
                   name="calendar-outline"
                   size={moderateScale(18)}
-                  color={colors.Brand_Blue}
+                  color={colors.BRAND_PRIMARY}
                 />
               </TouchableOpacity>
             </View>
@@ -152,7 +152,7 @@ export default function ApplyLeaves() {
               <Ionicons
                 name="time-outline"
                 size={moderateScale(16)}
-                color={colors.Brand_Blue}
+                color={colors.BRAND_PRIMARY}
               />
               <Text style={styles.durationText}>
                 {state.totalDays} {state.totalDays === 1 ? "Day" : "Days"}{" "}
@@ -194,7 +194,7 @@ export default function ApplyLeaves() {
                   color={
                     state.halfDayShift === "Morning"
                       ? "#FFFFFF"
-                      : colors.Brand_Blue
+                      : colors.BRAND_PRIMARY
                   }
                 />
                 <Text
@@ -222,7 +222,7 @@ export default function ApplyLeaves() {
                   color={
                     state.halfDayShift === "Afternoon"
                       ? "#FFFFFF"
-                      : colors.Brand_Blue
+                      : colors.BRAND_PRIMARY
                   }
                 />
                 <Text
@@ -257,7 +257,7 @@ export default function ApplyLeaves() {
         {/* Submit Button */}
         <UniversalButton
           title={state.isSubmitting ? "Submitting..." : "Submit Leave Request"}
-          color={colors.Brand_Green}
+          color={colors.BRAND_SECONDARY}
           onPress={actions.handleSubmit}
           disabled={isDisabled}
           icon={
@@ -287,7 +287,7 @@ export default function ApplyLeaves() {
         confirmText="Got it"
         confirmColor={
           state.actionModal.type === "success"
-            ? colors.Brand_Green
+            ? colors.BRAND_SECONDARY
             : colors.Danger_Red
         }
         icon={
@@ -295,7 +295,7 @@ export default function ApplyLeaves() {
             <Ionicons
               name="checkmark-circle"
               size={moderateScale(32)}
-              color={colors.Brand_Green}
+              color={colors.BRAND_SECONDARY}
             />
           ) : (
             <Ionicons
@@ -346,7 +346,7 @@ export default function ApplyLeaves() {
             </View>
             <UniversalButton
               title="Confirm Date"
-              color={colors.Brand_Blue}
+              color={colors.BRAND_PRIMARY}
               onPress={() => actions.handleDismiss("from")}
             />
           </CustomBottomModal>
@@ -366,7 +366,7 @@ export default function ApplyLeaves() {
             </View>
             <UniversalButton
               title="Confirm Date"
-              color={colors.Brand_Blue}
+              color={colors.BRAND_PRIMARY}
               onPress={() => actions.handleDismiss("to")}
             />
           </CustomBottomModal>
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   durationPill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: `${colors.Brand_Blue}15`,
+    backgroundColor: `${colors.BRAND_PRIMARY}15`,
     paddingHorizontal: moderateScale(12),
     paddingVertical: moderateScale(8),
     borderRadius: moderateScale(8),
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   durationText: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(12),
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     marginLeft: moderateScale(6),
   },
   halfDayToggle: {
@@ -459,12 +459,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  radioCircleActive: { borderColor: colors.Brand_Green },
+  radioCircleActive: { borderColor: colors.BRAND_SECONDARY },
   radioInner: {
     width: moderateScale(8),
     height: moderateScale(8),
     borderRadius: moderateScale(4),
-    backgroundColor: colors.Brand_Green,
+    backgroundColor: colors.BRAND_SECONDARY,
   },
   shiftRow: {
     flexDirection: "row",
@@ -485,8 +485,8 @@ const styles = StyleSheet.create({
     gap: moderateScale(6),
   },
   shiftPillActive: {
-    backgroundColor: colors.Brand_Blue,
-    borderColor: colors.Brand_Blue,
+    backgroundColor: colors.BRAND_PRIMARY,
+    borderColor: colors.BRAND_PRIMARY,
   },
   shiftPillText: {
     fontFamily: FONTS.semiBold,

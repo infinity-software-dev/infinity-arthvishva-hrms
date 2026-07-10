@@ -25,7 +25,7 @@ export default function ComplaintHistory() {
       {/* List Content */}
       {state.isLoadingHistory && !state.isRefreshing ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.Brand_Green} />
+          <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
         </View>
       ) : (
         <FlatList
@@ -38,8 +38,8 @@ export default function ComplaintHistory() {
             <RefreshControl
               refreshing={state.isRefreshing}
               onRefresh={actions.handleRefresh}
-              tintColor={colors.Brand_Green}
-              colors={[colors.Brand_Green]}
+              tintColor={colors.BRAND_SECONDARY}
+              colors={[colors.BRAND_SECONDARY]}
             />
           }
           ListEmptyComponent={
@@ -61,7 +61,7 @@ export default function ComplaintHistory() {
       <UniversalButton
         title="Raise Ticket"
         onPress={actions.openModal}
-        color={colors.Brand_Green}
+        color={colors.BRAND_SECONDARY}
         icon={<Ionicons name="add" size={moderateScale(24)} color="#FFFFFF" />}
         style={styles.fab}
       />
@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: moderateScale(24),
     right: moderateScale(16),
-    backgroundColor: colors.Brand_Green,
+    backgroundColor: colors.BRAND_SECONDARY,
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: moderateScale(14),
     paddingHorizontal: moderateScale(20),
     borderRadius: moderateScale(30),
-    shadowColor: colors.Brand_Green_Dark,
+    shadowColor: colors.BRAND_SECONDARY_Dark,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

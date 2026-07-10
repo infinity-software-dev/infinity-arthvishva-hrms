@@ -92,7 +92,7 @@ const HomeNavbar: React.FC<HomeNavbarProps> = ({ userName = "User" }) => {
     <View style={styles.wrapper}>
       <StatusBar style="light" />
       <LinearGradient
-        colors={[colors.Brand_Green, colors.Brand_Green_Dark]}
+        colors={[colors.BRAND_SECONDARY, colors.BRAND_SECONDARY_Dark]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[

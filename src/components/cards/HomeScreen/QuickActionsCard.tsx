@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Animated,
 } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -16,16 +17,71 @@ import { Href, router } from "expo-router";
 const { width } = Dimensions.get("window");
 const PAGE_WIDTH = width - moderateScale(40);
 
-export default function QuickActions() {
+interface QuickActionsProps {
+  isLeadershipRole: boolean;
+  pendingApprovalsCount: number;
+}
+
+export default function QuickActions({
+  isLeadershipRole,
+  pendingApprovalsCount
+}: QuickActionsProps) {
   const [currentPage, setCurrentPage] = useState(0);
 
+  // Initialize animated value for opacity tracking
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+
+  // Triggers the constant looping fade animation
+  useEffect(() => {
+    const blinkAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, {
+          toValue: 0.2, // Dims down to 20% opacity
+          duration: 800, // Speed of fading out (in ms)
+          useNativeDriver: true,
+        }),
+        Animated.timing(blinkAnim, {
+          toValue: 1, // Returns to 100% full opacity
+          duration: 800, // Speed of fading back in (in ms)
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    blinkAnimation.start();
+
+    return () => blinkAnimation.stop();
+  }, [blinkAnim]);
+
+  // Process array dynamically based on leadership status and live metrics
   const paginatedActions = useMemo(() => {
+    // Step A: Filter by leadership role only
+    let filtered = ACTIONS.filter((action) => {
+      if (action.id === "approvals") {
+        return isLeadershipRole;
+      }
+      return true;
+    });
+
+    // Step B: Inject live notification dot/badge states dynamically
+    filtered = filtered.map((action) => {
+      if (action.id === "approvals") {
+        return {
+          ...action,
+          showBadge: pendingApprovalsCount > 0,
+          badgeCount: pendingApprovalsCount,
+        };
+      }
+      return action;
+    });
+
+    // Step C: Chunking into pages of 6 items
     const pages = [];
-    for (let i = 0; i < ACTIONS.length; i += 6) {
-      pages.push(ACTIONS.slice(i, i + 6));
+    for (let i = 0; i < filtered.length; i += 6) {
+      pages.push(filtered.slice(i, i + 6));
     }
     return pages;
-  }, []);
+  }, [isLeadershipRole, pendingApprovalsCount]);
 
   const handlePress = (route: Href) => {
     router.push(route);
@@ -60,21 +116,30 @@ export default function QuickActions() {
                 onPress={() => handlePress(action.route)}
                 activeOpacity={0.7}
               >
-                <View
-                  style={[styles.iconBox, { backgroundColor: action.bgColor }]}
-                >
-                  {action.iconFamily === "Ionicons" ? (
-                    <Ionicons
-                      name={action.icon as any}
-                      size={moderateScale(24)}
-                      color={action.iconColor}
-                    />
-                  ) : (
-                    <MaterialCommunityIcons
-                      name={action.icon as any}
-                      size={moderateScale(24)}
-                      color={action.iconColor}
-                    />
+                <View style={styles.iconContainer}>
+                  <View
+                    style={[styles.iconBox, { backgroundColor: action.bgColor }]}
+                  >
+                    {action.iconFamily === "Ionicons" ? (
+                      <Ionicons
+                        name={action.icon as any}
+                        size={moderateScale(24)}
+                        color={action.iconColor}
+                      />
+                    ) : (
+                      <MaterialCommunityIcons
+                        name={action.icon as any}
+                        size={moderateScale(24)}
+                        color={action.iconColor}
+                      />
+                    )}
+                  </View>
+
+                  {/* Blinking Badge rendering */}
+                  {action.showBadge && (
+                    <Animated.View style={[styles.numericBadge, { opacity: blinkAnim }]}>
+                      <Text style={styles.badgeText}>{action.badgeCount}</Text>
+                    </Animated.View>
                   )}
                 </View>
                 <Text style={styles.actionTitle} numberOfLines={1}>
@@ -97,7 +162,7 @@ export default function QuickActions() {
                 width:
                   currentPage === index ? moderateScale(16) : moderateScale(6),
                 backgroundColor:
-                  currentPage === index ? colors.Brand_Blue : "#D1D5DB",
+                  currentPage === index ? colors.BRAND_PRIMARY : "#D1D5DB",
               },
             ]}
           />
@@ -129,18 +194,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: moderateScale(20),
   },
+  iconContainer: {
+    position: "relative",
+    marginBottom: moderateScale(8),
+  },
   iconBox: {
     width: moderateScale(56),
     height: moderateScale(56),
     borderRadius: moderateScale(18),
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: moderateScale(8),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
+  },
+  numericBadge: {
+    position: "absolute",
+    top: moderateScale(-2),
+    right: moderateScale(-4),
+    minWidth: moderateScale(18),
+    height: moderateScale(18),
+    borderRadius: moderateScale(9),
+    backgroundColor: "#FF0069",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: moderateScale(4),
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+  badgeText: {
+    color: "#FFFFFF",
+    fontSize: moderateScale(10),
+    fontFamily: FONTS.bold,
+    textAlign: "center",
   },
   actionTitle: {
     fontFamily: FONTS.semiBold,

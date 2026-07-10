@@ -38,7 +38,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
   } else if (isHalfDay) {
     badgeColor = colors.Warning_Yellow;
   } else if (isCompOff) {
-    badgeColor = colors.Brand_Blue
+    badgeColor = colors.BRAND_PRIMARY
   }
 
   return (
@@ -85,11 +85,11 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
           </View>
 
           <TouchableOpacity
-            style={[styles.ghostButton, isCompOff ? { borderColor: badgeColor, borderWidth: 1.5 } : { borderColor: colors.Brand_Green, }]}
+            style={[styles.ghostButton, isCompOff ? { borderColor: badgeColor, borderWidth: 1.5 } : { borderColor: colors.BRAND_SECONDARY, }]}
             activeOpacity={0.7}
             onPress={onViewDetails}
           >
-            <Text style={[styles.ghostButtonText, isCompOff ? { color: badgeColor } : { color: colors.Brand_Green }]}>View Details</Text>
+            <Text style={[styles.ghostButtonText, isCompOff ? { color: badgeColor } : { color: colors.BRAND_SECONDARY }]}>View Details</Text>
           </TouchableOpacity>
         </View>
       ) : (

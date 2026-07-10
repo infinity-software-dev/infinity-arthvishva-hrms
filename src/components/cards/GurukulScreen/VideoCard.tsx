@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(16),
     marginBottom: moderateScale(16),
     overflow: "hidden",
-    shadowColor: colors.Brand_Green_Dark,
+    shadowColor: colors.BRAND_SECONDARY_Dark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,

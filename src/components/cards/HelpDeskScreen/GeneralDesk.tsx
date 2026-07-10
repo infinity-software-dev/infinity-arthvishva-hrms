@@ -21,7 +21,7 @@ export default function GeneralDesk() {
         <Ionicons
           name="information-circle"
           size={moderateScale(24)}
-          color={colors.Brand_Blue}
+          color={colors.BRAND_PRIMARY}
         />
         <View style={styles.slaTextWrapper}>
           <Text style={styles.slaTitle}>Support Hours</Text>
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   content: { padding: moderateScale(16), paddingBottom: moderateScale(100) },
   slaBanner: {
     flexDirection: "row",
-    backgroundColor: `${colors.Brand_Blue}15`,
+    backgroundColor: `${colors.BRAND_PRIMARY}15`,
     padding: moderateScale(16),
     borderRadius: moderateScale(12),
     marginBottom: moderateScale(24),
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   slaTitle: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(14),
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
     marginBottom: moderateScale(4),
   },
   slaDesc: {

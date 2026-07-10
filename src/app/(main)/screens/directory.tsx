@@ -36,7 +36,7 @@ const DirectoryScreen = () => {
     if (!isFetchingMore) return <View style={{ height: moderateScale(20) }} />;
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={colors.Brand_Green} />
+        <ActivityIndicator size="small" color={colors.BRAND_SECONDARY} />
       </View>
     );
   };
@@ -98,7 +98,7 @@ const DirectoryScreen = () => {
       {/* ── LIST ── */}
       {isLoading && employees.length === 0 ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.Brand_Green} />
+          <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
         </View>
       ) : (
         <FlatList
@@ -117,8 +117,8 @@ const DirectoryScreen = () => {
             <RefreshControl
               refreshing={isLoading && employees.length > 0}
               onRefresh={actions.handleRefresh}
-              tintColor={colors.Brand_Green}
-              colors={[colors.Brand_Green]}
+              tintColor={colors.BRAND_SECONDARY}
+              colors={[colors.BRAND_SECONDARY]}
             />
           }
         />

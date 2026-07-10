@@ -168,12 +168,23 @@ export const useApplyLeave = () => {
     }
 
     if (selectedValue === 'CompOff' || selectedValue === 'Paid') {
-      // Instead of checking array length, we check if the selected sum is enough to cover the requested days
+      // Check if token selection falls below the required threshold
       if (selectedTokenValueSum < totalDays) {
         setActionModal({
           visible: true,
           title: "Incomplete Selection",
           message: `You requested ${totalDays} day(s) off, but only selected ${selectedTokenValueSum} day(s) worth of tokens.`,
+          type: "error",
+        });
+        return;
+      }
+
+      // NEW VALIDATION: Check if token selection exceeds the exact requested totalDays
+      if (selectedTokenValueSum > totalDays) {
+        setActionModal({
+          visible: true,
+          title: "Excess Selection",
+          message: `You requested a half day (${totalDays} day), but have selected ${selectedTokenValueSum} day(s) worth of tokens. Please deselect the excess token.`,
           type: "error",
         });
         return;

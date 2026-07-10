@@ -76,8 +76,8 @@ const AnnouncementScreen = () => {
           <RefreshControl
             refreshing={loading}
             onRefresh={fetchAnnouncements}
-            tintColor={colors.Brand_Green}
-            colors={[colors.Brand_Green]}
+            tintColor={colors.BRAND_SECONDARY}
+            colors={[colors.BRAND_SECONDARY]}
           />
         }
         ListEmptyComponent={
@@ -101,7 +101,7 @@ const getPriorityColor = (priority: string) => {
     case "High":
       return colors.Warning_Yellow;
     default:
-      return colors.Brand_Blue;
+      return colors.BRAND_PRIMARY;
   }
 };
 

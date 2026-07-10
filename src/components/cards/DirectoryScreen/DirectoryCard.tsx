@@ -93,7 +93,7 @@ export default function DirectoryCard({ employee }: DirectoryCardProps) {
           <Ionicons
             name="call"
             size={moderateScale(18)}
-            color={colors.Brand_Green || "#10B981"}
+            color={colors.BRAND_SECONDARY || "#10B981"}
           />
         </TouchableOpacity>
 
@@ -105,7 +105,7 @@ export default function DirectoryCard({ employee }: DirectoryCardProps) {
           <Ionicons
             name="mail"
             size={moderateScale(18)}
-            color={colors.Brand_Blue || "#3B82F6"}
+            color={colors.BRAND_PRIMARY || "#3B82F6"}
           />
         </TouchableOpacity>
       </View>
@@ -144,14 +144,14 @@ const styles = StyleSheet.create({
     width: moderateScale(50),
     height: moderateScale(50),
     borderRadius: moderateScale(25),
-    backgroundColor: `${colors.Brand_Blue}15`, // Light tinted background
+    backgroundColor: `${colors.BRAND_PRIMARY}15`, // Light tinted background
     justifyContent: "center",
     alignItems: "center",
   },
   avatarText: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(18),
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   infoContainer: {
     flex: 1, // Takes up remaining middle space

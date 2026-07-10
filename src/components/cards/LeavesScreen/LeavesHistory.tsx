@@ -86,7 +86,7 @@ export default function LeavesHistory() {
   if (isInitialLoading && leavesData.length === 0) {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.Brand_Green} />
+        <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
       </View>
     );
   }
@@ -115,8 +115,8 @@ export default function LeavesHistory() {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handlePullToRefresh}
-            tintColor={colors.Brand_Green}
-            colors={[colors.Brand_Green]}
+            tintColor={colors.BRAND_SECONDARY}
+            colors={[colors.BRAND_SECONDARY]}
           />
         }
         ListEmptyComponent={

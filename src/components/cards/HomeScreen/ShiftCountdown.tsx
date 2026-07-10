@@ -87,7 +87,7 @@ export default function ShiftCountdown({
         <MaterialCommunityIcons
           name="timer-sand"
           size={moderateScale(16)}
-          color={colors.Brand_Blue}
+          color={colors.BRAND_PRIMARY}
         />
         <Text style={styles.label}>Remaining Time</Text>
       </View>
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   overtimeText: {
     fontFamily: FONTS.bold,
     fontSize: moderateScale(16),
-    color: colors.Brand_Green,
+    color: colors.BRAND_SECONDARY,
   },
   subText: {
     fontFamily: "Nunito_600SemiBold",
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: "100%",
-    backgroundColor: colors.Brand_Blue,
+    backgroundColor: colors.BRAND_PRIMARY,
     borderRadius: moderateScale(3),
   },
   timeRangeRow: {

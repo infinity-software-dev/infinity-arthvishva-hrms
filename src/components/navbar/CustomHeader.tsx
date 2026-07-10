@@ -24,7 +24,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
 
   return (
     <LinearGradient
-      colors={[colors.Brand_Green, colors.Brand_Green_Dark]}
+      colors={[colors.BRAND_SECONDARY, colors.BRAND_SECONDARY_Dark]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
       style={[styles.container, { paddingTop: insets.top }]}

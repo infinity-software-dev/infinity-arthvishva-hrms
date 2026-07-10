@@ -135,7 +135,7 @@ export default function CheckoutModal({
             {isLoading ? (
               <ActivityIndicator
                 size="small"
-                color={colors.Brand_Blue}
+                color={colors.BRAND_PRIMARY}
                 style={styles.loader}
               />
             ) : !manager ? (
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   readOnlyPillText: {
     fontSize: moderateScale(12),
     fontFamily: FONTS.bold,
-    color: colors.Brand_Blue,
+    color: colors.BRAND_PRIMARY,
   },
   footer: {
     flexDirection: "row",
