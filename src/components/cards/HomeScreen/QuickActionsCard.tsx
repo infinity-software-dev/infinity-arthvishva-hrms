@@ -55,9 +55,9 @@ export default function QuickActions({
 
   // Process array dynamically based on leadership status and live metrics
   const paginatedActions = useMemo(() => {
-    // Step A: Filter by leadership role only
+    // Step A: Filter by leadership role only (Approvals & Team Reports)
     let filtered = ACTIONS.filter((action) => {
-      if (action.id === "approvals") {
+      if (action.id === "approvals" || action.id === "daily-reports") {
         return isLeadershipRole;
       }
       return true;

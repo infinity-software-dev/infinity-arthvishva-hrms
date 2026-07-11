@@ -24,6 +24,15 @@ export const ACTIONS: QuickActionItem[] = [
     iconColor: "#137333", // Strong operational validation green
   },
   {
+    id: "daily-reports",
+    title: "Team Reports",
+    route: "/(main)/screens/team-reports",
+    icon: "microsoft-teams",
+    iconFamily: "MaterialCommunityIcons",
+    bgColor: "#F3F4F6", 
+    iconColor: "#4B5563",
+  },
+  {
     id: "summary",
     title: "Summary",
     icon: "calendar-month",

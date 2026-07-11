@@ -181,13 +181,20 @@ export const useApplyLeave = () => {
 
       // NEW VALIDATION: Check if token selection exceeds the exact requested totalDays
       if (selectedTokenValueSum > totalDays) {
-        setActionModal({
-          visible: true,
-          title: "Excess Selection",
-          message: `You requested a half day (${totalDays} day), but have selected ${selectedTokenValueSum} day(s) worth of tokens. Please deselect the excess token.`,
-          type: "error",
-        });
-        return;
+        // Exception: Allow if it's a half-day request and exactly ONE token is selected.
+        // This lets the backend consume 0.5 and return the other 0.5 to the user.
+        // It will still block them if they select two tokens (e.g., two half-day tokens).
+        const isSplittingSingleToken = isHalfDay && selectedTokenIds.length === 1;
+
+        if (!isSplittingSingleToken) {
+          setActionModal({
+            visible: true,
+            title: "Excess Selection",
+            message: `You requested ${totalDays} day(s), but have selected ${selectedTokenValueSum} day(s) worth of tokens. Please deselect the excess token.`,
+            type: "error",
+          });
+          return;
+        }
       }
     }
 

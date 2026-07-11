@@ -35,9 +35,24 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
 
   if (!att) return null;
 
-  const isRequested = att.correctionRequested || isRequestedLocally;
+  // --- STATUS EVALUATION LOGIC ---
+  // Overrides the database status to 'Pending' immediately after a local submission
+  const effectiveStatus = isRequestedLocally
+    ? 'Pending'
+    : (att.correctionStatus || 'None');
 
-  if (!att) return null;
+  const isRejected = effectiveStatus === 'Rejected';
+  const isPending = effectiveStatus === 'Pending';
+  const isApproved = effectiveStatus === 'Approved';
+
+  // Unlock the button if no request exists OR if the previous one was rejected
+  const canApplyForCorrection = effectiveStatus === 'None' || effectiveStatus === 'Rejected';
+
+  // --- EXTRACT REJECTION REMARK ---
+  // Look backwards through the history to find the most recent 'Rejected' action
+  const rejectionHistory = att.correctionHistory?.filter((h: any) => h.action === 'Rejected') || [];
+  const latestRejection = rejectionHistory[rejectionHistory.length - 1];
+  const rejectionRemark = latestRejection?.remark || "Your request was rejected by HR. No specific remark provided.";
 
   // Format Date for Header
   const dateObj = new Date(data.date);
@@ -62,9 +77,11 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
 
       setActionConfig({
         title: "Success",
-        message: response.message,
+        message: response.message || "Correction request submitted successfully.",
       });
+      // Lock the UI into 'Pending' mode instantly
       setIsRequestedLocally(true);
+
       if (onCorrectionSuccess) {
         onCorrectionSuccess(att._id);
       }
@@ -169,7 +186,7 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
                 size={moderateScale(16)}
                 color="#6366F1"
               />
-              <Text style={[styles.cardTitle, { color: colors.Magic_Violet }]}>
+              <Text style={[styles.cardTitle, { color: "#6366F1" }]}>
                 TODAY'S WORK
               </Text>
             </View>
@@ -213,31 +230,46 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
           </View>
         </View>
 
-        {/* --- CORRECTION BUTTON --- */}
+        {/* --- REJECTION BANNER --- */}
+        {isRejected && (
+          <View style={styles.rejectionBanner}>
+            <Ionicons name="alert-circle" size={moderateScale(20)} color={colors.Danger_Red} />
+            <View style={styles.rejectionTextContainer}>
+              <Text style={styles.rejectionTitle}>Correction Request Rejected</Text>
+              <Text style={styles.rejectionRemark}>{rejectionRemark}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* --- DYNAMIC CORRECTION BUTTON --- */}
         <UniversalButton
-          title={isRequested ? "Correction Requested" : "Request Correction"}
+          title={
+            isPending ? "Correction Pending" :
+              isApproved ? "Correction Approved" :
+                isRejected ? "Reapply for Correction" :
+                  "Request Correction"
+          }
           variant="soft"
-          color={isRequested ? colors.Success_Green : colors.BRAND_PRIMARY}
+          color={
+            isPending ? colors.Warning_Yellow :
+              isApproved ? colors.Success_Green :
+                colors.BRAND_PRIMARY
+          }
           icon={
-            isRequested ? (
-              <Ionicons
-                name="checkmark-circle-outline"
-                size={moderateScale(18)}
-                color={colors.Success_Green}
-              />
+            isPending ? (
+              <Ionicons name="time-outline" size={moderateScale(18)} color={colors.Warning_Yellow} />
+            ) : isApproved ? (
+              <Ionicons name="checkmark-circle-outline" size={moderateScale(18)} color={colors.Success_Green} />
             ) : (
-              <Ionicons
-                name="create-outline"
-                size={moderateScale(18)}
-                color={colors.BRAND_PRIMARY}
-              />
+              <Ionicons name="create-outline" size={moderateScale(18)} color={colors.BRAND_PRIMARY} />
             )
           }
           onPress={() => setCorrectionModalVisible(true)}
           style={{ marginTop: moderateScale(10) }}
-          disabled={isRequested}
+          disabled={!canApplyForCorrection}
         />
       </ScrollView>
+
       <CustomBottomModal
         isVisible={isCorrectionModalVisible}
         onClose={() => setCorrectionModalVisible(false)}
@@ -417,22 +449,32 @@ const styles = StyleSheet.create({
     color: "#334155",
     lineHeight: moderateScale(20),
   },
-  // Correction Button Styles
-  correctionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#EFF6FF", // Light blue background
-    paddingVertical: moderateScale(14),
-    borderRadius: moderateScale(12),
+  // Rejection Banner Styles
+  rejectionBanner: {
+    flexDirection: 'row',
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: "#DBEAFE",
-    marginTop: moderateScale(10),
-    gap: moderateScale(8),
+    borderColor: '#FEE2E2',
+    padding: moderateScale(12),
+    borderRadius: moderateScale(12),
+    marginTop: moderateScale(8),
+    marginBottom: moderateScale(12),
+    alignItems: 'flex-start',
+    gap: moderateScale(10),
   },
-  correctionButtonText: {
+  rejectionTextContainer: {
+    flex: 1,
+  },
+  rejectionTitle: {
     fontFamily: FONTS.bold,
-    fontSize: moderateScale(14),
-    color: colors.BRAND_PRIMARY, // Assuming you have BRAND_PRIMARY in your theme
+    fontSize: moderateScale(13),
+    color: colors.Danger_Red,
+    marginBottom: moderateScale(2),
+  },
+  rejectionRemark: {
+    fontFamily: FONTS.medium,
+    fontSize: moderateScale(12),
+    color: '#991B1B',
+    lineHeight: moderateScale(16),
   },
 });

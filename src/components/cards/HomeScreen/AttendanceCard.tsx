@@ -239,7 +239,7 @@ export default function AttendanceCard() {
         <View style={styles.buttonContainer}>
           {status === "loading" && (
             <View style={styles.loaderWrapper}>
-              <ActivityIndicator size="large" color={colors.BRAND_PRIMARY} />
+              <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
               <Text style={styles.loadingText}>Verifying...</Text>
             </View>
           )}
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     color: "#6B7280",
   },
-  activeModeText: { color: colors.BRAND_PRIMARY, fontFamily: FONTS.bold },
+  activeModeText: { color: colors.BRAND_SECONDARY, fontFamily: FONTS.bold },
   infoBox: {
     flexDirection: "row",
     backgroundColor: "#F9FAFB",
