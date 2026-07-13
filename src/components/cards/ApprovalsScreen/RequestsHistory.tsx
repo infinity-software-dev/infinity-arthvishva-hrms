@@ -22,7 +22,7 @@ const RequestsHistory = () => {
     if (loading && !refreshing && history.length === 0) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={colors.BRAND_PRIMARY} />
+                <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
             </View>
         );
     }
@@ -69,7 +69,7 @@ const RequestsHistory = () => {
                 ListFooterComponent={
                     loadingMore ? (
                         <View style={styles.footerLoader}>
-                            <ActivityIndicator size="small" color={colors.BRAND_PRIMARY} />
+                            <ActivityIndicator size="small" color={colors.BRAND_SECONDARY} />
                         </View>
                     ) : null
                 }
@@ -121,8 +121,8 @@ const styles = StyleSheet.create({
         borderColor: "#E2E8F0",
     },
     chipActive: {
-        backgroundColor: colors.BRAND_PRIMARY,
-        borderColor: colors.BRAND_PRIMARY,
+        backgroundColor: colors.BRAND_SECONDARY,
+        borderColor: colors.BRAND_SECONDARY,
     },
     chipText: {
         fontFamily: FONTS.semiBold,

@@ -101,6 +101,13 @@ const PayrollDetailModal: React.FC<PayrollDetailModalProps> = ({
                             <Text style={styles.finLabel}>Allowances</Text>
                             <Text style={styles.finAmount}>₹{slip.earnings?.allowances.toFixed(2)}</Text>
                         </View>
+                        {/* INJECTED REIMBURSEMENTS ROW */}
+                        {slip.earnings?.reimbursements > 0 && (
+                            <View style={styles.finRow}>
+                                <Text style={styles.finLabel}>Reimbursements</Text>
+                                <Text style={styles.finAmount}>₹{slip.earnings?.reimbursements.toFixed(2)}</Text>
+                            </View>
+                        )}
                         <View style={[styles.finRow, styles.finTotalRow]}>
                             <Text style={styles.finTotalLabel}>Gross</Text>
                             <Text style={styles.finTotalAmount}>₹{slip.earnings?.totalGross.toFixed(2)}</Text>
@@ -125,6 +132,31 @@ const PayrollDetailModal: React.FC<PayrollDetailModalProps> = ({
                         </View>
                     </View>
                 </View>
+
+                {/* ── INJECTED REIMBURSEMENTS AUDIT TRAIL ── */}
+                {slip.reimbursementsList && slip.reimbursementsList.length > 0 && (
+                    <View style={styles.breakdownSection}>
+                        <Text style={styles.sectionTitle}>Reimbursements Breakdown</Text>
+                        {slip.reimbursementsList.map((item: any, index: number) => {
+                            return (
+                                <View key={`reimburse-${index}`} style={styles.breakdownRow}>
+                                    <View style={[styles.breakdownLeft, { flex: 1 }]}>
+                                        <View style={[styles.iconContainer, { backgroundColor: "#ECFDF5" }]}>
+                                            <Ionicons name="receipt" size={moderateScale(14)} color="#10B981" />
+                                        </View>
+                                        <View style={{ flex: 1, paddingRight: moderateScale(8) }}>
+                                            <Text style={styles.breakdownDate}>{formatDate(item.expenseDate)}</Text>
+                                            <Text style={styles.reimbursementReason} numberOfLines={1}>{item.reason}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.breakdownRight}>
+                                        <Text style={styles.breakdownValue}>+₹{item.amount}</Text>
+                                    </View>
+                                </View>
+                            );
+                        })}
+                    </View>
+                )}
 
                 {/* ── PAID DAYS AUDIT TRAIL ── */}
                 {slip.paidDaysBreakdown && slip.paidDaysBreakdown.length > 0 && (
@@ -298,6 +330,12 @@ const styles = StyleSheet.create({
         fontSize: moderateScale(13),
         color: "#1E293B",
     },
+    reimbursementReason: { // Only added this one specifically for the new reason text
+        fontFamily: FONTS.medium,
+        fontSize: moderateScale(11),
+        color: "#64748B",
+        marginTop: moderateScale(2),
+    },
     breakdownRight: {
         flexDirection: "row",
         alignItems: "center",
@@ -316,7 +354,7 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.bold,
         fontSize: moderateScale(14),
         color: "#0F172A",
-        width: moderateScale(30),
+        minWidth: moderateScale(40), // slightly adjusted from original width 30 to minWidth 40 to accommodate larger string lengths like '+25000'
         textAlign: "right",
     },
 });

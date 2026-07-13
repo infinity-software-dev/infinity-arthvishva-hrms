@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, LayoutAnimation } from
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
-import { WorkReport } from "@/hooks/useTeamReports";
+import { WorkReport } from "@/services/teamReportsService";
 
 interface CardProps {
     item: WorkReport;

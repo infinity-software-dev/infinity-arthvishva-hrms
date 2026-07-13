@@ -1,23 +1,43 @@
-import { View, Image, StyleSheet } from "react-native";
+// src/app/(main)/screens/reimburse.tsx
+import { View, StyleSheet } from "react-native";
 import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { colors } from "@/constants/theme";
 import { CustomHeader } from "@/components/navbar/CustomHeader";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { ModernTopTabBar } from "@/components/navbar/ModernTopBar";
+import { colors } from "@/constants/theme";
+import { SafeAreaView } from "react-native-safe-area-context";
+import ReimbursementForm from "@/components/cards/ReimbursementScreen/ReimbursementForm";
+import ReimbursementHistory from "@/components/cards/ReimbursementScreen/ReimbursementHistory";
 
-const ExpenseScreen = () => {
+const Tab = createMaterialTopTabNavigator();
+
+const ReimbursementScreen = () => {
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      style={{ flex: 1, backgroundColor: colors.Base_Background }}
       edges={["bottom"]}
     >
-      <CustomHeader title="Expenses" />
-
       <View style={styles.container}>
-        <Image
-          source={require("@/assets/images/coming-soon.jpg")}
-          style={styles.image}
-          resizeMode="contain"
-        />
+        <CustomHeader title="Apply Reimbursement" />
+
+        <Tab.Navigator
+          initialRouteName="ApplyReimbursement"
+          tabBar={(props) => <ModernTopTabBar {...props} />}
+          screenOptions={{
+            swipeEnabled: true,
+          }}
+        >
+          <Tab.Screen
+            name="ApplyReimbursement"
+            component={ReimbursementForm}
+            options={{ title: "Apply" }}
+          />
+          <Tab.Screen
+            name="ReimbursementHistory"
+            component={ReimbursementHistory}
+            options={{ title: "History" }}
+          />
+        </Tab.Navigator>
       </View>
     </SafeAreaView>
   );
@@ -26,13 +46,8 @@ const ExpenseScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: colors.Base_Background,
   },
-  image: {
-    width: 250,
-    height: 250,
-  }
 });
 
-export default ExpenseScreen;
+export default ReimbursementScreen;

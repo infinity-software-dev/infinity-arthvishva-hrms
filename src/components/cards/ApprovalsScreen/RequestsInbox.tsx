@@ -33,7 +33,7 @@ const RequestsInbox = () => {
     if (loading && !refreshing) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={colors.BRAND_PRIMARY} />
+                <ActivityIndicator size="large" color={colors.BRAND_SECONDARY} />
             </View>
         );
     }

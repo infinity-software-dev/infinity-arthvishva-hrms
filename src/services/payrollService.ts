@@ -50,6 +50,7 @@ export async function generateEmployeePayroll(
     const response = await apiClient.post("/api/app/payroll/preview", payload);
 
     // The backend uses ApiResponse, so the actual data is inside response.data.data
+    // console.log(response.data.data);
     return response.data.data;
   } catch (error: any) {
     // console.error("Error generating payroll:", error);
