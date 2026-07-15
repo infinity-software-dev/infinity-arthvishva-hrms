@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { View, Text, StyleSheet, Pressable, Animated } from "react-native";
+import { View, Text, StyleSheet, Pressable, Animated, TouchableOpacity } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
@@ -12,6 +12,7 @@ export interface LedgerBalances {
 interface LedgerBalanceCardProps {
   balances: LedgerBalances;
   onViewDetails: (leaveType: string) => void;
+  onViewSandwichPolicy: () => void;
 }
 
 const PUSH_DISTANCE = 4; // The "thickness" of the 3D button
@@ -59,19 +60,28 @@ const ThreeDPressable = ({ children, onPress, style }: any) => {
   );
 };
 
-export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBalanceCardProps) {
+export default function LedgerBalanceCard({
+  balances,
+  onViewDetails,
+  onViewSandwichPolicy
+}: LedgerBalanceCardProps) {
   return (
     <View style={styles.vaultCard}>
       <View style={styles.header}>
         <Ionicons name="wallet-outline" size={moderateScale(18)} color="#475569" />
         <Text style={styles.title}>Available Tokens</Text>
-        <Text style={styles.hintText}>(Tap to view details)</Text> 
+        {/* <Text style={styles.hintText}>(Tap to view details)</Text> */}
+        <TouchableOpacity onPress={onViewSandwichPolicy} style={{ marginLeft: "auto", }}>
+          <Text style={styles.hintText}>
+            View Sandwich Policy
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.balanceContainer}>
         {/* Paid Leaves */}
-        <ThreeDPressable 
-          style={styles.flexBox} 
+        <ThreeDPressable
+          style={styles.flexBox}
           onPress={() => onViewDetails('Paid')}
         >
           <View style={styles.iconCircle}>
@@ -84,8 +94,8 @@ export default function LedgerBalanceCard({ balances, onViewDetails }: LedgerBal
         </ThreeDPressable>
 
         {/* Comp-Offs */}
-        <ThreeDPressable 
-          style={styles.flexBox} 
+        <ThreeDPressable
+          style={styles.flexBox}
           onPress={() => onViewDetails('CompOff')}
         >
           <View style={[styles.iconCircle, { backgroundColor: `${colors.Success_Green}15` }]}>
@@ -126,8 +136,7 @@ const styles = StyleSheet.create({
   hintText: {
     fontFamily: FONTS.medium,
     fontSize: moderateScale(10),
-    color: "#94A3B8",
-    marginLeft: "auto", 
+    color: colors.BRAND_PRIMARY,
   },
   balanceContainer: {
     flexDirection: "row",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -47,8 +47,30 @@ export default function AttendanceCard() {
 
   const [isCheckoutModalVisible, setCheckoutModalVisible] = useState(false);
 
+  // State for the physical device reminder
+  const [isDeviceReminderVisible, setDeviceReminderVisible] = useState(false);
+  const prevStatusRef = useRef(status);
 
   const isLocationBlocked = workMode === "Office" && !isInsideOffice;
+
+  // Watch for successful check-in or check-out to trigger the reminder AFTER they are done
+  useEffect(() => {
+    // Only show for office workers
+    if (workMode === "Office") {
+      const wasPendingAndNowIn = prevStatusRef.current === "pending" && status === "in";
+      const wasInAndNowCompleted = prevStatusRef.current === "in" && status === "completed";
+
+      if (wasPendingAndNowIn || wasInAndNowCompleted) {
+        setDeviceReminderVisible(true);
+      }
+    }
+
+    // FIX: Only update the ref if the status isn't an intermediate loading state
+    if (status !== "loading") {
+      prevStatusRef.current = status;
+    }
+  }, [status, workMode]);
+
 
   const handleFaceError = (title: string, message: string) => {
     setModalTitle(title);
@@ -58,23 +80,19 @@ export default function AttendanceCard() {
 
   const onSwipeComplete = () => {
     if (status === "pending") {
-
-      //  CHECK-IN FLOW
+      // CHECK-IN FLOW
       verifyFaceAction(
         "checkin",
         () => handleCheckInPunch(),
         handleFaceError,
       );
-
     } else if (status === "in") {
-
-      //  CHECK-OUT FLOW
+      // CHECK-OUT FLOW
       verifyFaceAction(
         "checkout",
         () => setCheckoutModalVisible(true),
         handleFaceError,
       );
-
     }
   };
 
@@ -285,6 +303,7 @@ export default function AttendanceCard() {
           )}
         </View>
       </View>
+
       <CustomBottomModal
         isVisible={isCheckoutModalVisible}
         onClose={() => setCheckoutModalVisible(false)}
@@ -295,6 +314,8 @@ export default function AttendanceCard() {
           onCancel={() => setCheckoutModalVisible(false)}
         />
       </CustomBottomModal>
+
+      {/* Existing Error/Alert Modal */}
       <ActionModal
         visible={modalVisible}
         title={modalTitle}
@@ -302,6 +323,16 @@ export default function AttendanceCard() {
         confirmText="Understood"
         onConfirm={() => setModalVisible(false)}
         confirmColor={colors.Danger_Red}
+      />
+
+      {/* NEW: Physical Gate Device Reminder Modal */}
+      <ActionModal
+        visible={isDeviceReminderVisible}
+        title="App Attendance Marked! ✅"
+        message="Please don't forget to also scan your face at the physical gate device to complete your attendance log."
+        confirmText="Okay, I will"
+        onConfirm={() => setDeviceReminderVisible(false)}
+        confirmColor={colors.BRAND_SECONDARY}
       />
     </>
   );
@@ -313,7 +344,6 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(20),
     padding: moderateScale(20),
     marginHorizontal: moderateScale(20),
-    // marginTop: moderateScale(-50),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
@@ -411,7 +441,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: moderateScale(8),
     fontFamily: FONTS.semiBold,
-    color: colors.BRAND_PRIMARY,
+    color: colors.BRAND_SECONDARY,
   },
   completedWrapper: {
     height: moderateScale(60),

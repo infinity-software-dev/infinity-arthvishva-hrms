@@ -1,5 +1,5 @@
 import { submitLeaveRequest, fetchActiveLedgers } from "@/services/leavesService";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Platform } from "react-native";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useIsFocused } from "expo-router";
@@ -27,6 +27,8 @@ export const useApplyLeave = () => {
     type: "success" as "success" | "error",
   });
 
+  const [showSandwichModal, setShowSandwichModal] = React.useState(false);
+
 
   const [activeLedgerTokens, setActiveLedgerTokens] = useState<any[]>([]);
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
@@ -46,6 +48,28 @@ export const useApplyLeave = () => {
     };
     loadData();
   }, [isFocused]);
+
+  React.useEffect(() => {
+    if (fromDate && toDate) {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+
+      let includesSunday = false;
+
+      // Loop through the dates between fromDate and toDate
+      for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+        if (d.getDay() === 0) { // 0 represents Sunday in JavaScript Dates
+          includesSunday = true;
+          break;
+        }
+      }
+
+      // If Sunday is trapped in the range, pop the modal
+      if (includesSunday) {
+        setShowSandwichModal(true);
+      }
+    }
+  }, [fromDate, toDate]);
 
 
   const openLedgerInfo = (type: string) => {
@@ -262,6 +286,7 @@ export const useApplyLeave = () => {
       totalDays,
       actionModal,
       selectedTokenValueSum,
+      showSandwichModal,
     },
     actions: {
       setOptionVisible,
@@ -282,6 +307,7 @@ export const useApplyLeave = () => {
       toggleTokenSelection,
       handleSubmit,
       closeActionModal,
+      setShowSandwichModal
     },
   };
 };

@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { MaterialIcons } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
-import * as Haptics from "expo-haptics"; // ✅ Opinion: Better for Rich UI
+import * as Haptics from "expo-haptics"; //  Opinion: Better for Rich UI
 import { colors, FONTS } from "@/constants/theme";
 
 interface SwipeButtonProps {
@@ -18,7 +18,7 @@ interface SwipeButtonProps {
   title?: string;
   width?: number;
   height?: number;
-  disabled?: boolean; // ✅ Added disabled prop
+  disabled?: boolean; //  Added disabled prop
 }
 
 export default function CustomSwipeButton({
@@ -26,7 +26,7 @@ export default function CustomSwipeButton({
   title = "Swipe to complete",
   width = moderateScale(300),
   height = moderateScale(60),
-  disabled = false, // ✅ Default to false
+  disabled = false, //  Default to false
 }: SwipeButtonProps) {
   const [toggled, setToggled] = useState(false);
 
@@ -38,7 +38,7 @@ export default function CustomSwipeButton({
   const translateX = useSharedValue(0);
 
   const handleComplete = () => {
-    // ✅ Haptic: Success notification
+    //  Haptic: Success notification
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     setToggled(true);
@@ -52,7 +52,7 @@ export default function CustomSwipeButton({
 
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
-      if (toggled || disabled) return; // ✅ Block movement if disabled
+      if (toggled || disabled) return; //  Block movement if disabled
 
       const newValue = Math.max(0, Math.min(event.translationX, maxTranslateX));
       translateX.value = newValue;
@@ -61,7 +61,7 @@ export default function CustomSwipeButton({
       if (toggled || disabled) return;
 
       if (translateX.value > maxTranslateX * 0.75) {
-        // ✅ Haptic: Impact when snapping to complete
+        //  Haptic: Impact when snapping to complete
         runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
 
         translateX.value = withSpring(maxTranslateX, {
@@ -75,18 +75,18 @@ export default function CustomSwipeButton({
 
   const animatedKnobStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
-    // ✅ Visual feedback: Knob turns grey if disabled
+    //  Visual feedback: Knob turns grey if disabled
     backgroundColor: disabled ? "#F3F4F6" : "#FFFFFF",
   }));
 
   const animatedTextStyle = useAnimatedStyle(() => ({
     opacity: 1 - translateX.value / maxTranslateX,
-    // ✅ Text color adjustment for disabled state
+    //  Text color adjustment for disabled state
     color: disabled ? "rgba(255,255,255,0.9)" : "#FFFFFF",
   }));
 
   const animatedTrackStyle = useAnimatedStyle(() => {
-    // ✅ If disabled, keep the track a neutral grey
+    //  If disabled, keep the track a neutral grey
     if (disabled) {
       return { backgroundColor: "#d1d5db" };
     }

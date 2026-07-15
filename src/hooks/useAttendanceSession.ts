@@ -51,7 +51,7 @@ export function useAttendanceSession() {
   };
 
   useEffect(() => {
-    if (isFocused) loadSession();
+    if (isFocused) loadSession(); 
   }, [isFocused]);
 
   useEffect(() => {

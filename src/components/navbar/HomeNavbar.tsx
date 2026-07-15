@@ -56,8 +56,6 @@ const HomeNavbar: React.FC<HomeNavbarProps> = ({ userName = "User" }) => {
     const unsubOnMessage = onMessage(messaging, async (remoteMessage) => {
       // console.log("🔵 Foreground FCM message:", remoteMessage);
 
-      // Context check: Changed fallback from "MagicMenu" to "Infinity HRMS"
-      // to match your current project branding
       const title =
         typeof remoteMessage.data?.title === "string"
           ? remoteMessage.data.title

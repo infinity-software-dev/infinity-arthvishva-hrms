@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -13,19 +13,33 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, FONTS } from '@/constants/theme';
 import { usePayrolls } from "@/hooks/usePayrolls";
 import PayrollCard from "@/components/cards/PayrollScreen/PayrollCard";
+import HistoricalPayrollModal from '@/components/modals/HistoricalPayrollModal';
 
 const OldPayrollTab = () => {
   const { state, actions } = usePayrolls();
 
-  // Fetch the list when the tab mounts
+  // Local state strictly for modal visibility
+  const [isModalVisible, setModalVisible] = useState(false);
+
   useEffect(() => {
     actions.fetchPayrolls();
   }, []);
 
+  const handleCardPress = async (payrollId: string) => {
+    // 1. Call the hook to fetch detailed data
+    const success = await actions.fetchPayrollDetails(payrollId);
+
+    // 2. Only show the modal if the API call succeeded
+    if (success) {
+      setModalVisible(true);
+    }
+  };
+
   const renderHeader = () => (
     <View style={styles.historyHeader}>
       <Text style={styles.sectionTitle}>Statement History</Text>
-      {state.isLoading && (
+      {/* Show loading spinner if fetching list OR fetching details */}
+      {(state.isLoading || state.isFetchingDetails) && (
         <ActivityIndicator size="small" color={colors.BRAND_SECONDARY} />
       )}
     </View>
@@ -39,7 +53,7 @@ const OldPayrollTab = () => {
         renderItem={({ item }) => (
           <PayrollCard
             item={item}
-            onPress={() => console.log("Navigate to Slip Detail", item._id)}
+            onPress={() => handleCardPress(item._id)}
           />
         )}
         contentContainerStyle={styles.listContainer}
@@ -56,11 +70,7 @@ const OldPayrollTab = () => {
         ListEmptyComponent={
           !state.isLoading ? (
             <View style={styles.emptyState}>
-              <Ionicons
-                name="document-text-outline"
-                size={48}
-                color="#CBD5E1"
-              />
+              <Ionicons name="document-text-outline" size={48} color="#CBD5E1" />
               <Text style={styles.emptyTitle}>No statements found</Text>
               <Text style={styles.emptySub}>
                 You haven't generated any payroll slips yet.
@@ -68,6 +78,13 @@ const OldPayrollTab = () => {
             </View>
           ) : null
         }
+      />
+
+      {/* Modal renders using the enriched data stored in the hook state */}
+      <HistoricalPayrollModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        slip={state.selectedSlip}
       />
     </SafeAreaView>
   );

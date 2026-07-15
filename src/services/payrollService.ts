@@ -77,5 +77,10 @@ export async function getPayrollList(
   }
 }
 
+export const getPayrollDetails = async (payrollId: string) => {
+  const response = await apiClient.get(`/api/app/payroll/${payrollId}/details`);
+  return response.data;
+};
+
 //3670.97
 //3187.1

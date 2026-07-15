@@ -34,7 +34,7 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
           <Ionicons
             name="calendar-outline"
             size={14}
-            color={colors.BRAND_PRIMARY}
+            color={colors.BRAND_SECONDARY}
           />
           <Text style={styles.periodText}>
             {formattedFromDate} - {formattedToDate}
@@ -58,7 +58,7 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
           <Ionicons
             name="chevron-forward"
             size={20}
-            color={colors.BRAND_PRIMARY}
+            color={colors.BRAND_SECONDARY}
           />
         </View>
       </View>
@@ -69,14 +69,16 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
         <View style={styles.footItem}>
           <Text style={styles.footLabel}>PAID DAYS</Text>
           <Text style={styles.footValue}>
-            {item.paidDays} / {item.totalDaysInMonth}
+            {/* FIX 1: Updated to match MongoDB schema */}
+            {item.paidDays} / {item.totalCycleDays}
           </Text>
         </View>
         <View style={styles.verticalDivider} />
         <View style={styles.footItem}>
           <Text style={styles.footLabel}>GROSS EARNINGS</Text>
           <Text style={styles.footValue}>
-            ₹{(item.grossEarnings || 0).toLocaleString("en-IN")}
+            {/* FIX 2: Updated to map to earnings.totalGross */}
+            ₹{(item.earnings?.totalGross || 0).toLocaleString("en-IN")}
           </Text>
         </View>
       </View>

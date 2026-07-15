@@ -1,4 +1,4 @@
-import { generateEmployeePayroll, getPayrollList } from "@/services/payrollService";
+import { generateEmployeePayroll, getPayrollList, getPayrollDetails } from "@/services/payrollService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { formatDateForApi } from "@/utils/TimeUtils";
 import { useState, useEffect, useCallback } from "react";
@@ -10,16 +10,19 @@ export const usePayrolls = () => {
     new Date(new Date().setMonth(new Date().getMonth() - 1))
   );
   const [toDate, setToDate] = useState<Date>(new Date());
+
   // Data State
   const [payrollList, setPayrollList] = useState<any[]>([]);
   const [latestSlip, setLatestSlip] = useState<any>(null);
   const [selectedSlip, setSelectedSlip] = useState<any | null>(null);
+
+  // Loading States
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false); // NEW
 
   // UI State
   const [showCycleModal, setShowCycleModal] = useState(false);
-
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [actionModal, setActionModal] = useState({
@@ -33,9 +36,8 @@ export const usePayrolls = () => {
   useEffect(() => {
     const currentUser = useAuthStore.getState().user;
     setEmployeeId(currentUser?._id || "");
-    fetchPayrolls()
+    fetchPayrolls();
   }, []);
-
 
   const formatDateForUI = (date: Date) => {
     return date.toLocaleDateString("en-GB", {
@@ -56,9 +58,7 @@ export const usePayrolls = () => {
         self: true
       });
 
-      // If data is already an array, use it directly. Otherwise, look for .payrolls
       const actualPayrolls = Array.isArray(data) ? data : (data?.payrolls || []);
-
       setPayrollList(actualPayrolls);
     } catch (error: any) {
       console.error("Fetch failed", error);
@@ -73,34 +73,50 @@ export const usePayrolls = () => {
     }
   }, [fromDate, toDate]);
 
-  // Helper to generate strict "Jan-Feb" cycle options, capping at the current active cycle
+  // NEW: Fetch specific payroll details
+  const fetchPayrollDetails = async (payrollId: string) => {
+    setIsFetchingDetails(true);
+    try {
+      const data = await getPayrollDetails(payrollId);
+      // Assuming your backend returns { data: { ... } } or just the object
+      const enrichedSlip = data.data || data;
+      setSelectedSlip(enrichedSlip);
+      return true; // Return success boolean for the component
+    } catch (error: any) {
+      console.error("Failed to fetch slip details", error);
+      setActionModal({
+        visible: true,
+        type: "error",
+        title: "Details Fetch Failed",
+        message: error.message || "Could not load statement details."
+      });
+      return false; // Return failure
+    } finally {
+      setIsFetchingDetails(false);
+    }
+  };
+
   const getCycleOptions = () => {
     const options = [];
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     const now = new Date();
     const currentDate = now.getDate();
-    let currentMonth = now.getMonth(); // 0-indexed (0 = Jan, 11 = Dec)
+    let currentMonth = now.getMonth();
     let currentYear = now.getFullYear();
 
-    // 1. Determine the "End Month" of the currently active cycle
-    // If today is <= the 20th, the current cycle ends THIS month.
-    // If today is > the 20th, the current cycle ends NEXT month.
     let targetEndMonth = currentDate > 20 ? currentMonth + 1 : currentMonth;
     let targetEndYear = currentYear;
 
-    // Handle December overflow into January of the next year
     if (targetEndMonth > 11) {
       targetEndMonth = 0;
       targetEndYear++;
     }
 
-    // 2. Generate the current cycle and the previous 5 cycles (6 total)
     for (let i = 0; i < 6; i++) {
       let endM = targetEndMonth - i;
       let endY = targetEndYear;
 
-      // Correct negative months (e.g., stepping back from Jan to Dec)
       while (endM < 0) {
         endM += 12;
         endY--;
@@ -114,20 +130,14 @@ export const usePayrolls = () => {
         startY--;
       }
 
-      // 3. Format the strings perfectly
-      const label = `${monthNames[startM]}-${monthNames[endM]}`; // "Jan-Feb"
-
-      // 4. Push to options array using native local Date constructors
-      // Note: The Date constructor takes 0-indexed months, so we use startM and endM directly!
+      const label = `${monthNames[startM]}-${monthNames[endM]}`;
       options.push({
         label: label,
         year: endY,
-        // new Date(year, monthIndex, day, hours, minutes, seconds)
-        fromDate: new Date(startY, startM, 21, 0, 0, 0), // Exactly midnight local time
-        toDate: new Date(endY, endM, 20, 23, 59, 59)     // Exactly 11:59 PM local time
+        fromDate: new Date(startY, startM, 21, 0, 0, 0),
+        toDate: new Date(endY, endM, 20, 23, 59, 59)
       });
     }
-
     return options;
   };
 
@@ -142,14 +152,11 @@ export const usePayrolls = () => {
     setIsGenerating(true);
 
     try {
-      // 1. Call the real backend controller
       const response = await generateEmployeePayroll({
         startDate: formatDateForApi(fromDate),
         endDate: formatDateForApi(toDate),
       });
-
       setLatestSlip(response);
-
     } catch (error: any) {
       setActionModal({
         visible: true,
@@ -174,6 +181,7 @@ export const usePayrolls = () => {
       selectedSlip,
       isLoading,
       isGenerating,
+      isFetchingDetails, // Exposed to UI
       showFromPicker,
       showToPicker,
       actionModal,
@@ -189,6 +197,7 @@ export const usePayrolls = () => {
       formatDateForUI,
       handleGenerate,
       fetchPayrolls,
+      fetchPayrollDetails, // Exposed to UI
       closeActionModal,
       setShowCycleModal,
       getCycleOptions,

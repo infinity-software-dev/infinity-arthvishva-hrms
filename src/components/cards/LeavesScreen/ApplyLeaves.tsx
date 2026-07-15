@@ -21,6 +21,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import LedgerSelectionVault from "./LedgerSelectionVault";
 import LedgerBalanceCard from "./LedgerBalanceCard";
 import LedgerTokenDetails from "@/components/modals/LedgerTokenDetails";
+import SandwichRuleModal from "@/components/modals/SandwichRuleModal";
 
 export default function ApplyLeaves() {
   const { state, actions } = useApplyLeave();
@@ -57,6 +58,7 @@ export default function ApplyLeaves() {
               .reduce((sum, token) => sum + (token.value || 1), 0)
           }}
           onViewDetails={actions.openLedgerInfo}
+          onViewSandwichPolicy={() => actions.setShowSandwichModal(true)}
         />
 
         {/* Form Section */}
@@ -159,6 +161,7 @@ export default function ApplyLeaves() {
                 Selected
               </Text>
             </View>
+
 
             <TouchableOpacity
               style={styles.halfDayToggle}
@@ -372,6 +375,10 @@ export default function ApplyLeaves() {
           </CustomBottomModal>
         </>
       )}
+      <SandwichRuleModal
+        isVisible={state.showSandwichModal}
+        onClose={() => actions.setShowSandwichModal(false)}
+      />
     </>
   );
 }
