@@ -106,6 +106,7 @@ export const useProfile = () => {
 
           // 2. Refresh the profile so the UI instantly updates and hides the registration button
           await loadProfile();
+          await fetchLatestProfile();
 
           // 3. Show Success Alert
           setActionModalConfig({

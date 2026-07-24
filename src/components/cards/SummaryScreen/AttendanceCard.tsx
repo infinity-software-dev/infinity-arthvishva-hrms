@@ -27,6 +27,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
   const isAbsent = status === "A" || status === "Absent";
   const isHalfDay = status === "H" || status === "Half";
   const isCompOff = status === "CO" || status === "CompOff";
+  const isLeave = status === "L" || status === "Leave";
 
   // 2. Assign unique colors for each status badge
   let badgeColor = "#64748B"; // Default (WeekOff or undefined status)
@@ -39,6 +40,8 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
     badgeColor = colors.Warning_Yellow;
   } else if (isCompOff) {
     badgeColor = colors.BRAND_PRIMARY
+  }else if (isLeave) {
+    badgeColor = colors.Rise_Orange
   }
 
   return (

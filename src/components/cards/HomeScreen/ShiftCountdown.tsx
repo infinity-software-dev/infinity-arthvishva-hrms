@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { moderateScale } from "react-native-size-matters";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors, FONTS } from "@/constants/theme";
@@ -20,26 +20,37 @@ export default function ShiftCountdown({
   });
   const [progress, setProgress] = useState(0);
   const [isShiftOver, setIsShiftOver] = useState(false);
+  
+  // NEW: State to track which expected out time to show
+  const [showHalfDay, setShowHalfDay] = useState(false);
 
-  // Calculate start time, end time, and formatting
-  const { formattedStartTime, endTime, formattedEndTime, shiftDurationMs } =
-    useMemo(() => {
-      const durationMs = shiftDurationHours * 60 * 60 * 1000;
-      const end = new Date(checkInTime.getTime() + durationMs);
+  // Calculate start time, end times, and formatting
+  const {
+    formattedStartTime,
+    endTime,
+    formattedEndTime,
+    formattedHalfDayEndTime,
+    shiftDurationMs,
+  } = useMemo(() => {
+    const fullDurationMs = shiftDurationHours * 60 * 60 * 1000;
+    const halfDurationMs = (shiftDurationHours / 2) * 60 * 60 * 1000;
 
-      return {
-        formattedStartTime: checkInTime.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        endTime: end,
-        formattedEndTime: end.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        shiftDurationMs: durationMs,
-      };
-    }, [checkInTime, shiftDurationHours]);
+    const end = new Date(checkInTime.getTime() + fullDurationMs);
+    const halfEnd = new Date(checkInTime.getTime() + halfDurationMs);
+
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+
+    return {
+      formattedStartTime: checkInTime.toLocaleTimeString([], timeOptions),
+      endTime: end,
+      formattedEndTime: end.toLocaleTimeString([], timeOptions),
+      formattedHalfDayEndTime: halfEnd.toLocaleTimeString([], timeOptions),
+      shiftDurationMs: fullDurationMs,
+    };
+  }, [checkInTime, shiftDurationHours]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,7 +72,7 @@ export default function ShiftCountdown({
         const timePassed = now - checkInTime.getTime();
         const percentComplete = Math.min(
           (timePassed / shiftDurationMs) * 100,
-          100,
+          100
         );
         setProgress(percentComplete);
       }
@@ -101,16 +112,27 @@ export default function ShiftCountdown({
         <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
       </View>
 
-      {/* NEW: Side-by-side Check-In and Check-Out timeline */}
       <View style={styles.timeRangeRow}>
+        {/* Left Side: Check In */}
         <View style={styles.timeBlock}>
           <Text style={styles.metaLabel}>Checked In</Text>
           <Text style={styles.metaValue}>{formattedStartTime}</Text>
         </View>
-        <View style={styles.timeBlockRight}>
+
+        {/* Right Side: Clickable Expected Out */}
+        <TouchableOpacity 
+          style={styles.timeBlockRight}
+          activeOpacity={0.7}
+          onPress={() => setShowHalfDay((prev) => !prev)}
+        >
           <Text style={styles.metaLabel}>Expected Out</Text>
-          <Text style={styles.metaValue}>{formattedEndTime}</Text>
-        </View>
+          <Text style={styles.metaValue}>
+            {showHalfDay ? formattedHalfDayEndTime : formattedEndTime}
+          </Text>
+          <Text style={styles.subMetaLabel}>
+            {showHalfDay ? "Half Day" : "Full Day"}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -166,14 +188,17 @@ const styles = StyleSheet.create({
   timeRangeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start", // Ensures alignment at the top even with the extra label on the right
     width: "100%",
     paddingHorizontal: moderateScale(4),
   },
   timeBlock: {
     alignItems: "flex-start",
+    flex: 1,
   },
   timeBlockRight: {
     alignItems: "flex-end",
+    flex: 1,
   },
   metaLabel: {
     fontFamily: "Nunito_600SemiBold",
@@ -186,4 +211,10 @@ const styles = StyleSheet.create({
     color: "#374151",
     marginTop: moderateScale(2),
   },
+  subMetaLabel: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: moderateScale(10),
+    color: colors.BRAND_PRIMARY, // Using primary color to hint it's interactive/toggled
+    marginTop: moderateScale(2),
+  }
 });

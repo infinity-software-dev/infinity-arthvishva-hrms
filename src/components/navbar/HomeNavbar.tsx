@@ -6,7 +6,6 @@ import { moderateScale } from "react-native-size-matters";
 import { User } from "lucide-react-native";
 import { colors, FONTS } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
-import { toTitleCase } from "@/utils/TextHelpers";
 import { formattedDate, getGreeting } from "@/utils/Date-TimeHelpers";
 import { LinearGradient } from "expo-linear-gradient";
 import HelloWave from "../animations/HelloWave";
@@ -105,8 +104,8 @@ const HomeNavbar: React.FC<HomeNavbarProps> = ({ userName = "User" }) => {
               <Text style={styles.dateText}> • {formattedDate}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.userName} numberOfLines={1} onPress={()=>{}}>
-                {toTitleCase(userName.split(" ")[0])}
+              <Text style={styles.userName} numberOfLines={1} onPress={() => { }}>
+                {userName}
               </Text>
               {isFocused && <HelloWave />}
             </View>

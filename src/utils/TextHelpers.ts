@@ -16,6 +16,22 @@ export const toTitleCase = (name: string): string => {
     .join(" ");
 };
 
-export const getFirstName = (userName: string): string => {
-  return userName?.split(" ")[0] || "Employee";
+export const getFirstName = (fullName: string) => {
+  if (!fullName) return "";
+
+  const trimmed = fullName.trim();
+
+  // 1. Remove common prefixes (supports optional dot AND optional space, e.g., "Ms.Pooja" or "Ms. Pooja")
+  const cleanedName = trimmed.replace(
+    /^(mr|mrs|ms|miss|dr|prof|mx|shri|smt|er|adv)\.?\s*/i,
+    ""
+  );
+
+  // 2. Extract first word
+  const firstName = cleanedName.split(/\s+/)[0];
+
+  // 3. Fallback to original first word if removing prefix resulted in an empty string
+  const result = firstName || trimmed.split(/\s+/)[0];
+
+  return toTitleCase(result);
 };

@@ -105,15 +105,15 @@ export const ACTIONS: QuickActionItem[] = [
     iconColor: "#0284C7",
     route: "/(main)/screens/gurukul",
   },
-  {
-    id: "resignation",
-    title: "Resignation",
-    icon: "exit-outline", // Or "document-text-outline" if you prefer a form icon
-    iconFamily: "Ionicons",
-    bgColor: "#FFE4E6",   // Soft Rose background
-    iconColor: "#E11D48", // Deep Red/Rose icon
-    route: "/(main)/screens/resignation",
-  },
+  // {
+  //   id: "resignation",
+  //   title: "Resignation",
+  //   icon: "exit-outline", // Or "document-text-outline" if you prefer a form icon
+  //   iconFamily: "Ionicons",
+  //   bgColor: "#FFE4E6",   // Soft Rose background
+  //   iconColor: "#E11D48", // Deep Red/Rose icon
+  //   route: "/(main)/screens/resignation",
+  // },
   {
     id: "helpdesk",
     title: "Helpdesk",
