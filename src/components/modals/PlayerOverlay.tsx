@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 import { useVideoPlayer, VideoView } from "expo-video";
+import YoutubeIframe from "react-native-youtube-iframe";
 import { colors, FONTS } from "@/constants/theme";
 import { VideoProps } from "@/components/cards/GurukulScreen/VideoCard";
 import { StatusBar } from "expo-status-bar";
@@ -12,11 +13,28 @@ interface PlayerOverlayProps {
     onClose: () => void;
 }
 
+// Helper to safely extract the YouTube Video ID from various YouTube URL formats
+const getYoutubeId = (url?: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+};
+
 export default function PlayerOverlay({ video, onClose }: PlayerOverlayProps) {
+
+    // Determine player types
+    const isYoutube = video?.videoType === 'youtube';
+    const isDirect = video?.videoType === 'direct';
+
+    // We strictly pass null to expo-video if it's a YouTube link so it doesn't try to parse HTML
+    const expoVideoSource = isDirect && video?.videoUrl ? video.videoUrl : null;
+    const youtubeId = useMemo(() => isYoutube ? getYoutubeId(video?.videoUrl) : null, [video, isYoutube]);
+
     // Unconditional Hook Call to abide by React rules
-    const player = useVideoPlayer(video?.cloudinaryUrl || null, (playerInstance) => {
+    const player = useVideoPlayer(expoVideoSource, (playerInstance) => {
         playerInstance.loop = false;
-        if (video?.cloudinaryUrl) {
+        if (expoVideoSource) {
             playerInstance.play();
         }
     });
@@ -50,17 +68,31 @@ export default function PlayerOverlay({ video, onClose }: PlayerOverlayProps) {
 
                 {/* Video Player Canvas Container */}
                 <View style={styles.videoWrapper}>
-                    <VideoView
-                        player={player}
-                        style={styles.videoPlayer}
-                        nativeControls={true}
-                        contentFit="contain"
-                    />
+                    {isYoutube && youtubeId ? (
+                        // YouTube Player Render
+                        <View style={styles.youtubeContainer}>
+                            <YoutubeIframe
+                                height={moderateScale(220)} // Adjust height to maintain approx 16:9 ratio
+                                play={true}
+                                videoId={youtubeId}
+                                webViewStyle={{ backgroundColor: 'black' }}
+                            />
+                        </View>
+                    ) : (
+                        // Native Expo Video Render (Direct/Cloudinary)
+                        <VideoView
+                            player={player}
+                            style={styles.videoPlayer}
+                            nativeControls={true}
+                            contentFit="contain"
+                        />
+                    )}
                 </View>
 
                 {/* Info & Meta Details Section */}
                 <View style={styles.detailsContainer}>
-                    {video?.description ? (
+                    {/* FIXED: Check if the string actually exists and has length, rather than just truthy evaluation */}
+                    {(video?.description && video.description.length > 0) ? (
                         <>
                             <Text style={styles.sectionHeading}>Description</Text>
                             <Text style={styles.videoDescription}>{video.description}</Text>
@@ -135,10 +167,15 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 20,
         elevation: 10,
+        // Removed fixed aspectRatio here to allow inner components to size themselves if needed
     },
     videoPlayer: {
         width: "100%",
         aspectRatio: 16 / 9,
+    },
+    youtubeContainer: {
+        width: "100%",
+        justifyContent: "center",
     },
     detailsContainer: {
         flex: 1,

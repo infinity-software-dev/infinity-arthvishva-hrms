@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
   Platform,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
@@ -67,13 +68,19 @@ const GlobalAlertScreen = () => {
   // ── NEW LOGIC: Dynamic Button Handler ──
   const handlePrimaryAction = () => {
     if (platformLink) {
-      // If there is a link, open the App Store / Play Store
+      // 1. If link exists, open it (App Store / Play Store / Web)
       Linking.openURL(platformLink).catch((err) => {
         console.error("Failed to open URL:", err);
       });
-    } else {
-      // If there is no link, just dismiss the alert and enter the app
+    } else if (alertData?.isSkippable) {
       navigateForward();
+    } else {
+      if (Platform.OS === "android") {
+        BackHandler.exitApp();
+      } else {
+        // iOS guidelines prevent programmatic exits; keeping the screen locked
+        // (If you use 'react-native-exit-app', call RNExitApp.exitApp() here)
+      }
     }
   };
 

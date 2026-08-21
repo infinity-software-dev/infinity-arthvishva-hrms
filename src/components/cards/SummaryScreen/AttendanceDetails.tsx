@@ -9,6 +9,7 @@ import { submitAttendanceCorrection } from "@/services/attendanceService";
 import CustomBottomModal from "@/components/modals/CustomBottomModal";
 import CorrectionModal from "@/components/modals/CorrectionModal";
 import ActionModal from "@/components/modals/AlertModal";
+import { formatHours } from "@/utils/Date-TimeHelpers";
 
 interface Props {
   data: AttendanceDayRecord;
@@ -112,7 +113,7 @@ export default function AttendanceDetails({ data, onCorrectionSuccess }: Props) 
           </View>
           <View style={styles.hoursPill}>
             <Text style={styles.hoursPillText}>
-              {att.totalHours ? `${att.totalHours}h` : "--"} logged
+              {att.totalHours ? `${formatHours(att.totalHours)} logged` : "--"}
             </Text>
           </View>
         </View>

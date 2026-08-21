@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
@@ -9,9 +9,10 @@ export interface VideoProps {
   _id: string;
   title: string;
   description?: string;
-  cloudinaryUrl: string;
+  videoUrl: string; // <-- Changed from cloudinaryUrl
+  videoType: 'youtube' | 'direct'; // <-- Added this
   thumbnail?: string;
-  duration?: number; // In seconds
+  duration?: number;
   createdAt: string;
   isActive: boolean;
   createdBy?: {
@@ -25,7 +26,12 @@ interface VideoCardProps {
   onPress: (video: VideoProps) => void;
 }
 
+const DEFAULT_THUMBNAIL = "https://res.cloudinary.com/diyxmoyuj/image/upload/v1783577195/new_hrms_employees_data/IA11111/vka3akbv5jkdjajxjxwm.png";
+
 export default function VideoCard({ video, onPress }: VideoCardProps) {
+  // State to track if the provided image URL fails to load
+  const [imgError, setImgError] = useState(false);
+
   // Helper to convert seconds to MM:SS
   const formatDuration = (totalSeconds?: number) => {
     if (!totalSeconds) return "00:00";
@@ -49,17 +55,18 @@ export default function VideoCard({ video, onPress }: VideoCardProps) {
       style={[styles.card, !video.isActive && styles.inactiveCard]}
       activeOpacity={0.8}
       onPress={() => onPress(video)}
+      disabled={!video.isActive}
     >
       {/* Thumbnail Section */}
       <View style={styles.thumbnailContainer}>
         <Image
           source={{
-            uri:
-              video.thumbnail ||
-              "https://via.placeholder.com/600x400/E2E8F0/94A3B8?text=No+Thumbnail",
+            // Use default if there's an error loading, OR if the thumbnail is empty/null
+            uri: (!imgError && video.thumbnail) ? video.thumbnail : DEFAULT_THUMBNAIL,
           }}
           style={styles.thumbnail}
           resizeMode="cover"
+          onError={() => setImgError(true)} // Triggers if the image URL is invalid or broken
         />
 
         {/* Play Icon Overlay */}
@@ -71,8 +78,8 @@ export default function VideoCard({ video, onPress }: VideoCardProps) {
           />
         </View>
 
-        {/* Duration Pill */}
-        {video.duration && (
+        {/* FIXED: Safely check for undefined, and ensure it is greater than 0 */}
+        {(video.duration ?? 0) > 0 && (
           <View style={styles.durationPill}>
             <Text style={styles.durationText}>
               {formatDuration(video.duration)}
@@ -154,13 +161,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)", // Slight dimming to make the play button pop
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   durationPill: {
     position: "absolute",
     bottom: moderateScale(10),
     right: moderateScale(10),
-    backgroundColor: "rgba(15, 23, 42, 0.8)", // Dark slate background
+    backgroundColor: "rgba(15, 23, 42, 0.8)",
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(4),
     borderRadius: moderateScale(6),

@@ -1,6 +1,6 @@
 import { colors, FONTS } from "@/constants/theme";
 import { AttendanceDayRecord } from "@/types/attendance";
-import { formatTime } from "@/utils/Date-TimeHelpers";
+import { formatHours, formatTime } from "@/utils/Date-TimeHelpers";
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { moderateScale } from "react-native-size-matters";
@@ -16,6 +16,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
 }) => {
   const { date, status, myAttendance, isWeekOff } = data;
   const dateObj = new Date(date);
+
 
   const dayNum = dateObj.getDate().toString().padStart(2, "0");
   const dayName = dateObj
@@ -40,7 +41,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
     badgeColor = colors.Warning_Yellow;
   } else if (isCompOff) {
     badgeColor = colors.BRAND_PRIMARY
-  }else if (isLeave) {
+  } else if (isLeave) {
     badgeColor = colors.Rise_Orange
   }
 
@@ -83,7 +84,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({
           <View style={[styles.timeRow, styles.hoursRow]}>
             <Text style={styles.timeLabel}>HRS</Text>
             <Text style={styles.hoursValue}>
-              {myAttendance.totalHours ? `${myAttendance.totalHours}h` : "--"}
+              {myAttendance.totalHours ? formatHours(myAttendance.totalHours) : "--"}
             </Text>
           </View>
 
