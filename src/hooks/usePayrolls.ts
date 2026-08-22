@@ -1,27 +1,28 @@
-import { generateEmployeePayroll, getPayrollList, getPayrollDetails } from "@/services/payrollService";
+import { generateEmployeePayroll, getPayrollList, getPayrollDetails, downloadPayrollPdf } from "@/services/payrollService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { formatDateForApi } from "@/utils/TimeUtils";
 import { useState, useEffect, useCallback } from "react";
 
+// FIX: Import from the legacy module to restore previous TypeScript definitions
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+
 export const usePayrolls = () => {
   const [employeeId, setEmployeeId] = useState("");
-  // Default to past 6 months to today
   const [fromDate, setFromDate] = useState<Date>(
     new Date(new Date().setMonth(new Date().getMonth() - 1))
   );
   const [toDate, setToDate] = useState<Date>(new Date());
 
-  // Data State
   const [payrollList, setPayrollList] = useState<any[]>([]);
   const [latestSlip, setLatestSlip] = useState<any>(null);
   const [selectedSlip, setSelectedSlip] = useState<any | null>(null);
 
-  // Loading States
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isFetchingDetails, setIsFetchingDetails] = useState(false); // NEW
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  // UI State
   const [showCycleModal, setShowCycleModal] = useState(false);
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
@@ -32,7 +33,6 @@ export const usePayrolls = () => {
     message: "",
   });
 
-  // Auto-fetch Employee ID
   useEffect(() => {
     const currentUser = useAuthStore.getState().user;
     setEmployeeId(currentUser?._id || "");
@@ -73,15 +73,13 @@ export const usePayrolls = () => {
     }
   }, [fromDate, toDate]);
 
-  // NEW: Fetch specific payroll details
   const fetchPayrollDetails = async (payrollId: string) => {
     setIsFetchingDetails(true);
     try {
       const data = await getPayrollDetails(payrollId);
-      // Assuming your backend returns { data: { ... } } or just the object
       const enrichedSlip = data.data || data;
       setSelectedSlip(enrichedSlip);
-      return true; // Return success boolean for the component
+      return true;
     } catch (error: any) {
       console.error("Failed to fetch slip details", error);
       setActionModal({
@@ -90,7 +88,7 @@ export const usePayrolls = () => {
         title: "Details Fetch Failed",
         message: error.message || "Could not load statement details."
       });
-      return false; // Return failure
+      return false;
     } finally {
       setIsFetchingDetails(false);
     }
@@ -169,6 +167,61 @@ export const usePayrolls = () => {
     }
   };
 
+  const handlePdfDownload = async (payrollId: string) => {
+    setIsDownloading(true);
+    try {
+      const base64Data = await downloadPayrollPdf(payrollId);
+
+      // Utilize FileSystem mapped from the legacy import
+      const safeDirectory = FileSystem.documentDirectory ?? "file:///";
+
+      // Look up the specific slip in our state to grab the dates for a clean name
+      const slipInfo = payrollList.find(p => p._id === payrollId);
+      let cleanFilename = `Payslip_${payrollId}.pdf`; // Fallback name
+
+      if (slipInfo && slipInfo.fromDate) {
+        const d = new Date(slipInfo.fromDate);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        // Formats to: Payslip_Aug_2026.pdf
+        cleanFilename = `Payslip_${monthNames[d.getMonth()]}_${d.getFullYear()}.pdf`;
+      }
+
+      // Map the clean filename directly into the phone's file path
+      const fileUri = `${safeDirectory}${cleanFilename}`;
+
+      // Write the file locally
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Download Payslip',
+          UTI: 'com.adobe.pdf', // Required for iOS
+        });
+      } else {
+        setActionModal({
+          visible: true,
+          type: "error",
+          title: "Sharing Unavailable",
+          message: "Cannot share or save files on this device.",
+        });
+      }
+    } catch (error: any) {
+      console.error("PDF Download failed", error);
+      setActionModal({
+        visible: true,
+        type: "error",
+        title: "Download Failed",
+        message: error.message || "Could not download the payslip.",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const closeActionModal = () => setActionModal((prev) => ({ ...prev, visible: false }));
 
   return {
@@ -181,10 +234,11 @@ export const usePayrolls = () => {
       selectedSlip,
       isLoading,
       isGenerating,
-      isFetchingDetails, // Exposed to UI
+      isFetchingDetails,
       showFromPicker,
       showToPicker,
       actionModal,
+      isDownloading,
       showCycleModal,
       cycleOptions: getCycleOptions(),
     },
@@ -197,11 +251,12 @@ export const usePayrolls = () => {
       formatDateForUI,
       handleGenerate,
       fetchPayrolls,
-      fetchPayrollDetails, // Exposed to UI
+      fetchPayrollDetails,
       closeActionModal,
       setShowCycleModal,
       getCycleOptions,
-      handleSelectCycle
+      handleSelectCycle,
+      handlePdfDownload,
     },
   };
 };

@@ -82,5 +82,32 @@ export const getPayrollDetails = async (payrollId: string) => {
   return response.data;
 };
 
+export const downloadPayrollPdf = async (payrollId: string): Promise<string> => {
+  try {
+    // 1. Fetch binary data explicitly as a blob
+    const response = await apiClient.get(`/api/app/payroll/${payrollId}/download`, {
+      responseType: 'blob',
+    });
+
+    // 2. Use native FileReader to convert Blob to Base64 safely
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        // Strip out the "data:application/pdf;base64," prefix
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(response.data);
+    });
+  } catch (error: any) {
+    console.error("Error downloading PDF:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to download payslip"
+    );
+  }
+};
+
 //3670.97
 //3187.1

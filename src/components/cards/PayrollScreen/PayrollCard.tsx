@@ -7,15 +7,16 @@ import { colors, FONTS } from "@/constants/theme";
 interface PayrollCardProps {
   item: any;
   onPress: () => void;
+  onDownload?: () => void; // Added prop for the download action
 }
 
-const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
+const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress, onDownload }) => {
   const formattedFromDate = new Date(item.fromDate).toLocaleDateString(
     "en-IN",
     {
       day: "numeric",
       month: "short",
-    },
+    }
   );
   const formattedToDate = new Date(item.toDate).toLocaleDateString("en-IN", {
     day: "numeric",
@@ -40,10 +41,29 @@ const PayrollCard: React.FC<PayrollCardProps> = ({ item, onPress }) => {
             {formattedFromDate} - {formattedToDate}
           </Text>
         </View>
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>
-            {(item.status || "PROCESSED").toUpperCase()}
-          </Text>
+
+        {/* Grouped Status Badge and Download Button */}
+        <View style={styles.headerRight}>
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>
+              {(item.status || "PROCESSED").toUpperCase()}
+            </Text>
+          </View>
+
+          {/* Render button only if onDownload is passed */}
+          {onDownload && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onDownload}
+              style={styles.downloadBtn}
+            >
+              <Ionicons
+                name="download-outline"
+                size={14}
+                color={colors.BRAND_SECONDARY}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -101,6 +121,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: moderateScale(14),
   },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(8),
+  },
   periodBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -125,6 +150,14 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     fontSize: moderateScale(9),
     color: colors.BRAND_SECONDARY,
+  },
+  downloadBtn: {
+    width: moderateScale(26),
+    height: moderateScale(26),
+    borderRadius: moderateScale(13),
+    backgroundColor: `${colors.BRAND_SECONDARY}15`,
+    justifyContent: "center",
+    alignItems: "center",
   },
   mainInfo: {
     flexDirection: "row",

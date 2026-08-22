@@ -2,7 +2,7 @@
   "expo": {
     "name": "Infinity-Arthvishva-HRMS",
     "slug": "Infinity-Arthvishva-HRMS",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./src/assets/images/icon.png",
     "scheme": "infinityarthvishvahrms",
@@ -54,7 +54,8 @@
       "expo-secure-store",
       "expo-camera",
       "@react-native-community/datetimepicker",
-      "expo-video"
+      "expo-video",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -54,6 +54,7 @@ const OldPayrollTab = () => {
           <PayrollCard
             item={item}
             onPress={() => handleCardPress(item._id)}
+            onDownload={() => actions.handlePdfDownload(item._id)}
           />
         )}
         contentContainerStyle={styles.listContainer}
