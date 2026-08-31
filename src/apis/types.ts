@@ -74,6 +74,7 @@ export interface Employee {
   position?: string;
   isLeadershipRole: boolean;
   joiningDate?: string;
+  employmentDate?: string;
   lastWorkingDate?: string | null;
   salary: number;
   fixedAllowance: number;

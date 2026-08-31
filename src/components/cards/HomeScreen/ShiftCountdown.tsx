@@ -6,7 +6,7 @@ import { colors, FONTS } from "@/constants/theme";
 
 interface ShiftCountdownProps {
   checkInTime: Date;
-  shiftDurationHours: number;
+  shiftDurationHours?: number;
 }
 
 export default function ShiftCountdown({
@@ -19,24 +19,30 @@ export default function ShiftCountdown({
     seconds: 0,
   });
   const [progress, setProgress] = useState(0);
-  const [isShiftOver, setIsShiftOver] = useState(false);
-  
-  // NEW: State to track which expected out time to show
+  const [isTargetReached, setIsTargetReached] = useState(false);
   const [showHalfDay, setShowHalfDay] = useState(false);
 
-  // Calculate start time, end times, and formatting
+  // Automatically detect Saturday from checkInTime
+  const isSaturday = checkInTime.getDay() === 6;
+
+  // Saturday: 7h full / 3.5h half. Mon-Fri: 8.5h full / 4.5h half
+  const FULL_DAY_HOURS = shiftDurationHours ?? (isSaturday ? 7 : 8.5);
+  const HALF_DAY_HOURS = isSaturday ? 3.5 : 4.5;
+
   const {
     formattedStartTime,
-    endTime,
+    fullEndTime,
+    halfEndTime,
     formattedEndTime,
     formattedHalfDayEndTime,
-    shiftDurationMs,
+    fullDurationMs,
+    halfDurationMs,
   } = useMemo(() => {
-    const fullDurationMs = shiftDurationHours * 60 * 60 * 1000;
-    const halfDurationMs = (shiftDurationHours / 2) * 60 * 60 * 1000;
+    const fullMs = FULL_DAY_HOURS * 60 * 60 * 1000;
+    const halfMs = HALF_DAY_HOURS * 60 * 60 * 1000;
 
-    const end = new Date(checkInTime.getTime() + fullDurationMs);
-    const halfEnd = new Date(checkInTime.getTime() + halfDurationMs);
+    const fullEnd = new Date(checkInTime.getTime() + fullMs);
+    const halfEnd = new Date(checkInTime.getTime() + halfMs);
 
     const timeOptions: Intl.DateTimeFormatOptions = {
       hour: "2-digit",
@@ -45,24 +51,30 @@ export default function ShiftCountdown({
 
     return {
       formattedStartTime: checkInTime.toLocaleTimeString([], timeOptions),
-      endTime: end,
-      formattedEndTime: end.toLocaleTimeString([], timeOptions),
+      fullEndTime: fullEnd,
+      halfEndTime: halfEnd,
+      formattedEndTime: fullEnd.toLocaleTimeString([], timeOptions),
       formattedHalfDayEndTime: halfEnd.toLocaleTimeString([], timeOptions),
-      shiftDurationMs: fullDurationMs,
+      fullDurationMs: fullMs,
+      halfDurationMs: halfMs,
     };
-  }, [checkInTime, shiftDurationHours]);
+  }, [checkInTime, FULL_DAY_HOURS, HALF_DAY_HOURS]);
+
+  const currentTargetTime = showHalfDay ? halfEndTime : fullEndTime;
+  const currentDurationMs = showHalfDay ? halfDurationMs : fullDurationMs;
+  const currentTargetHours = showHalfDay ? HALF_DAY_HOURS : FULL_DAY_HOURS;
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const updateCountdown = () => {
       const now = new Date().getTime();
-      const difference = endTime.getTime() - now;
+      const difference = currentTargetTime.getTime() - now;
 
       if (difference <= 0) {
-        clearInterval(timer);
-        setIsShiftOver(true);
+        setIsTargetReached(true);
         setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
         setProgress(100);
       } else {
+        setIsTargetReached(false);
         const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((difference / 1000 / 60) % 60);
         const seconds = Math.floor((difference / 1000) % 60);
@@ -71,56 +83,63 @@ export default function ShiftCountdown({
 
         const timePassed = now - checkInTime.getTime();
         const percentComplete = Math.min(
-          (timePassed / shiftDurationMs) * 100,
+          (timePassed / currentDurationMs) * 100,
           100
         );
-        setProgress(percentComplete);
+        setProgress(Math.max(percentComplete, 0));
       }
-    }, 1000);
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(timer);
-  }, [endTime, shiftDurationMs, checkInTime]);
+  }, [currentTargetTime, currentDurationMs, checkInTime]);
 
   const formatTime = (time: number) => (time < 10 ? `0${time}` : time);
 
-  if (isShiftOver) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.overtimeText}>Shift Completed! 🎉</Text>
-        <Text style={styles.subText}>You can check out now.</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <MaterialCommunityIcons
-          name="timer-sand"
-          size={moderateScale(16)}
-          color={colors.BRAND_PRIMARY}
-        />
-        <Text style={styles.label}>Remaining Time</Text>
-      </View>
+      {isTargetReached ? (
+        <View style={styles.completedContainer}>
+          <Text style={styles.overtimeText}>
+            {showHalfDay ? "Half Day Completed! 🎯" : "Shift Completed! 🎉"}
+          </Text>
+          <Text style={styles.subText}>You can check out now.</Text>
+        </View>
+      ) : (
+        <>
+          <View style={styles.row}>
+            <MaterialCommunityIcons
+              name="timer-sand"
+              size={moderateScale(16)}
+              color={colors.BRAND_PRIMARY}
+            />
+            <Text style={styles.label}>
+              {showHalfDay
+                ? `Remaining to Half Day (${HALF_DAY_HOURS}h)`
+                : `Remaining to Full Day (${FULL_DAY_HOURS}h)`}
+            </Text>
+          </View>
 
-      <Text style={styles.timerText}>
-        {formatTime(timeLeft.hours)}h {formatTime(timeLeft.minutes)}m{" "}
-        {formatTime(timeLeft.seconds)}s
-      </Text>
+          <Text style={styles.timerText}>
+            {formatTime(timeLeft.hours)}h {formatTime(timeLeft.minutes)}m{" "}
+            {formatTime(timeLeft.seconds)}s
+          </Text>
 
-      <View style={styles.progressBarBackground}>
-        <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
-      </View>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+          </View>
+        </>
+      )}
 
       <View style={styles.timeRangeRow}>
-        {/* Left Side: Check In */}
         <View style={styles.timeBlock}>
           <Text style={styles.metaLabel}>Checked In</Text>
           <Text style={styles.metaValue}>{formattedStartTime}</Text>
         </View>
 
-        {/* Right Side: Clickable Expected Out */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.timeBlockRight}
           activeOpacity={0.7}
           onPress={() => setShowHalfDay((prev) => !prev)}
@@ -130,7 +149,7 @@ export default function ShiftCountdown({
             {showHalfDay ? formattedHalfDayEndTime : formattedEndTime}
           </Text>
           <Text style={styles.subMetaLabel}>
-            {showHalfDay ? "Half Day" : "Full Day"}
+            {`● ${showHalfDay ? "Half Day" : "Full Day"} (${currentTargetHours} hrs)`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -143,6 +162,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: moderateScale(5),
+  },
+  completedContainer: {
+    alignItems: "center",
+    marginBottom: moderateScale(10),
   },
   row: {
     flexDirection: "row",
@@ -188,7 +211,7 @@ const styles = StyleSheet.create({
   timeRangeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start", // Ensures alignment at the top even with the extra label on the right
+    alignItems: "flex-start",
     width: "100%",
     paddingHorizontal: moderateScale(4),
   },
@@ -214,7 +237,7 @@ const styles = StyleSheet.create({
   subMetaLabel: {
     fontFamily: "Nunito_600SemiBold",
     fontSize: moderateScale(10),
-    color: colors.BRAND_PRIMARY, // Using primary color to hint it's interactive/toggled
+    color: colors.BRAND_PRIMARY,
     marginTop: moderateScale(2),
-  }
+  },
 });

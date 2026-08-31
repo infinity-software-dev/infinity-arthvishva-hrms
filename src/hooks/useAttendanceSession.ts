@@ -8,7 +8,7 @@ import {
 import { getCurrentLocation } from "@/utils/LocationHelper";
 import { useIsFocused } from "expo-router";
 
-export type AttendanceStatus = "pending" | "in" | "loading" | "completed" | "blocked";
+export type AttendanceStatus = "pending" | "in" | "loading" | "completed" | "blocked" | "error";
 export type WorkMode = "Office" | "Field" | "WFH";
 
 export function useAttendanceSession() {
@@ -27,20 +27,22 @@ export function useAttendanceSession() {
   const [modalMessage, setModalMessage] = useState("");
 
   const loadSession = async () => {
+    setStatus("loading"); // Button is now OFF
+
     try {
       const record = await fetchTodayAttendance();
 
-      setStatus(record.uiStatus);
+      setStatus(record.uiStatus); // Server dictates the real status
       setWorkMode(record.workMode);
       setCheckInTime(record.checkInTime);
       setCheckOutTime(record.checkOutTime);
       setStatusMessage(record.statusMessage);
-    } catch (err) {
-      console.error("Load Session Failed:", err); //  ADD THIS
-      setModalTitle("Error");
-      setModalMessage("Failed to load attendance data. Please try restart the app.");
-      setModalVisible(true);
-      setStatus("pending");
+    } catch (err: any) {
+      console.error("Load Session Failed:", err);
+
+      // Server failed. Status becomes error, button stays OFF.
+      setStatus("error");
+      setStatusMessage(err.message || "Failed to load attendance data.");
     }
   };
 
@@ -51,7 +53,7 @@ export function useAttendanceSession() {
   };
 
   useEffect(() => {
-    if (isFocused) loadSession(); 
+    if (isFocused) loadSession();
   }, [isFocused]);
 
   useEffect(() => {

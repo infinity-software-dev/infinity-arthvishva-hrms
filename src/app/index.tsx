@@ -47,47 +47,64 @@ export default function Index() {
         if (!isMounted) return;
 
         if (isAlertActive) {
-          // Fetch the profile quickly before redirecting, if an access token exists
           const accessToken = await SecureStore.getItemAsync("accessToken");
           if (accessToken) {
             await Promise.all([
               initializeAppConfigs(),
-              fetchLatestProfile() // Run this so the alert screen has user context
-            ]).catch(err => console.log("Silent profile fetch failed:", err));
+              fetchLatestProfile(),
+            ]).catch((err) => console.log("Silent profile fetch failed:", err));
           }
 
           setTimeout(() => resetAndNavigate("/globalAlert"), 1000);
           return;
         }
 
-        // 2. If no alert, proceed with normal initialization flow
+        // 2. Fetch App Configs & Token
         const [_, accessToken] = await Promise.all([
           initializeAppConfigs(),
           SecureStore.getItemAsync("accessToken"),
         ]);
 
-        if (accessToken) {
-          await fetchLatestProfile();
-
-          const currentUser = useAuthStore.getState().user;
-          if (currentUser?.status === 'Inactive') {
-            resetAndNavigate("/deactivedAccount/DeactivatedAccountScreen");
-            return;
-          }
-
-          const report = await getAppPermissionReport();
-
-          if (report.allMandatoryGranted) {
-            resetAndNavigate("/(main)/screens/home");
-          } else {
-            resetAndNavigate("/(setup)/permissions");
-          }
-        } else {
+        if (!accessToken) {
           resetAndNavigate("/(auth)/login");
+          return;
         }
-      } catch (error) {
-        if (isMounted) {
+
+        // 3. MUST successfully fetch profile before proceeding
+        await fetchLatestProfile();
+
+        const currentUser = useAuthStore.getState().user;
+
+        // GUARD: If profile could not be loaded, stop here and do not proceed to Home
+        if (!currentUser) {
+          throw new Error("PROFILE_FETCH_FAILED");
+        }
+
+        // Check Inactive status
+        if (currentUser.status === "Inactive") {
+          resetAndNavigate("/deactivedAccount/DeactivatedAccountScreen");
+          return;
+        }
+
+        // 4. Check Permissions and Navigate
+        const report = await getAppPermissionReport();
+
+        if (report.allMandatoryGranted) {
+          resetAndNavigate("/(main)/screens/home");
+        } else {
+          resetAndNavigate("/(setup)/permissions");
+        }
+      } catch (error: any) {
+        if (!isMounted) return;
+
+        // Only redirect to login if token is explicitly invalid/expired
+        if (error?.response?.status === 401) {
+          await SecureStore.deleteItemAsync("accessToken");
           resetAndNavigate("/(auth)/login");
+        } else {
+          // Network/Server issue: Alert the user without booting them to login
+          console.error("Initialization error:", error);
+          // Optional: keep splash screen visible or show retry dialog
         }
       } finally {
         await SplashScreen.hideAsync();

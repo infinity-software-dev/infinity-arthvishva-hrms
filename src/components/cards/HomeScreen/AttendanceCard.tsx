@@ -38,6 +38,7 @@ export default function AttendanceCard() {
     handleCheckOutPunch,
     getTotalTimeLogged,
     formatPunchTime,
+    refreshSession,
   } = useAttendanceSession();
 
   const { isInsideOffice, distance, shiftHours, isLoadingLocation } =
@@ -287,6 +288,26 @@ export default function AttendanceCard() {
               >
                 {statusMessage}
               </Text>
+            </View>
+          )}
+
+          {status === "error" && (
+            <View style={styles.completedWrapper}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={moderateScale(30)}
+                color={colors.Danger_Red}
+              />
+              <Text style={[styles.completedText, { color: colors.Danger_Red }]}>
+                {statusMessage}
+              </Text>
+
+              {/* Simple retry button to hit the server again */}
+              <TouchableOpacity onPress={refreshSession} style={{ marginTop: moderateScale(10) }}>
+                <Text style={{ color: colors.BRAND_SECONDARY, fontFamily: FONTS.bold }}>
+                  Tap to Retry
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
 

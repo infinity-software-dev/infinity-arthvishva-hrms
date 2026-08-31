@@ -140,6 +140,10 @@ export default function ProfileScreen() {
                 value={actions.formatDate(profile?.joiningDate)}
               />
               <DetailRow
+                label="Employment Date"
+                value={actions.formatDate(profile?.employmentDate)}
+              />
+              <DetailRow
                 label="Experience Type"
                 value={profile?.experienceType || "N/A"}
               />

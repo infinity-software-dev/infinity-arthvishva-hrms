@@ -35,6 +35,19 @@ const HolidayScreen = () => {
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <MaterialIcons
+                name="event-busy"
+                size={moderateScale(48)}
+                color="#94A3B8"
+              />
+              <Text style={styles.emptyTitle}>No Holidays Listed</Text>
+              <Text style={styles.emptySubtitle}>
+                There are currently no holidays scheduled. Pull down to refresh.
+              </Text>
+            </View>
+          }
           renderItem={({ item }) => {
             const itemDate = new Date(item.date);
             itemDate.setHours(0, 0, 0, 0);
@@ -130,6 +143,29 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: moderateScale(24),
     paddingTop: moderateScale(16),
+  },
+  emptyListContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: moderateScale(32),
+  },
+  emptyTitle: {
+    fontSize: moderateScale(16),
+    fontFamily: FONTS.bold,
+    color: "#0F172A",
+    marginTop: moderateScale(12),
+  },
+  emptySubtitle: {
+    fontSize: moderateScale(13),
+    fontFamily: FONTS.medium,
+    color: "#94A3B8",
+    textAlign: "center",
+    marginTop: moderateScale(6),
+    lineHeight: moderateScale(18),
   },
   card: {
     backgroundColor: "#FFFFFF",
