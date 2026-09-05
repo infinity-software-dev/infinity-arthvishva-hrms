@@ -27,7 +27,7 @@ export default function ShiftCountdown({
 
   // Saturday: 7h full / 3.5h half. Mon-Fri: 8.5h full / 4.5h half
   const FULL_DAY_HOURS = shiftDurationHours ?? (isSaturday ? 7 : 8.5);
-  const HALF_DAY_HOURS = isSaturday ? 3.5 : 4.5;
+  const HALF_DAY_HOURS = FULL_DAY_HOURS / 2;
 
   const {
     formattedStartTime,

@@ -1,6 +1,6 @@
 import FaceScannerEngine from "@/components/ui/FaceScannerEngine";
 import OfflineScreen from "@/components/ui/OfflineScreen";
-import { colors } from "@/constants/theme";
+import { colors, FONTS } from "@/constants/theme";
 import {
   Nunito_400Regular,
   Nunito_500Medium,
@@ -58,7 +58,7 @@ export default function RootLayout() {
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
-              fontFamily: "Nunito_700Bold",
+              fontFamily: FONTS.bold,
             },
           }}
         />
@@ -72,7 +72,7 @@ export default function RootLayout() {
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
-              fontFamily: "Nunito_700Bold",
+              fontFamily: FONTS.bold,
             },
           }}
         />
@@ -86,7 +86,7 @@ export default function RootLayout() {
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
-              fontFamily: "Nunito_700Bold",
+              fontFamily: FONTS.bold,
             },
           }}
         />
